@@ -1,0 +1,6 @@
+paho-mqtt==1.6.1
+python-dotenv==1.0.0
+requests==2.31.0
+numpy==1.26.0
+# For thermal camera simulation later
+Pillow==10.0.0
