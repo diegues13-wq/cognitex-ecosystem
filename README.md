@@ -37,19 +37,40 @@ We utilize the bleeding edge of web development:
 *   **Styling**: Tailwind CSS v4 (Oxide engine)
 *   **Languages**: JavaScript (ESM), Python (AI/IoT Backend)
 
+> [!IMPORTANT]
+> **Python Management**: We strictly use [uv](https://github.com/astral-sh/uv) (An extremely fast Python package installer and resolver, written in Rust) instead of pip/venv.
+
 ## 🏁 Getting Started
 
 ### Prerequisites
 *   Node.js v20+
 *   npm v10+
+*   **uv** (Install via `curl -LsSf https://astral.sh/uv/install.sh | sh` or `pip install uv`)
 
 ### Installation
+
+#### Web Applications (Frontend)
 ```bash
-# Install dependencies for all projects
+# Install dependencies for all web projects
 cd cognitex-landing && npm install && cd ..
 cd industry-sentinel && npm install && cd ..
 cd personal-sentinel && npm install && cd ..
 cd agro-sentinel/web && npm install && cd ../..
+```
+
+#### Python Components (Backend/Edge)
+Use `uv` to create virtual environments and install dependencies.
+
+```bash
+# Agro Cloud Components
+cd agro-sentinel/cloud
+uv venv
+uv pip install -r requirements.txt
+
+# Agro Edge Components
+cd ../edge
+uv venv
+uv pip install -r requirements.txt
 ```
 
 ### Development
