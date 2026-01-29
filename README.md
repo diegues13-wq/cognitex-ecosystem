@@ -1,36 +1,67 @@
 # Cognitex Industrial Ecosystem
 
-This repository contains the source code for the Cognitex Industrial platform ecosystem, comprising the main landing page and the Sentinel suite of monitoring applications.
+The **Cognitex Industrial Ecosystem** is a unified suite of next-generation monitoring platforms powered by AI and IIoT (Industrial Internet of Things).
 
-## Project Structure
+## 🚀 Platforms
 
-This monorepo hosts the following applications:
+This monorepo hosts the following integrated applications:
 
-*   **[cognitex-landing](./cognitex-landing)** (Port 5173)
-    *   The central marketing and entry point for the platform.
-    *   Features: "Neural Network" particle background, localized content, and product showcase.
-*   **[industry-sentinel](./industry-sentinel)** (Port 5175/5179)
-    *   **Theme**: Industrial Blue/Cyan.
-    *   **Domain**: Smart Manufacturing & Predictive Maintenance.
-    *   **Features**: OEE monitoring, vibration analysis, motor status.
-*   **[personal-sentinel](./personal-sentinel)** (Port 5176)
-    *   **Theme**: Safety Orange/Amber.
-    *   **Domain**: EHS (Environment, Health, Safety) & Workforce Monitoring.
-    *   **Features**: Biometrics, zone alerts, incident reporting.
-*   **[agro-sentinel](./agro-sentinel)**
-    *   **Theme**: Agriculture Green/Emerald.
-    *   **Domain**: Precision Agriculture & IoT.
+### 1. [Cognitex Landing](./cognitex-landing) (Port 5173)
+*   **Role**: Central Marketing & Entry Hub.
+*   **Tech**: React 19, Tailwind 4, Vite 7.
+*   **Identity**: The "Brain" of the ecosystem. Neural network aesthetics.
 
-## Getting Started
+### 2. [Industry Sentinel](./industry-sentinel) (Port 5175)
+*   **Role**: Smart Manufacturing & Predictive Maintenance.
+*   **Domain**: Factory floors, production lines, OEE monitoring.
+*   **Theme**: **Cyan/Industrial Blue**.
+*   **Tech**: React 19, Vite 7, Tailwind 4.
 
-1.  **Install Dependencies**: Navigate to each project folder and run `npm install`.
-2.  **Development**: Run `npm run dev` in each folder to start the local servers.
-3.  **Production**: Run `npm run build` to generate optimized assets.
+### 3. [Personal Sentinel](./personal-sentinel) (Port 5176)
+*   **Role**: Workforce Safety & EHS.
+*   **Domain**: Biometrics tracking, zone alerts, incident reporting.
+*   **Theme**: **Safety Orange/Amber**.
+*   **Tech**: React 19, Vite 7, Tailwind 4.
 
-## Recent Updates
-*   **Unified Branding**: All platforms now use the new transparent "Cognitex" brain icon.
-*   **Theming**: distinct color palettes established for each vertical (Cyan, Orange, Green).
-*   **Performance**: Production builds verified for stability.
+### 4. [Agro Sentinel](./agro-sentinel) (Port 5174)
+*   **Role**: Precision Agriculture.
+*   **Domain**: Soil monitoring, drone telemetry, crop health.
+*   **Theme**: **Emerald/Green**.
+*   **Tech**: React 19, Vite 7, Tailwind 4, Python (IoT Edge).
+
+---
+
+## 🛠️ Technology Stack
+We utilize the bleeding edge of web development:
+*   **Frontend**: React 19 + Vite 7
+*   **Styling**: Tailwind CSS v4 (Oxide engine)
+*   **Languages**: JavaScript (ESM), Python (AI/IoT Backend)
+
+## 🏁 Getting Started
+
+### Prerequisites
+*   Node.js v20+
+*   npm v10+
+
+### Installation
+```bash
+# Install dependencies for all projects
+cd cognitex-landing && npm install && cd ..
+cd industry-sentinel && npm install && cd ..
+cd personal-sentinel && npm install && cd ..
+cd agro-sentinel/web && npm install && cd ../..
+```
+
+### Development
+Currently, you can run each project individually (monorepo orchestration coming soon).
+
+```bash
+# Run Landing Page
+cd cognitex-landing && npm run dev
+
+# Run Industry Sentinel
+cd industry-sentinel && npm run dev
+```
 
 ---
 © 2026 Cognitex Industrial. All inputs. All outputs. Optimized.
