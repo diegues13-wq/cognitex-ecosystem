@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Dashboard from './Dashboard';
 import cleanLogo from './assets/cognitex_icon.png';
 

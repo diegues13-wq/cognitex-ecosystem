@@ -40,6 +40,13 @@ We utilize the bleeding edge of web development:
 > [!IMPORTANT]
 > **Python Management**: We strictly use [uv](https://github.com/astral-sh/uv) (An extremely fast Python package installer and resolver, written in Rust) instead of pip/venv.
 
+## 🔐 Access & Credentials
+| Platform | URL | Default User | Default Password |
+| :--- | :--- | :--- | :--- |
+| **Industry Sentinel** | [http://localhost:5175](http://localhost:5175) | `admin` | `admin` |
+| **Personal Sentinel** | [http://localhost:5176](http://localhost:5176) | `admin` | `admin` |
+| **Agro Sentinel** | [http://localhost:5174](http://localhost:5174) | `admin` | `admin` |
+
 ## 🏁 Getting Started
 
 ### Prerequisites

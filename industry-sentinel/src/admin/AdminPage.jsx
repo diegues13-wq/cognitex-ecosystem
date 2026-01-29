@@ -19,7 +19,7 @@ const StatCard = ({ icon: Icon, label, value, color }) => (
 const AdminPage = () => {
     return (
         <div className="flex h-screen bg-[#0a0f1c] text-cyan-100 font-sans overflow-hidden bg-[url('/assets/grid-pattern.png')]">
-            <Sidebar />
+            <Sidebar user={{ name: 'Super Admin', email: 'admin@cognitex.com' }} />
 
             <main className="flex-1 overflow-y-auto p-8 relative">
                 {/* Header */}

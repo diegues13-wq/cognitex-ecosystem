@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import CleanLogo from './assets/cognitex_icon.png';
 import Dashboard from './Dashboard';
-import AdminPage from './admin/AdminPage';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 function Login() {
@@ -16,7 +15,7 @@ function Login() {
         setLoading(true);
         setTimeout(() => {
             if (username === 'admin' && password === 'admin') {
-                navigate('/admin');
+                navigate('/dashboard');
             } else if (username === 'user' && password === 'user') {
                 navigate('/dashboard');
             } else {
@@ -152,7 +151,6 @@ function App() {
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard onLogout={() => window.location.href = '/'} />} />
-                <Route path="/admin" element={<AdminPage />} />
             </Routes>
         </Router>
     );

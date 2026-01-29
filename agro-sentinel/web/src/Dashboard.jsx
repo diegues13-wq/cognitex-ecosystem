@@ -431,23 +431,21 @@ export default function Dashboard({ onLogout }) {
                                         </div>
                                     ) : (
                                         alarmStats.recent.map((row, i) => (
-                                            alarmStats.recent.map((row, i) => (
-                                                <div key={i} className={`flex justify-between items-center p-3 rounded-xl border transition-all group cursor-pointer ${row.priority === 'CRITICAL' ? 'bg-red-500/5 border-red-500/10 hover:bg-red-500/10' : 'bg-yellow-500/5 border-yellow-500/10 hover:bg-yellow-500/10'}`}>
-                                                    <div className="flex flex-col">
-                                                        <div className="flex items-center gap-2">
-                                                            <ShieldAlert size={12} className={row.priority === 'CRITICAL' ? 'text-red-500' : 'text-yellow-500'} />
-                                                            <span className={`text-xs font-bold transition-colors ${row.priority === 'CRITICAL' ? 'text-red-200' : 'text-yellow-200'}`}>{row.type}</span>
-                                                        </div>
-                                                        <span className="text-[10px] text-gray-500 font-mono pl-5">{row.time.split('T')[1]?.substring(0, 5) || row.time} HRS</span>
+                                            <div key={i} className={`flex justify-between items-center p-3 rounded-xl border transition-all group cursor-pointer ${row.priority === 'CRITICAL' ? 'bg-red-500/5 border-red-500/10 hover:bg-red-500/10' : 'bg-yellow-500/5 border-yellow-500/10 hover:bg-yellow-500/10'}`}>
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-2">
+                                                        <ShieldAlert size={12} className={row.priority === 'CRITICAL' ? 'text-red-500' : 'text-yellow-500'} />
+                                                        <span className={`text-xs font-bold transition-colors ${row.priority === 'CRITICAL' ? 'text-red-200' : 'text-yellow-200'}`}>{row.type}</span>
                                                     </div>
-                                                    <div className="text-right flex items-center gap-3">
-                                                        <span className={`text-xs font-mono font-bold block px-2 py-1 rounded ${row.priority === 'CRITICAL' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}`}>{row.value}</span>
-                                                        <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-all" title="Acknowledge">
-                                                            <div className="w-4 h-4 rounded-full border border-current flex items-center justify-center text-[8px]">✓</div>
-                                                        </button>
-                                                    </div>
+                                                    <span className="text-[10px] text-gray-500 font-mono pl-5">{row.time.split('T')[1]?.substring(0, 5) || row.time} HRS</span>
                                                 </div>
-                                            ))
+                                                <div className="text-right flex items-center gap-3">
+                                                    <span className={`text-xs font-mono font-bold block px-2 py-1 rounded ${row.priority === 'CRITICAL' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}`}>{row.value}</span>
+                                                    <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-all" title="Acknowledge">
+                                                        <div className="w-4 h-4 rounded-full border border-current flex items-center justify-center text-[8px]">✓</div>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         ))
                                     )}
                                 </div>
