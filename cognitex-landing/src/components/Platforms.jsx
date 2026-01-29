@@ -55,7 +55,7 @@ const Platforms = ({ t }) => {
                                 <p className="text-gray-400 text-sm leading-relaxed mb-8 flex-1">{t.items[app.id].description}</p>
 
                                 <a
-                                    href={`http://localhost:${app.port}`}
+                                    href={app.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className={`w-full py-4 rounded-xl font-bold text-sm tracking-wide bg-white/5 border border-white/10 group-hover:bg-white text-white group-hover:text-black transition-all duration-300 flex items-center justify-center gap-2`}

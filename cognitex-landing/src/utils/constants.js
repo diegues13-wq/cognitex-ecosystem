@@ -1,37 +1,34 @@
-import { Sprout, Factory, Users } from 'lucide-react';
-
+```javascript
 export const APPS = [
     {
         id: 'agro',
-        title: 'Agro-Sentinel',
-        subtitle: 'Precision Agriculture',
-        description: 'AI-driven monitoring for crop health, pest prediction, and environmental control.',
-        icon: Sprout,
-        color: 'text-neon-green',
-        bg: 'bg-neon-green/10',
-        border: 'border-neon-green/20',
+        name: 'Agro Sentinel',
+        description: 'Monitoreo de cultivos de precisión y control de drones.',
+        icon: 'Sprout',
+        color: 'from-emerald-400 to-green-600',
+        path: '/agro',
         port: 5174,
+        url: 'https://agro.cognitexindustrial.com'
     },
     {
         id: 'industry',
-        title: 'Industry-Sentinel',
-        subtitle: 'Manufacturing 4.0',
-        description: 'Real-time OEE tracking, predictive maintenance (RUL), and process automation.',
-        icon: Factory,
-        color: 'text-neon-cyan',
-        bg: 'bg-neon-cyan/10',
-        border: 'border-neon-cyan/20',
+        name: 'Industry Sentinel',
+        description: 'Mantenimiento predictivo y gemelos digitales de fábrica.',
+        icon: 'Factory',
+        color: 'from-cyan-400 to-blue-600',
+        path: '/industry',
         port: 5175,
+        url: 'https://industry.cognitexindustrial.com'
     },
     {
         id: 'personal',
-        title: 'Personal-Sentinel',
-        subtitle: 'Workforce EHS',
-        description: 'Biometric safety monitoring, fatigue prediction, and smart workforce allocation.',
-        icon: Users,
-        color: 'text-neon-orange',
-        bg: 'bg-neon-orange/10',
-        border: 'border-neon-orange/20',
+        name: 'Personal Sentinel',
+        description: 'Seguridad laboral y monitoreo biométrico en tiempo real.',
+        icon: 'UserCheck',
+        color: 'from-orange-400 to-amber-600',
+        path: '/personal',
         port: 5176,
+        url: 'https://personal.cognitexindustrial.com'
     }
 ];
+```
