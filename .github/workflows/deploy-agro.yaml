@@ -1,0 +1,49 @@
+name: Deploy Agro Sentinel
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "agro-sentinel/web/**"
+      - ".github/workflows/deploy-agro.yaml"
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-east4
+  GAR_LOCATION: us-east4
+  REPOSITORY: cognitex-repo
+  SERVICE: agro-sentinel
+  CONTEXT: ./agro-sentinel/web
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
+
+      - name: Build and Push
+        run: |
+          GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c1-7)
+          IMAGE_NAME=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${GITHUB_SHA_SHORT}
+          docker build -t $IMAGE_NAME ${{ env.CONTEXT }}
+          docker push $IMAGE_NAME
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          image: ${{ env.IMAGE_NAME }}
+          flags: '--allow-unauthenticated'
