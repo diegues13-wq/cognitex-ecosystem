@@ -91,5 +91,23 @@ cd cognitex-landing && npm run dev
 cd industry-sentinel && npm run dev
 ```
 
+### 🐳 Production Deployment (Docker)
+You can run the entire ecosystem in production mode using Docker Compose.
+**Note**: Ensure [Docker](https://docs.docker.com/get-docker/) is installed and running on your machine.
+
+```bash
+# Build and Start all platforms
+docker compose up --build -d
+
+# Verify containers are running
+docker-compose ps
+```
+
+The applications will be available at the same ports:
+*   **Landing**: http://localhost:5173
+*   **Industry**: http://localhost:5175
+*   **Personal**: http://localhost:5176
+*   **Agro**: http://localhost:5174
+
 ---
 © 2026 Cognitex Industrial. All inputs. All outputs. Optimized.
