@@ -39,7 +39,7 @@ function App() {
         </main>
 
         <footer className="mt-20 text-center text-slate-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Cognitex Industrial. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} Cash-Sentinel. Powered by <a href="https://cognitexindustrial.com" className="text-emerald-500 hover:underline" target="_blank" rel="noopener noreferrer">Cognitex Industrial</a>.</p>
         </footer>
       </div>
     </div>
