@@ -55,8 +55,8 @@ function App() {
       {/* Main Content Area */}
       <main className="flex-1 w-full relative pb-20">
         {/* Dynamic Blue Background Accent */}
-        <div className="absolute top-0 left-0 w-full h-[550px] bg-gradient-to-br from-blue-900 to-blue-700 z-0 hidden lg:block" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 70%, 0% 100%)' }}></div>
-        <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-br from-blue-900 to-blue-700 z-0 lg:hidden" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 85%, 0% 100%)' }}></div>
+        <div className="absolute top-0 left-0 w-full h-[850px] bg-gradient-to-br from-slate-950 to-blue-900 z-0 hidden lg:block" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 70%, 0% 100%)' }}></div>
+        <div className="absolute top-0 left-0 w-full h-[700px] bg-gradient-to-br from-slate-950 to-blue-900 z-0 lg:hidden" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 85%, 0% 100%)' }}></div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 pt-10 lg:pt-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">

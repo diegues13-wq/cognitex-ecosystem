@@ -90,19 +90,19 @@ const Calculator = ({ t }) => {
             </div>
 
             <div className="space-y-6 relative">
-                <div className="bg-slate-50 rounded-2xl p-4 lg:p-5 border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                    <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">{t('youSend')}</label>
+                <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 focus-within:border-blue-600 focus-within:ring-4 focus-within:ring-blue-100 transition-all shadow-sm">
+                    <label className="text-sm text-slate-500 font-extrabold uppercase tracking-widest mb-3 block">{t('youSend')}</label>
                     <div className="flex justify-between items-center">
                         <div className="flex flex-col">
-                            <span className="text-sm font-bold text-slate-900 mb-1">{currencyNameFrom}</span>
+                            <span className="text-base font-bold text-slate-800 mb-1">{currencyNameFrom}</span>
                         </div>
-                        <div className="flex items-center">
-                            <span className="text-xl font-bold text-slate-400 mr-1">{currencySymbolFrom}</span>
+                        <div className="flex items-center w-full justify-end">
+                            <span className="text-3xl font-bold text-slate-400 mr-2">{currencySymbolFrom}</span>
                             <input
                                 type="number"
                                 value={amount || ''}
                                 onChange={handleAmountChange}
-                                className="bg-transparent text-3xl sm:text-4xl font-black text-slate-900 text-right w-32 focus:outline-none"
+                                className="bg-transparent text-4xl sm:text-5xl font-black text-slate-900 text-right w-full max-w-[180px] focus:outline-none"
                                 min="0"
                             />
                         </div>
@@ -112,21 +112,21 @@ const Calculator = ({ t }) => {
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 -mt-2">
                     <button
                         onClick={toggleDirection}
-                        className="w-12 h-12 rounded-full bg-blue-600 border-[4px] border-white flex items-center justify-center text-white hover:bg-blue-700 transition-all hover:scale-105 shadow-md"
+                        className="w-14 h-14 rounded-full bg-blue-700 border-[6px] border-white flex items-center justify-center text-white hover:bg-blue-800 transition-all hover:scale-110 shadow-lg"
                     >
-                        <ArrowDownUp className="w-5 h-5" />
+                        <ArrowDownUp className="w-6 h-6" />
                     </button>
                 </div>
 
-                <div className="bg-blue-50 rounded-2xl p-4 lg:p-5 border border-blue-100">
-                    <label className="text-xs text-blue-700 font-bold uppercase tracking-wider mb-2 block">{t('recipientGets')}</label>
+                <div className="bg-slate-50 rounded-2xl p-6 border-2 border-blue-100 shadow-inner">
+                    <label className="text-sm text-blue-800 font-extrabold uppercase tracking-widest mb-3 block">{t('recipientGets')}</label>
                     <div className="flex justify-between items-center">
                         <div className="flex flex-col">
-                            <span className="text-sm font-bold text-slate-900 mb-1">{currencyNameTo}</span>
+                            <span className="text-base font-bold text-slate-800 mb-1">{currencyNameTo}</span>
                         </div>
-                        <div className="flex items-center">
-                            <span className="text-xl font-bold text-blue-600 mr-1">{currencySymbolTo}</span>
-                            <span className="text-3xl sm:text-4xl font-black text-blue-700 tracking-tight break-all">
+                        <div className="flex items-center overflow-hidden w-full justify-end">
+                            <span className="text-3xl font-bold text-emerald-600 mr-2 shrink-0">{currencySymbolTo}</span>
+                            <span className="text-4xl sm:text-5xl font-black text-emerald-600 tracking-tight truncate">
                                 {receivedAmount.toFixed(2)}
                             </span>
                         </div>
