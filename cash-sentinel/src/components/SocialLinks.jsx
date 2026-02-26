@@ -7,12 +7,12 @@ const TiktokIcon = () => (
     </svg>
 );
 
-const SocialLinks = () => {
+const SocialLinks = ({ t }) => {
     return (
-        <div id="soporte" className="bg-white rounded-2xl shadow-soft p-8 w-full border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div id="soporte" className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 w-full flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex flex-col gap-2 text-center md:text-left">
-                <h3 className="text-xl font-bold text-slate-900">¿Necesitas ayuda con tu envío?</h3>
-                <p className="text-slate-600">Nuestro equipo de soporte está disponible 24/7 en WhatsApp y redes sociales.</p>
+                <h3 className="text-2xl font-bold text-slate-900">{t('needHelp')}</h3>
+                <p className="text-slate-600 font-medium">{t('supportDesc')}</p>
             </div>
 
             <div className="flex flex-wrap justify-center md:justify-end gap-3">
@@ -23,17 +23,17 @@ const SocialLinks = () => {
                     className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold transition-all shadow-md shadow-[#25D366]/20"
                 >
                     <MessageCircle className="w-5 h-5" />
-                    Contactar Soporte
+                    {t('contactSupport')}
                 </a>
 
                 <div className="flex gap-2">
-                    <a href="#" className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700" title="Instagram">
+                    <a href="#" className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-slate-600" title="Instagram">
                         <Instagram className="w-5 h-5" />
                     </a>
-                    <a href="#" className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700" title="Facebook">
+                    <a href="#" className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-slate-600" title="Facebook">
                         <Facebook className="w-5 h-5" />
                     </a>
-                    <a href="#" className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700" title="TikTok">
+                    <a href="#" className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-slate-600" title="TikTok">
                         <TiktokIcon />
                     </a>
                 </div>

@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { RefreshCw, ArrowDownUp, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const Calculator = () => {
-    const [rateUsdToRub, setRateUsdToRub] = useState(100); // Default fallback
-    const [direction, setDirection] = useState('USD_TO_RUB'); // 'USD_TO_RUB' or 'RUB_TO_USD'
+const Calculator = ({ t }) => {
+    const [rateUsdToRub, setRateUsdToRub] = useState(100);
+    const [direction, setDirection] = useState('USD_TO_RUB');
     const [amount, setAmount] = useState(100);
     const [loading, setLoading] = useState(true);
 
-    const COMMISSION_RATE = 0.03; // 3%
+    const COMMISSION_RATE = 0.03;
 
     useEffect(() => {
         const fetchRate = async () => {
@@ -26,7 +26,7 @@ const Calculator = () => {
         };
 
         fetchRate();
-        const interval = setInterval(fetchRate, 60000); // Update every minute
+        const interval = setInterval(fetchRate, 60000);
         return () => clearInterval(interval);
     }, []);
 
@@ -51,17 +51,23 @@ const Calculator = () => {
     };
 
     const currencySymbolFrom = direction === 'USD_TO_RUB' ? '$' : '₽';
-    const currencyNameFrom = direction === 'USD_TO_RUB' ? 'USD - Dólar Estadounidense' : 'RUB - Rublo Ruso';
+    const currencyNameFrom = direction === 'USD_TO_RUB' ? t('usdName') : t('rubName');
 
     const currencySymbolTo = direction === 'USD_TO_RUB' ? '₽' : '$';
-    const currencyNameTo = direction === 'USD_TO_RUB' ? 'RUB - Rublo Ruso' : 'USD - Dólar Estadounidense';
+    const currencyNameTo = direction === 'USD_TO_RUB' ? t('rubName') : t('usdName');
 
     const handleAmountChange = (e) => {
         const val = parseFloat(e.target.value);
         setAmount(isNaN(val) ? 0 : val);
     };
 
-    const whatsappMessage = encodeURIComponent(`Hola, quisiera iniciar una operación de envío de dinero. Deseo enviar ${amount.toFixed(2)} ${direction === 'USD_TO_RUB' ? 'USD' : 'RUB'}, para que el destinatario reciba ${receivedAmount.toFixed(2)} ${direction === 'USD_TO_RUB' ? 'RUB' : 'USD'}.`);
+    const wsParams = {
+        amount: amount.toFixed(2),
+        from: direction === 'USD_TO_RUB' ? 'USD' : 'RUB',
+        received: receivedAmount.toFixed(2),
+        to: direction === 'USD_TO_RUB' ? 'RUB' : 'USD'
+    };
+    const whatsappMessage = encodeURIComponent(t('waMessage', wsParams));
     const whatsappLink = `https://wa.me/numerodetelefono?text=${whatsappMessage}`;
 
     return (
@@ -69,25 +75,23 @@ const Calculator = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="w-full max-w-md p-6 sm:p-8 rounded-2xl bg-white shadow-2xl relative overflow-hidden"
+            className="w-full max-w-md p-6 lg:p-8 rounded-3xl bg-white shadow-2xl shadow-blue-900/10 relative overflow-hidden border border-slate-100"
         >
-
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">Calculadora</h3>
-                <div className="flex items-center text-xs font-semibold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
+            <div className="flex justify-between items-center mb-6 lg:mb-8">
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">{t('calculator')}</h3>
+                <div className="flex items-center text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
                     {loading ? (
-                        <RefreshCw className="w-3 h-3 mr-2 animate-spin text-slate-500" />
+                        <RefreshCw className="w-3 h-3 mr-2 animate-spin text-slate-400" />
                     ) : (
-                        <span className="w-2 h-2 rounded-full bg-green-500 mr-2 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
                     )}
                     {exchangeRateDisplay}
                 </div>
             </div>
 
             <div className="space-y-6 relative">
-                {/* From Box */}
-                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-inner group focus-within:border-yellow-400 focus-within:ring-1 focus-within:ring-yellow-400 transition-all">
-                    <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Tú Envías</label>
+                <div className="bg-slate-50 rounded-2xl p-4 lg:p-5 border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                    <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">{t('youSend')}</label>
                     <div className="flex justify-between items-center">
                         <div className="flex flex-col">
                             <span className="text-sm font-bold text-slate-900 mb-1">{currencyNameFrom}</span>
@@ -98,33 +102,31 @@ const Calculator = () => {
                                 type="number"
                                 value={amount || ''}
                                 onChange={handleAmountChange}
-                                className="bg-transparent text-3xl font-black text-slate-900 text-right w-32 focus:outline-none"
+                                className="bg-transparent text-3xl sm:text-4xl font-black text-slate-900 text-right w-32 focus:outline-none"
                                 min="0"
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Swap Button */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 -mt-2">
                     <button
                         onClick={toggleDirection}
-                        className="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all hover:scale-105 shadow-md"
+                        className="w-12 h-12 rounded-full bg-blue-600 border-[4px] border-white flex items-center justify-center text-white hover:bg-blue-700 transition-all hover:scale-105 shadow-md"
                     >
                         <ArrowDownUp className="w-5 h-5" />
                     </button>
                 </div>
 
-                {/* To Box */}
-                <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 shadow-sm">
-                    <label className="text-xs text-yellow-800 font-bold uppercase tracking-wider mb-2 block">Destinatario Recibe</label>
+                <div className="bg-blue-50 rounded-2xl p-4 lg:p-5 border border-blue-100">
+                    <label className="text-xs text-blue-700 font-bold uppercase tracking-wider mb-2 block">{t('recipientGets')}</label>
                     <div className="flex justify-between items-center">
                         <div className="flex flex-col">
                             <span className="text-sm font-bold text-slate-900 mb-1">{currencyNameTo}</span>
                         </div>
                         <div className="flex items-center">
-                            <span className="text-xl font-bold text-yellow-600 mr-1">{currencySymbolTo}</span>
-                            <span className="text-3xl font-black text-slate-900 tracking-tight">
+                            <span className="text-xl font-bold text-blue-600 mr-1">{currencySymbolTo}</span>
+                            <span className="text-3xl sm:text-4xl font-black text-blue-700 tracking-tight break-all">
                                 {receivedAmount.toFixed(2)}
                             </span>
                         </div>
@@ -132,22 +134,22 @@ const Calculator = () => {
                 </div>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-slate-100 space-y-3">
+            <div className="mt-8 pt-6 border-t border-slate-100 space-y-3">
                 <div className="flex justify-between text-sm text-slate-600 font-medium">
-                    <span>Monto inicial</span>
+                    <span>{t('initialAmount')}</span>
                     <span>{currencySymbolFrom}{amount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-slate-800 font-bold items-center">
                     <span className="flex items-center gap-1">
-                        Comisión (3%)
-                        <span className="cursor-help text-slate-400" title="Tarifa de servicio reducida por transacción">
-                            <Info className="w-3 h-3" />
+                        {t('commission')}
+                        <span className="cursor-help text-slate-400" title={t('commissionTooltip')}>
+                            <Info className="w-4 h-4" />
                         </span>
                     </span>
-                    <span className="text-red-600">- {currencySymbolFrom}{commissionAmount.toFixed(2)}</span>
+                    <span className="text-blue-600">- {currencySymbolFrom}{commissionAmount.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm text-slate-600 font-medium pt-2 border-t border-slate-50 border-dashed">
-                    <span>Monto convertido a tasa actual</span>
+                <div className="flex justify-between text-sm text-slate-600 font-medium pt-3 mt-1 border-t border-slate-100 border-dashed">
+                    <span>{t('convertedAmount')}</span>
                     <span>{currencySymbolFrom}{netAmount.toFixed(2)}</span>
                 </div>
             </div>
@@ -156,14 +158,14 @@ const Calculator = () => {
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-8 w-full block text-center py-4 rounded-xl bg-yellow-400 text-slate-900 font-black text-lg hover:bg-yellow-500 transition-all shadow-md active:scale-95"
+                className="mt-8 w-full flex items-center justify-center py-4 rounded-xl bg-emerald-500 text-white font-bold text-lg hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/30 active:scale-95"
             >
-                Continuar Envío
+                {t('continueTransfer')}
             </a>
 
-            <div className="mt-4 flex justify-center items-center text-xs text-slate-500 gap-1.5 font-bold">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                Transacción 100% Segura y Verificada
+            <div className="mt-5 flex justify-center items-center text-xs text-slate-500 gap-2 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                {t('secureVerified')}
             </div>
         </motion.div>
     );
