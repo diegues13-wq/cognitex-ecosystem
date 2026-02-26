@@ -14,18 +14,15 @@ function App() {
       </div>
 
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6 sm:p-12">
-        <header className="w-full max-w-4xl flex items-center justify-between mb-8 sm:mb-12">
+        <header className="w-full max-w-4xl flex items-center justify-center mb-8 sm:mb-12">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-amber-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <ArrowLeftRight className="text-slate-950 w-6 h-6" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-amber-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <ArrowLeftRight className="text-slate-950 w-7 h-7" />
             </div>
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-amber-500 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-amber-500 tracking-tight uppercase">
               Cash-Sentinel
             </h1>
           </div>
-          <a href="https://cognitexindustrial.com" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">
-            Volver al Ecosistema
-          </a>
         </header>
 
         <main className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center flex-1">
