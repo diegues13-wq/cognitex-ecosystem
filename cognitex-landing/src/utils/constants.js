@@ -1,4 +1,4 @@
-import { Sprout, Factory, UserCheck } from 'lucide-react';
+import { Sprout, Factory, UserCheck, Wallet } from 'lucide-react';
 
 export const APPS = [
     {
@@ -30,5 +30,15 @@ export const APPS = [
         path: '/personal',
         port: 5176,
         url: 'https://personal.cognitexindustrial.com'
+    },
+    {
+        id: 'cash',
+        name: 'Cash Sentinel',
+        description: 'Plataforma segura y rápida para envío de remesas entre Ecuador y Rusia.',
+        icon: Wallet,
+        color: 'from-emerald-400 to-amber-500',
+        path: '/cash',
+        port: 5176,
+        url: 'https://cash.cognitexindustrial.com'
     }
 ];
