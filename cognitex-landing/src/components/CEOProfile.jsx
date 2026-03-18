@@ -1,50 +1,52 @@
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Award, GraduationCap, Phone, User } from 'lucide-react';
+import { Award, GraduationCap } from 'lucide-react';
+import SectionHeader from './common/SectionHeader';
 
 const CEOProfile = ({ translations }) => {
     return (
-        <section className="py-20 px-6 relative z-10 bg-black/20">
-            <div className="max-w-5xl mx-auto">
-                <h3 className="text-3xl font-black text-white mb-12 text-center flex items-center justify-center gap-3">
-                    <Award className="text-neon-cyan" size={32} />
-                    {translations.title}
-                </h3>
+        <section id="leadership" className="py-24 px-6 relative z-10 bg-industrial-950">
+            <div className="max-w-4xl mx-auto relative z-10">
+                <SectionHeader 
+                    kicker={translations.title}
+                    title={translations.role}
+                    alignment="center"
+                />
 
-                <div className="bg-industrial-900/50 border border-white/10 rounded-3xl p-8 backdrop-blur-sm flex flex-col md:flex-row gap-8 items-center">
-                    {/* Avatar Placeholder */}
-                    <div className="flex-shrink-0 relative group">
-                        <div className="w-48 h-48 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border-4 border-neon-cyan/20 flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(6,182,212,0.2)]">
-                            <User size={64} className="text-gray-500" />
-                        </div>
-                        <div className="absolute inset-0 rounded-full border-4 border-neon-cyan/50 animate-pulse-slow"></div>
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="mt-12 bg-industrial-900/40 border border-white/5 rounded-3xl p-8 md:p-12 text-center max-w-2xl mx-auto shadow-2xl backdrop-blur-sm"
+                >
+                    {/* Simple Text Badge instead of an image */}
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-black border border-white/10 flex items-center justify-center mb-6 shadow-inner">
+                        <Award size={28} className="text-neon-cyan opacity-80" />
                     </div>
 
-                    <div className="flex-1 text-center md:text-left">
-                        <h4 className="text-3xl font-bold text-white mb-2">Ing. Diego Mosquera MSc.</h4>
-                        <p className="text-neon-cyan font-mono font-bold tracking-widest text-sm mb-6">{translations.role}</p>
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                        Ing. Diego Mosquera MSc.
+                    </h2>
+                    <p className="text-neon-cyan font-mono text-sm tracking-widest uppercase mb-10 opacity-90">
+                        {translations.role}
+                    </p>
 
-                        <div className="space-y-3 mb-6">
-                            {translations.education.map((item, index) => (
-                                <div key={index} className="flex items-center gap-3 text-gray-300 text-sm">
-                                    <GraduationCap size={18} className="text-neon-purple flex-shrink-0" />
-                                    <span>{item}</span>
-                                </div>
-                            ))}
-                        </div>
+                    <p className="text-gray-400 font-light leading-relaxed mb-8 hidden md:block">
+                        Liderando la innovación tecnológica con un enfoque multidisciplinario en datos, sistemas y automatización industrial.
+                    </p>
 
-                        <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
-                            <a
-                                href="https://wa.me/593996432010"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600/20 border border-emerald-500/50 rounded-xl text-emerald-400 font-bold hover:bg-emerald-600/30 transition-all"
-                            >
-                                <Phone size={18} />
-                                +593 99 643 2010
-                            </a>
-                        </div>
+                    {/* Classic Simple List */}
+                    <div className="space-y-4 text-left border-t border-white/5 pt-8">
+                        {translations.education.map((item, index) => (
+                            <div key={index} className="flex items-start gap-4">
+                                <GraduationCap size={20} className="text-gray-500 shrink-0 mt-0.5" />
+                                <p className="text-gray-300 font-light leading-relaxed">
+                                    {item}
+                                </p>
+                            </div>
+                        ))}
                     </div>
-                </div>
+                </motion.div>
             </div>
         </section>
     );

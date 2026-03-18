@@ -1,10 +1,11 @@
 export const translations = {
     es: {
         nav: {
-            solutions: 'SOLUCIONES',
-            platforms: 'PLATAFORMAS',
-            about: 'NOSOTROS',
-            contact: 'AGENDAR VISITA',
+            about: 'QUIÉNES SOMOS',
+            ecosystem: 'CICLO DEL DATO',
+            solutions: 'SERVICIOS',
+            platforms: 'PRODUCTOS',
+            contact: 'CONTACTO',
         },
         hero: {
             status: 'SISTEMA ONLINE • V4.0.1 ALPHA',
@@ -12,14 +13,14 @@ export const translations = {
             titleLine2: 'Aplicada a la Industria',
             subtitle: 'El Cerebro Digital de tu Industria. Decisiones en Tiempo Real, Resultados Reales.',
             slogan: 'Tu industria en la palma de tu mano',
-            cta: 'AGENDAR VISITA TÉCNICA',
+            cta: 'CUÉNTANOS TU DESAFÍO INDUSTRIAL',
             description: 'Cognitex Industrial es una empresa de ingeniería y desarrollo tecnológico enfocada en Industria 4.0. Integramos analítica avanzada e IA para optimizar procesos.'
         },
         about: {
             title: 'QUIÉNES SOMOS',
-            description: 'Donde el Bit se encuentra con el Átomo. No solo programamos; diseñamos el futuro. Fusionamos la robustez del hardware industrial con la agilidad de la IA moderna.',
-            axis1: 'Inteligencia Artificial Industrial',
-            axis2: 'Data Analytics & CI'
+            subtitle: 'INGENIERÍA ECUATORIANA DE CLASE MUNDIAL',
+            description: 'Cognitex Industrial es orgullo ecuatoriano exportando tecnología cutting-edge. No vendemos software empaquetado; construimos el cerebro digital de tu planta. Si eres gerente de operaciones o ingeniero responsable, sabes que lo que no se mide, cuesta dinero. Hemos diseñado un proceso integral para llevar tu infraestructura actual hacia la Industria 4.0 sin detener tu operación.',
+            slogan: 'Transformamos hardware tradicional en activos inteligentes que multiplican tu rentabilidad.'
         },
         services: {
             title: 'SERVICIOS',
@@ -47,28 +48,66 @@ export const translations = {
                 }
             ]
         },
-        industry40: {
-            title: 'LA INDUSTRIA 4.0',
-            subtitle: 'La Convergencia Digital',
-            description: 'La Cuarta Revolución Industrial es la digitalización total de la manufactura. Transformamos datos en acciones físicas mediante los 9 Pilares Tecnológicos.',
-            benefitsTitle: 'Beneficios Clave',
-            benefits: [
-                { title: 'Eficiencia', desc: 'Reducción de tiempos muertos y desperdicios.' },
-                { title: 'Agilidad', desc: 'Adaptación rápida a cambios en la demanda.' },
-                { title: 'Personalización', desc: 'Producción masiva personalizada (Mass Customization).' }
-            ],
-            workflowTitle: 'El Flujo de Valor',
-            workflow: ['Sensores (Captura)', 'Cloud (Procesamiento)', 'IA (Análisis)', 'Acción (Control)'],
-            nodes: [
-                { id: 'bigdata', title: 'Big Data & Analytics', desc: 'Análisis masivo de datos para descubrir patrones ocultos y optimizar la toma de decisiones.' },
-                { id: 'robots', title: 'Robots Autónomos', desc: 'Máquinas inteligentes que interactúan de forma segura con humanos (Cobots) y aprenden tareas complejas.' },
-                { id: 'sim', title: 'Simulación (Digital Twin)', desc: 'Espejos virtuales de procesos físicos para testear cambios sin riesgo operativo.' },
-                { id: 'integration', title: 'Integración de Sistemas', desc: 'Conexión vertical (planta a gerencia) y horizontal (proveedores a clientes).' },
-                { id: 'iiot', title: 'IIoT', desc: 'Internet Industrial de las Cosas. Conectividad total de sensores y actuadores en tiempo real.' },
-                { id: 'cyber', title: 'Ciberseguridad', desc: 'Protección robusta de redes industriales y datos críticos contra amenazas digitales.' },
-                { id: 'cloud', title: 'Cloud Computing', desc: 'Infraestructura flexible y escalable para el procesamiento de datos fuera del borde (Edge).' },
-                { id: 'additive', title: 'Manufactura Aditiva', desc: 'Impresión 3D para prototipado rápido y creación de piezas complejas bajo demanda.' },
-                { id: 'ar', title: 'Realidad Aumentada', desc: 'Superposición de información digital en el mundo real para mantenimiento y capacitación asistida.' }
+        ecosystem: {
+            title: 'EL MOTOR COGNITEX',
+            subtitle: 'CICLO DE VIDA DEL DATO',
+            description: 'Unificamos hardware, nube e inteligencia artificial en un flujo de valor continuo. Selecciona cada fase para descubrir cómo transformamos tu industria.',
+            phases: [
+                {
+                    id: 'fase0',
+                    tab: 'Gestión de Proyectos',
+                    name: 'Ingeniería & Consultoría 4.0',
+                    icon: 'Briefcase',
+                    technologies: ['Consultoría de Eficiencia', 'Gestión Ágil (Scrum/Kanban)', 'Implementación Llave en Mano'],
+                    benefit: 'Auditoría detallada con ROI proyectado y ejecución impecable bajo estándares industriales.',
+                    color: 'text-amber-400',
+                    border: 'border-amber-500',
+                    bg: 'bg-amber-500/20'
+                },
+                {
+                    id: 'fase1',
+                    tab: 'Captura',
+                    name: 'Hardware Edge & Sensórica',
+                    icon: 'Factory',
+                    technologies: ['IIoT (Internet Industrial)', 'Retrofitting de Maquinaria', 'Integración PLC & SCADA'],
+                    benefit: 'Descubrimiento de datos ocultos y visibilidad operativa en tiempo real.',
+                    color: 'text-gray-300',
+                    border: 'border-gray-500',
+                    bg: 'bg-gray-500/20'
+                },
+                {
+                    id: 'fase2',
+                    tab: 'Procesamiento',
+                    name: 'Cloud Computing & Seguridad',
+                    icon: 'CloudLightning',
+                    technologies: ['Infraestructura Serverless', 'Ciberseguridad Industrial', 'Data Lakes & Pipelines'],
+                    benefit: 'Infraestructura resiliente, escalable y protegida contra ciberamenazas.',
+                    color: 'text-neon-cyan',
+                    border: 'border-neon-cyan',
+                    bg: 'bg-neon-cyan/20'
+                },
+                {
+                    id: 'fase3',
+                    tab: 'Analítica',
+                    name: 'Visualización & BI',
+                    icon: 'LayoutDashboard',
+                    technologies: ['Big Data & Análisis Crítico', 'Dashboards Dinámicos', 'Digital Twins (Simulación)'],
+                    benefit: 'Toma de decisiones ágil y control milimétrico de mermas y OEE.',
+                    color: 'text-neon-green',
+                    border: 'border-neon-green',
+                    bg: 'bg-neon-green/20'
+                },
+                {
+                    id: 'fase4',
+                    tab: 'Autonomía',
+                    name: 'IA & Sistemas Expertos',
+                    icon: 'BrainCircuit',
+                    technologies: ['Machine Learning', 'Sistemas IA expertos en su Proceso', 'Sistemas Expertos de Control'],
+                    benefit: 'Operación autónoma, predicción de fallos mecánicos y máximo ROI.',
+                    color: 'text-neon-purple',
+                    border: 'border-neon-purple',
+                    bg: 'bg-neon-purple/20'
+                }
             ]
         },
         agroSentinel: {
@@ -119,22 +158,23 @@ export const translations = {
             }
         },
         contact: {
-            title: 'Solicitar Inspección Técnica',
-            modalTitle: 'Solicitar Inspección Técnica',
-            subtitle: 'Nuestros ingenieros evaluarán sus requerimientos en planta.',
+            title: 'Cuéntanos tu Desafío Industrial',
+            modalTitle: 'Cuéntanos tu Desafío Industrial',
+            subtitle: 'Nuestro equipo de ingeniería analizará tu requerimiento y se pondrá en contacto.',
             name: 'NOMBRE COMPLETO',
             email: 'EMAIL CORPORATIVO',
             message: 'DETALLES DEL REQUERIMIENTO',
-            send: 'SOLICITAR VISITA',
+            send: 'ENVIAR REQUERIMIENTO',
             whatsapp: 'Contactar por WhatsApp'
         }
     },
     en: {
         nav: {
-            solutions: 'SOLUTIONS',
-            platforms: 'PLATFORMS',
-            about: 'ABOUT US',
-            contact: 'SCHEDULE VISIT',
+            about: 'WHO WE ARE',
+            ecosystem: 'THE ENGINE',
+            solutions: 'SERVICES',
+            platforms: 'PRODUCTS',
+            contact: 'CONTACT',
         },
         hero: {
             status: 'SYSTEM ONLINE • V4.0.1 ALPHA',
@@ -142,14 +182,14 @@ export const translations = {
             titleLine2: 'Applied to Industry',
             subtitle: 'The Digital Brain of Your Industry. Real-Time Decisions, Tangible Results.',
             slogan: 'Your industry in the palm of your hand',
-            cta: 'SCHEDULE TECHNICAL VISIT',
+            cta: 'TELL US YOUR INDUSTRIAL CHALLENGE',
             description: 'Cognitex Industrial is an engineering and technology development firm focused on Industry 4.0. We integrate advanced analytics and AI to optimize processes.'
         },
         about: {
             title: 'WHO WE ARE',
-            description: 'Where the Bit Meets the Atom. We don\'t just code; we engineer the future. Fusing industrial hardware robustness with modern AI agility.',
-            axis1: 'Industrial AI',
-            axis2: 'Data Analytics & CI'
+            subtitle: 'WORLD-CLASS ECUADORIAN ENGINEERING',
+            description: 'Cognitex Industrial is Ecuadorian pride exporting cutting-edge technology. We don\'t just sell packaged software; we build the digital brain of your plant. If you are an operations manager or lead engineer, you know that what gets measured, gets managed. We have designed a comprehensive process to take your current infrastructure to Industry 4.0 without halting your operations.',
+            slogan: 'We transform traditional hardware into intelligent assets that multiply your profitability.'
         },
         services: {
             title: 'SERVICES',
@@ -177,28 +217,66 @@ export const translations = {
                 }
             ]
         },
-        industry40: {
-            title: 'INDUSTRY 4.0',
-            subtitle: 'The Digital Convergence',
-            description: 'The Fourth Industrial Revolution is the total digitalization of manufacturing. We transform data into physical actions through the 9 Technological Pillars.',
-            benefitsTitle: 'Key Benefits',
-            benefits: [
-                { title: 'Efficiency', desc: 'Reduction of downtime and waste.' },
-                { title: 'Agility', desc: 'Rapid adaptation to changes in demand.' },
-                { title: 'Customization', desc: 'Mass Customization capabilities.' }
-            ],
-            workflowTitle: 'The Value Stream',
-            workflow: ['Sensors (Capture)', 'Cloud (Process)', 'AI (Analyze)', 'Action (Control)'],
-            nodes: [
-                { id: 'bigdata', title: 'Big Data & Analytics', desc: 'Massive data analysis to uncover hidden patterns and optimize decision-making.' },
-                { id: 'robots', title: 'Autonomous Robots', desc: 'Intelligent machines that interact safely with humans (Cobots) and learn complex tasks.' },
-                { id: 'sim', title: 'Simulation (Digital Twin)', desc: 'Virtual mirrors of physical processes to test changes without operational risk.' },
-                { id: 'integration', title: 'System Integration', desc: 'Vertical (shop floor to top floor) and horizontal (supply chain) connection.' },
-                { id: 'iiot', title: 'IIoT', desc: 'Industrial Internet of Things. Total connectivity of sensors and actuators in real-time.' },
-                { id: 'cyber', title: 'Cybersecurity', desc: 'Robust protection of industrial networks and critical data against digital threats.' },
-                { id: 'cloud', title: 'Cloud Computing', desc: 'Flexible and scalable infrastructure for data processing beyond the Edge.' },
-                { id: 'additive', title: 'Additive Manufacturing', desc: '3D printing for rapid prototyping and creating complex parts on demand.' },
-                { id: 'ar', title: 'Augmented Reality', desc: 'Overlaying digital information on the real world for assisted maintenance and training.' }
+        ecosystem: {
+            title: 'THE COGNITEX ENGINE',
+            subtitle: 'THE DATA LIFECYCLE',
+            description: 'We unify hardware, cloud, and artificial intelligence into a continuous value stream. Select each phase to discover how we transform your industry.',
+            phases: [
+                {
+                    id: 'fase0',
+                    tab: 'Project Management',
+                    name: 'Engineering & Consulting 4.0',
+                    icon: 'Briefcase',
+                    technologies: ['Efficiency Consulting', 'Agile Management (Scrum/Kanban)', 'Turnkey Implementation'],
+                    benefit: 'Detailed audit with projected ROI and flawless execution under industrial standards.',
+                    color: 'text-amber-400',
+                    border: 'border-amber-500',
+                    bg: 'bg-amber-500/20'
+                },
+                {
+                    id: 'fase1',
+                    tab: 'Capture',
+                    name: 'Hardware Edge & Sensorics',
+                    icon: 'Factory',
+                    technologies: ['IIoT (Industrial Internet)', 'Machinery Retrofitting', 'PLC & SCADA Integration'],
+                    benefit: 'Discovery of hidden data and real-time operational visibility.',
+                    color: 'text-gray-300',
+                    border: 'border-gray-500',
+                    bg: 'bg-gray-500/20'
+                },
+                {
+                    id: 'fase2',
+                    tab: 'Processing',
+                    name: 'Cloud Computing & Security',
+                    icon: 'CloudLightning',
+                    technologies: ['Serverless Infrastructure', 'Industrial Cybersecurity', 'Data Lakes & Pipelines'],
+                    benefit: 'Resilient, scalable infrastructure protected against cyber threats.',
+                    color: 'text-neon-cyan',
+                    border: 'border-neon-cyan',
+                    bg: 'bg-neon-cyan/20'
+                },
+                {
+                    id: 'fase3',
+                    tab: 'Analytics',
+                    name: 'Visualization & BI',
+                    icon: 'LayoutDashboard',
+                    technologies: ['Big Data & Critical Analysis', 'Dynamic Dashboards', 'Digital Twins (Simulation)'],
+                    benefit: 'Agile decision making and millimeter control of waste and OEE.',
+                    color: 'text-neon-green',
+                    border: 'border-neon-green',
+                    bg: 'bg-neon-green/20'
+                },
+                {
+                    id: 'fase4',
+                    tab: 'Autonomy',
+                    name: 'AI & Expert Systems',
+                    icon: 'BrainCircuit',
+                    technologies: ['Machine Learning', 'Process Expert AI Systems', 'Expert Control Systems'],
+                    benefit: 'Autonomous operation, mechanical failure prediction and maximum ROI.',
+                    color: 'text-neon-purple',
+                    border: 'border-neon-purple',
+                    bg: 'bg-neon-purple/20'
+                }
             ]
         },
         agroSentinel: {
@@ -249,13 +327,13 @@ export const translations = {
             }
         },
         contact: {
-            title: 'Request Technical Inspection',
-            modalTitle: 'Request Technical Inspection',
-            subtitle: 'Our engineers will assess your requirements on-site.',
+            title: 'Tell Us Your Industrial Challenge',
+            modalTitle: 'Tell Us Your Industrial Challenge',
+            subtitle: 'Our engineering team will analyze your requirement and get in touch.',
             name: 'FULL NAME',
             email: 'WORK EMAIL',
             message: 'REQUIREMENT DETAILS',
-            send: 'REQUEST VISIT',
+            send: 'SUBMIT REQUIREMENT',
             whatsapp: 'Contact via WhatsApp'
         }
     }

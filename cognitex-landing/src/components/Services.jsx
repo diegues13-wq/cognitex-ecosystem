@@ -1,13 +1,14 @@
 import React from 'react';
 import { BrainCircuit, Activity, Cpu, Factory } from 'lucide-react';
+import SectionHeader from './common/SectionHeader';
 
 const Services = ({ t }) => {
     return (
         <section id="services" className="py-24 px-6 relative z-10">
-            <div className="max-w-7xl mx-auto text-center mb-16">
-                <h3 className="text-4xl font-black text-white mb-4">{t.title}</h3>
-                <p className="text-gray-400">{t.subtitle}</p>
-            </div>
+            <SectionHeader 
+                kicker={t.title}
+                title={t.subtitle}
+            />
 
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {t.items.map((service, idx) => {

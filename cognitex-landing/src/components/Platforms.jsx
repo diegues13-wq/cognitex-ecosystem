@@ -1,20 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Globe, ShieldCheck, ArrowRight } from 'lucide-react';
 import { APPS } from '../utils/constants';
+import SectionHeader from './common/SectionHeader';
 
 const Platforms = ({ t }) => {
-    const [hoveredApp, setHoveredApp] = useState(null);
-
-
 
     return (
-        <section id="platforms" className="py-20 px-6 relative z-10">
+        <section id="platforms" className="py-24 px-6 relative z-10">
             <div className="max-w-7xl mx-auto">
-                <div className="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
-                    <div>
-                        <h3 className="text-3xl font-black text-white mb-2">{t.title}</h3>
-                        <p className="text-gray-400">{t.subtitle}</p>
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-white/10 pb-6 gap-6">
+                    <div className="md:w-2/3">
+                        <SectionHeader 
+                            alignment="left"
+                            kicker={t.title}
+                            title={t.subtitle}
+                            className="!mb-0"
+                        />
                     </div>
                     <div className="hidden md:flex gap-4">
                         <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
@@ -34,8 +36,6 @@ const Platforms = ({ t }) => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            onMouseEnter={() => setHoveredApp(app.id)}
-                            onMouseLeave={() => setHoveredApp(null)}
                             className={`relative group p-1 rounded-3xl bg-gradient-to-b from-white/10 to-transparent hover:from-${app.color.split('-')[1]}-500/50 transition-all duration-500`}
                         >
                             <div className="absolute inset-0 bg-industrial-900 rounded-[22px] m-[1px] z-0"></div>

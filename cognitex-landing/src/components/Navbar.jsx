@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X, Languages } from 'lucide-react';
+import { Menu, X, Languages, MessageCircle } from 'lucide-react';
 import cognitexLogo from '../assets/cognitex_icon.png';
 
 const Navbar = ({
@@ -8,9 +8,13 @@ const Navbar = ({
     language,
     toggleLanguage,
     isMobileMenuOpen,
-    setIsMobileMenuOpen,
-    setIsContactModalOpen
+    setIsMobileMenuOpen
 }) => {
+    const waMessage = language === 'en' 
+        ? "Hello, I would like to get more information about Cognitex Industrial's services." 
+        : "Hola, me gustaría obtener más información sobre los servicios de Cognitex Industrial.";
+    const waUrl = `https://wa.me/593996432010?text=${encodeURIComponent(waMessage)}`;
+
     return (
         <>
             <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-industrial-950/80 backdrop-blur-md">
@@ -27,6 +31,7 @@ const Navbar = ({
                     </div>
                     <div className="hidden md:flex items-center gap-8 text-sm font-bold text-gray-400">
                         <a href="#about" className="hover:text-white transition-colors">{t.about}</a>
+                        <a href="#ecosystem" className="hover:text-white transition-colors">{t.ecosystem}</a>
                         <a href="#services" className="hover:text-white transition-colors">{t.solutions}</a>
                         <a href="#platforms" className="hover:text-white transition-colors">{t.platforms}</a>
 
@@ -37,21 +42,24 @@ const Navbar = ({
                             <Languages size={16} /> {language.toUpperCase()}
                         </button>
 
-                        <button
-                            onClick={() => setIsContactModalOpen(true)}
-                            className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 hover:border-neon-cyan/50 transition-all text-white"
+                        <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-5 py-2 bg-[#25D366]/20 border border-[#25D366]/50 rounded-lg hover:bg-[#25D366]/30 transition-all text-[#25D366] font-bold"
                         >
+                            <MessageCircle size={16} />
                             {t.contact}
-                        </button>
+                        </a>
                     </div>
-                    <button
+                    <div
                         className="md:hidden text-white flex items-center gap-4"
                     >
                         <button onClick={toggleLanguage} className="font-mono font-bold text-xs bg-white/10 px-2 py-1 rounded">{language.toUpperCase()}</button>
-                        <div onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                        </div>
-                    </button>
+                        </button>
+                    </div>
                 </div>
             </nav>
 
@@ -65,17 +73,19 @@ const Navbar = ({
             >
                 <div className="flex flex-col gap-6 text-lg font-bold text-gray-300">
                     <a href="#about" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>{t.about}</a>
+                    <a href="#ecosystem" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>{t.ecosystem}</a>
                     <a href="#services" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>{t.solutions}</a>
                     <a href="#platforms" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>{t.platforms}</a>
-                    <button
-                        onClick={() => {
-                            setIsMobileMenuOpen(false);
-                            setIsContactModalOpen(true);
-                        }}
-                        className="px-5 py-3 bg-neon-cyan/10 border border-neon-cyan/50 rounded-lg text-neon-cyan"
+                    <a
+                        href="https://wa.me/593996432010"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex justify-center items-center gap-2 px-5 py-3 bg-[#25D366]/20 border border-[#25D366]/50 rounded-lg text-[#25D366] font-bold"
                     >
+                        <MessageCircle size={20} />
                         {t.contact}
-                    </button>
+                    </a>
                 </div>
             </motion.div>
         </>
