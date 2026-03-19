@@ -19,7 +19,7 @@ export const translations = {
         about: {
             title: 'QUIÉNES SOMOS',
             subtitle: 'INGENIERÍA ECUATORIANA DE CLASE MUNDIAL',
-            description: 'Cognitex Industrial es orgullo ecuatoriano exportando tecnología cutting-edge. No vendemos software empaquetado; construimos el cerebro digital de tu planta. Si eres gerente de operaciones o ingeniero responsable, sabes que lo que no se mide, cuesta dinero. Hemos diseñado un proceso integral para llevar tu infraestructura actual hacia la Industria 4.0 sin detener tu operación.',
+            description: 'En Cognitex Industrial, somos una empresa 100% ecuatoriana dedicada a transformar la industria nacional. Más que proveedores, somos tu socio estratégico para el desarrollo de proyectos de automatización industrial a todo nivel dentro del Ecuador. Nuestro compromiso es potenciar las capacidades operativas de tu empresa, optimizando recursos y maximizando tus ganancias. Construimos el cerebro digital de tu planta para que domines la Industria 4.0 sin detener tu operación.',
             slogan: 'Transformamos hardware tradicional en activos inteligentes que multiplican tu rentabilidad.'
         },
         services: {
@@ -188,7 +188,7 @@ export const translations = {
         about: {
             title: 'WHO WE ARE',
             subtitle: 'WORLD-CLASS ECUADORIAN ENGINEERING',
-            description: 'Cognitex Industrial is Ecuadorian pride exporting cutting-edge technology. We don\'t just sell packaged software; we build the digital brain of your plant. If you are an operations manager or lead engineer, you know that what gets measured, gets managed. We have designed a comprehensive process to take your current infrastructure to Industry 4.0 without halting your operations.',
+            description: 'At Cognitex Industrial, we are a 100% Ecuadorian company dedicated to transforming the national industry. More than just providers, we are your strategic partner for developing industrial automation projects at all levels within Ecuador. Our commitment is to boost your company\'s operational capabilities, optimizing resources and maximizing your profits. We build the digital brain of your plant so you can master Industry 4.0 without halting your operations.',
             slogan: 'We transform traditional hardware into intelligent assets that multiply your profitability.'
         },
         services: {
