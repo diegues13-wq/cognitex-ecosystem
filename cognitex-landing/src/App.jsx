@@ -44,25 +44,27 @@ function App() {
         setIsContactModalOpen={setIsContactModalOpen}
       />
 
-      <Hero
-        t={t.hero}
-        setIsContactModalOpen={setIsContactModalOpen}
-      />
+      <main>
+        <Hero
+          t={t.hero}
+          setIsContactModalOpen={setIsContactModalOpen}
+        />
 
-      <About t={t.about} />
+        <About t={t.about} />
 
-      <InteractiveEcosystem translations={t.ecosystem} />
+        <InteractiveEcosystem translations={t.ecosystem} />
 
-      <Suspense fallback={<LoadingFallback />}>
-      </Suspense>
+        <Suspense fallback={<LoadingFallback />}>
+        </Suspense>
 
-      <Services t={t.services} />
+        <Services t={t.services} />
 
-      <Suspense fallback={<LoadingFallback />}>
-        <CEOProfile translations={t.leadership} />
-      </Suspense>
+        <Suspense fallback={<LoadingFallback />}>
+          <CEOProfile translations={t.leadership} />
+        </Suspense>
 
-      <Platforms t={t.platforms} />
+        <Platforms t={t.platforms} />
+      </main>
 
       <Footer />
 
