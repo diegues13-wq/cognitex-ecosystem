@@ -22,10 +22,10 @@ const Navbar = ({
                     <div className="flex items-center gap-5">
                         <div className="relative group">
                             <div className="absolute inset-0 bg-neon-cyan/20 blur-xl rounded-full group-hover:bg-neon-cyan/40 transition-all duration-500"></div>
-                            <img src={cognitexLogo} alt="Cognitex Logo" className="w-24 h-24 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]" />
+                            <img src={cognitexLogo} alt="Cognitex Industrial - Automatización e Industria 4.0 en Ecuador" className="w-24 h-24 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]" />
                         </div>
                         <div className="leading-tight">
-                            <h1 className="text-2xl font-black tracking-tighter text-white">COGNITEX <span className="text-neon-cyan">INDUSTRIAL</span></h1>
+                            <div className="text-2xl font-black tracking-tighter text-white">COGNITEX <span className="text-neon-cyan">INDUSTRIAL</span></div>
                             <span className="text-[10px] font-mono text-gray-400 tracking-[0.3em] block ml-1">AI SUPERVISION SYSTEMS</span>
                         </div>
                     </div>

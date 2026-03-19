@@ -21,29 +21,30 @@ const Hero = ({ t, setIsContactModalOpen }) => {
                     {t.status}
                 </motion.div>
 
-                <motion.div
+                <motion.h1
                     initial={{ opacity: 0, y: 30, filter: 'blur(15px)' }}
                     animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                    className="text-4xl md:text-5xl lg:text-6xl font-black mb-2 text-white tracking-tight leading-tight"
+                    className="flex flex-col items-center mb-8"
                 >
-                    {t.titleLine1}
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9, filter: 'blur(15px)' }}
-                    animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                    transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-                    className="text-5xl md:text-7xl lg:text-[5.5rem] font-black mb-8 tracking-tighter leading-tight"
-                >
+                    <span className="text-4xl md:text-5xl lg:text-6xl font-black mb-2 text-white tracking-tight leading-tight block">
+                        {t.titleLine1}
+                    </span>
                     <motion.span 
-                        animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-                        transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-                        className="inline-block bg-clip-text text-transparent bg-[linear-gradient(to_right,#06b6d4,#ffffff,#3b82f6,#06b6d4)] bg-[length:200%_auto] drop-shadow-[0_0_20px_rgba(6,182,212,0.4)] pb-2"
+                        initial={{ opacity: 0, scale: 0.9, filter: 'blur(15px)' }}
+                        animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                        transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+                        className="text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-tight block"
                     >
-                        {t.titleLine2}
+                        <motion.span 
+                            animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                            transition={{ duration: 6, ease: "linear", repeat: Infinity }}
+                            className="inline-block bg-clip-text text-transparent bg-[linear-gradient(to_right,#06b6d4,#ffffff,#3b82f6,#06b6d4)] bg-[length:200%_auto] drop-shadow-[0_0_20px_rgba(6,182,212,0.4)] pb-2"
+                        >
+                            {t.titleLine2}
+                        </motion.span>
                     </motion.span>
-                </motion.div>
+                </motion.h1>
 
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
