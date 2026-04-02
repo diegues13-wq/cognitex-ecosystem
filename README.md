@@ -29,6 +29,12 @@ This monorepo hosts the following integrated applications:
 *   **Theme**: **Emerald/Green**.
 *   **Tech**: React 19, Vite 7, Tailwind 4, Python (IoT Edge).
 
+### 5. [Terra Latitude](./terra-landing) (Port 5177)
+*   **Role**: Premium B2B Export Marketing & Data Interface.
+*   **Domain**: Ecuadorian Botanical Atlas (Coffee & Cacao), Geolocation Telemetry, Logistics.
+*   **Theme**: **Gold/Earth/Emerald**.
+*   **Tech**: React 19, Tailwind 4, Framer Motion, Vite 7.
+
 ---
 
 ## 🛠️ Technology Stack
@@ -63,6 +69,7 @@ cd cognitex-landing && npm install && cd ..
 cd industry-sentinel && npm install && cd ..
 cd personal-sentinel && npm install && cd ..
 cd agro-sentinel/web && npm install && cd ../..
+cd terra-landing && npm install && cd ..
 ```
 
 #### Python Components (Backend/Edge)
@@ -89,6 +96,9 @@ cd cognitex-landing && npm run dev
 
 # Run Industry Sentinel
 cd industry-sentinel && npm run dev
+
+# Run Terra Latitude
+cd terra-landing && npm run dev
 ```
 
 ### 🐳 Production Deployment (Docker)

@@ -1,0 +1,108 @@
+{
+  "nav": {
+    "origin": "The Origin",
+    "products": "Catalog",
+    "sustainability": "Traceability",
+    "contact": "Negotiations"
+  },
+  "hero": {
+    "title": "Terra Latitude: Origin at the center of the planet",
+    "subtitle": "Connecting the most exclusive coffee and cacao from Ecuador directly to the global market.",
+    "cta_contact": "Contact Us",
+    "specs": "B2B Specifications",
+    "spec1": "Transit St. Petersburg",
+    "spec1_val": "28 Days",
+    "spec2": "EUDR Traceability",
+    "spec2_val": "Verified Lots"
+  },
+  "legitimacy": {
+    "title": "Governance and Transparency",
+    "desc": "Backed by Ecuadorian regulatory institutions to guarantee safe and legitimate exports."
+  },
+  "heritage": {
+    "label": "Chronicles of Origin / Хроники происхождения",
+    "title": "Heritage and Legacy: The History of Coffee and Cacao in the Center of the World",
+    "subtitle": "Наследие и легенда: История кофе и какао в Центре Мира",
+    "coffee_title": "The Black Gold of the Andes",
+    "coffee_desc_es": "Since the 19th century, Ecuadorian coffee has been a cultural bridge. Grown on the slopes of volcanoes, its unique profile is the result of unparalleled geography on the terrestrial equator.",
+    "coffee_desc_ru": "С XIX века эквадорский кофе служил культурным мостом. Выращенный на склонах вулканов, его уникальный профиль — результат бесподобной географии на земном экваторе.",
+    "cacao_title": "'Nacional' Cacao: The Soul of Chocolate",
+    "cacao_desc_es": "Ecuador is the cradle of cacao. Archaeological research places the origin of cacao consumption in the Ecuadorian Amazon over 5,000 years ago.",
+    "cacao_desc_ru": "Эквадор — колыбель какао. Археологические исследования подтверждают, что употребление какао началось в эквадорской Амазонии более 5000 лет назад.",
+    "cacao_spec1": "Historical Genetics",
+    "cacao_spec1_val": "Fine Aroma",
+    "cacao_spec2": "Antiquity",
+    "cacao_spec2_val": "5,300+ Years"
+  },
+  "products": {
+    "label": "Our Portfolio / Наш портфель",
+    "title": "Excellence from Origin",
+    "arabica_title": "Arabica Coffee Screen 15-17",
+    "arabica_desc": "Арабика Сетка 15-17. Grown at 1,200m+ with citrus and floral cup profiles.",
+    "arabica_spec1": "Moisture",
+    "arabica_spec1_val": "10.5% - 12%",
+    "arabica_spec2": "Defects",
+    "arabica_spec2_val": "0-5 (Grade 1)",
+    "cacao_title": "Fine Aroma Cacao",
+    "cacao_desc": "Национальный Какао. >75% controlled fermentation.",
+    "robusta_title": "Specialty Conilon Robusta",
+    "robusta_cta": "Technical Specifications"
+  },
+  "logistics": {
+    "label": "Transcontinental Logistics",
+    "title": "Ecuador Express Route: Guayaquil — St. Petersburg",
+    "desc": "We optimize the B2B supply chain with strategic alliances with MSC and Maersk, guaranteeing record times and thermal traceability.",
+    "feature1_title": "Direct Departure",
+    "feature1_desc": "Port of Guayaquil (Contecon/TPG) without unnecessary transshipments.",
+    "feature2_title": "Atmosphere Control",
+    "feature2_desc": "Food-Grade containers with IoT moisture monitoring."
+  },
+  "eudr": {
+    "title": "My Farm, My Footprint",
+    "subtitle": "Моя ферма, мой след",
+    "desc": "Our traceability platform is 100% compliant with EUDR regulations. We provide precise geolocation for each lot to guarantee zero deforestation.",
+    "card1_title": "Georeferencing",
+    "card1_desc": "Exact polygons of our producing partners' farms in the Andean foothills.",
+    "card2_title": "Lot Certification",
+    "card2_desc": "Digital documentation accessible via QR for each sack exported to the Eurasian Economic Union.",
+    "card3_title": "Social Impact",
+    "card3_desc": "Fair trade verification and direct technical support to rural communities."
+  },
+  "model": {
+    "title": "Our Operating Model",
+    "label": "Steps toward export",
+    "step1_title": "Farm Selection / Выбор на ферме",
+    "step1_desc": "Our agronomists cup and select the best micro-lots directly at origin, ensuring physical and sensory consistency.",
+    "step2_title": "Processing and Milling",
+    "step2_desc": "Milling and electronic sorting to meet the screen and grade standards requested by the B2B client.",
+    "step3_title": "Customs Consolidation",
+    "step3_desc": "Complete document management: Phytosanitary Certificates, Origin, and compliance with Russian import regulations.",
+    "step4_title": "Delivery at Destination / Доставка",
+    "step4_desc": "Tracking until unloading at Baltic ports or designated land terminals."
+  },
+  "benefits": {
+    "title": "Driving Shared Growth",
+    "card1_title": "Fair Price / Справедливая цена",
+    "card1_desc": "We eliminate unnecessary intermediaries to maximize producer return and competitiveness for the importer.",
+    "card2_title": "Stable Supply",
+    "card2_desc": "Long-term contracts ensuring constant volumes even during seasons of high volatility."
+  },
+  "contact": {
+    "title": "Start Your Next Import",
+    "desc": "Our bilingual team is ready to advise you in Spanish and Russian.",
+    "whatsapp": "Direct WhatsApp",
+    "form_name": "Name / Имя",
+    "form_company": "Company / Компания",
+    "form_email": "Email / Электронная почта",
+    "form_message": "Message / Сообщение",
+    "form_submit": "Send Inquiry / Отправить"
+  },
+  "footer": {
+    "slogan": "Heritage & Precision in every bean.",
+    "products": "Products",
+    "legal": "Legal",
+    "hq": "Headquarters",
+    "hq_address": "Av. de las Américas, Guayaquil, Ecuador | Business Center, Floor 12",
+    "copyright": "© 2026 Terra Latitude S.A.S. | Heritage & Precision"
+  }
+}

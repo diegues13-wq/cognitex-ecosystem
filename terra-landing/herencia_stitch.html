@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Terra Latitude | Specialty Coffee &amp; Cacao Export</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@300;400;600;800&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-fixed": "#271900",
+              "on-secondary": "#ffffff",
+              "surface-container-low": "#f5f3f3",
+              "on-error-container": "#93000a",
+              "primary": "#00342b",
+              "on-tertiary-container": "#b2b1b1",
+              "error": "#ba1a1a",
+              "outline": "#707975",
+              "on-surface-variant": "#3f4945",
+              "tertiary-fixed-dim": "#c7c6c6",
+              "on-primary-fixed": "#00201a",
+              "on-tertiary-fixed": "#1b1c1c",
+              "surface-bright": "#fbf9f9",
+              "tertiary-fixed": "#e3e2e2",
+              "secondary-fixed": "#ffdea6",
+              "surface-tint": "#29695b",
+              "inverse-primary": "#94d3c1",
+              "surface-container-high": "#e9e8e7",
+              "on-primary-fixed-variant": "#065043",
+              "on-secondary-fixed-variant": "#5d4200",
+              "inverse-on-surface": "#f2f0f0",
+              "background": "#fbf9f9",
+              "on-tertiary-fixed-variant": "#464747",
+              "inverse-surface": "#303031",
+              "error-container": "#ffdad6",
+              "secondary-container": "#fdc34d",
+              "on-error": "#ffffff",
+              "primary-fixed-dim": "#94d3c1",
+              "on-primary-container": "#7ebdac",
+              "primary-fixed": "#afefdd",
+              "on-background": "#1b1c1c",
+              "surface-container-lowest": "#ffffff",
+              "outline-variant": "#bfc9c4",
+              "primary-container": "#004d40",
+              "tertiary-container": "#434444",
+              "surface-container-highest": "#e3e2e2",
+              "tertiary": "#2d2e2e",
+              "surface": "#fbf9f9",
+              "surface-dim": "#dbdad9",
+              "on-surface": "#1b1c1c",
+              "on-primary": "#ffffff",
+              "on-secondary-container": "#715000",
+              "surface-container": "#efeded",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed-dim": "#f7bd48",
+              "secondary": "#7b5800",
+              "surface-variant": "#e3e2e2"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Manrope"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(251, 249, 249, 0.65);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(191, 201, 196, 0.2);
+      }
+      .industrial-gradient {
+        background: linear-gradient(135deg, #00342b 0%, #004d40 100%);
+      }
+      .blueprint-pattern {
+        background-image: radial-gradient(rgba(112, 121, 117, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+      .technical-overlay {
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0v60M0 30h60' stroke='white' stroke-width='0.5' stroke-opacity='0.2' fill='none'/%3E%3C/svg%3E");
+      }
+      .industrial-border {
+        border-image: linear-gradient(to bottom, #7b5800, transparent) 1;
+        border-left: 1px solid;
+      }
+    </style>
+</head>
+<body class="bg-background text-tertiary font-body">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#fbf9f9] dark:bg-[#2d2e2e]">
+<nav class="flex justify-between items-center px-12 py-6 max-w-screen-2xl mx-auto w-full">
+<div class="font-['Noto_Serif'] font-bold text-[#00342b] dark:text-[#fbf9f9] text-2xl tracking-tight">
+                Terra Latitude
+            </div>
+<div class="hidden md:flex space-x-10 items-center">
+<a class="font-['Noto_Serif'] text-lg tracking-tight text-[#00342b] dark:text-[#fdc34d] border-b-2 border-[#7b5800] pb-1 hover:opacity-100 transition-colors" href="#">Origen</a>
+<a class="font-['Noto_Serif'] text-lg tracking-tight text-[#2d2e2e] dark:text-[#fbf9f9] opacity-80 hover:opacity-100 hover:text-[#004d40] transition-colors" href="#">Productos</a>
+<a class="font-['Noto_Serif'] text-lg tracking-tight text-[#2d2e2e] dark:text-[#fbf9f9] opacity-80 hover:opacity-100 hover:text-[#004d40] transition-colors" href="#">Sostenibilidad</a>
+<a class="font-['Noto_Serif'] text-lg tracking-tight text-[#2d2e2e] dark:text-[#fbf9f9] opacity-80 hover:opacity-100 hover:text-[#004d40] transition-colors" href="#">Contacto</a>
+</div>
+<div class="flex items-center gap-4 text-[#004d40] font-['Noto_Serif'] font-bold">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+<span class="text-sm">RU/ES</span>
+</div>
+</nav>
+</header>
+<main class="pt-20">
+<!-- Section 1: Hero Macro -->
+<section class="relative h-[921px] flex items-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center" data-alt="extreme close-up macro photography of fresh green coffee cherries and dark roasted beans with soft golden lighting and depth of field" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA9ICPnXO3Gddb7oZqCPvgrOzHOXg7GMUJIyoD4MPZDBsdHx0M5z1YC7WEDsVg9MqiKNb5oykKsPktuv1YkDzYU9n34Dh2ORJ2-s5oBHYEYhpu3hCWpF0TJGZ-3NghjbwuR2cRt0ZooAtR_aKXdGlcGKS3eVMjVH9cBa8Z8ByqdkN1HCHH2TkS7aDvK39i-2DLYaIrfLzNBF0ry26XYKBQHFVeUChRiXWAToBM2dkaKXZa74pOxtKuFR6Jc0BeQJgo6PuGqFr78xFPQ')"></div>
+<div class="absolute inset-0 bg-primary/40 mix-blend-multiply"></div>
+<!-- Subtle Blueprint Overlay -->
+<div class="absolute inset-0 blueprint-pattern opacity-20"></div>
+</div>
+<div class="relative z-10 max-w-screen-xl mx-auto px-12 w-full">
+<div class="max-w-3xl">
+<h1 class="font-headline text-6xl md:text-8xl text-surface-bright font-bold leading-tight tracking-tighter mb-6">
+                        Su departamento de ventas en el mercado euroasiático
+                    </h1>
+<p class="font-headline text-2xl md:text-3xl text-secondary-container italic mb-10 opacity-90">
+                        Ваш отдел продаж на евразийском рынке
+                    </p>
+<div class="flex gap-6">
+<button class="industrial-gradient text-on-primary px-8 py-4 text-lg font-semibold rounded-md shadow-xl hover:scale-[1.02] transition-transform">
+                            Explorar Catálogo / Каталог
+                        </button>
+<button class="border-b-2 border-secondary text-surface-bright font-headline text-xl pb-1 hover:text-secondary-container transition-colors">
+                            Hablemos / Контакты
+                        </button>
+</div>
+</div>
+</div>
+<!-- Floating Data Pane (Industrial Precision) -->
+<div class="absolute bottom-12 right-12 glass-card p-8 rounded-lg max-w-sm hidden lg:block border-t-2 border-secondary">
+<div class="flex items-center gap-4 mb-4">
+<span class="material-symbols-outlined text-secondary" data-icon="precision_manufacturing">precision_manufacturing</span>
+<span class="font-label text-xs uppercase tracking-widest font-bold">Technical Specs</span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="font-label text-sm opacity-60">Transit St. Petersburg</span>
+<span class="font-label text-xl font-bold">28 Days</span>
+</div>
+<div class="h-px bg-outline-variant/30"></div>
+<div class="flex justify-between items-end">
+<span class="font-label text-sm opacity-60">EUDR Compliance</span>
+<span class="font-label text-xl font-bold">100% Verified</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Legitimidad -->
+<section class="py-24 bg-surface-container-low relative">
+<div class="absolute top-0 right-0 w-64 h-64 opacity-[0.03] pointer-events-none p-12">
+<svg class="w-full h-full" viewbox="0 0 100 100"><path d="M10 10L90 10L90 90L10 90Z" fill="none" stroke="currentColor" stroke-width="0.5"></path><path d="M10 10L90 90M10 90L90 10" stroke="currentColor" stroke-width="0.5"></path></svg>
+</div>
+<div class="max-w-screen-xl mx-auto px-12">
+<div class="flex flex-col md:flex-row justify-between items-center gap-12">
+<div class="max-w-md">
+<h2 class="font-headline text-3xl font-bold text-primary mb-4">Gobernanza y Transparencia</h2>
+<p class="text-tertiary/70">Respaldados por las instituciones reguladoras del Ecuador para garantizar exportaciones seguras y legítimas.</p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-12 opacity-60 grayscale hover:grayscale-0 transition-all">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-4xl" data-icon="account_balance">account_balance</span>
+<span class="font-label text-xs font-bold uppercase tracking-tighter">SRI Ecuador</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-4xl" data-icon="gavel">gavel</span>
+<span class="font-label text-xs font-bold uppercase tracking-tighter">Supercias</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-4xl" data-icon="verified_user">verified_user</span>
+<span class="font-label text-xs font-bold uppercase tracking-tighter">Agrocalidad</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-4xl" data-icon="ship">sailing</span>
+<span class="font-label text-xs font-bold uppercase tracking-tighter">Senae</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- NEW SECTION: Herencia y Legado -->
+<section class="py-32 bg-surface overflow-hidden blueprint-pattern">
+<div class="max-w-screen-2xl mx-auto px-12">
+<div class="mb-20">
+<span class="font-label text-secondary font-bold tracking-[0.2em] uppercase text-sm">Crónicas del Origen / Хроники происхождения</span>
+<h2 class="font-headline text-5xl font-bold text-primary mt-4">Herencia y Legado: La Historia del Café y Cacao en el Centro del Mundo</h2>
+<p class="font-headline text-2xl italic text-secondary mt-2">Наследие и легенда: История кофе и какао в Центре Мира</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-0 border border-outline-variant/30">
+<!-- Historical Block 1: Coffee -->
+<div class="relative h-[600px] group overflow-hidden">
+<img class="absolute inset-0 w-full h-full object-cover grayscale brightness-50 group-hover:scale-105 transition-transform duration-1000" data-alt="vintage sepia style photo of coffee farmers in the Ecuadorian Andes mountains early 20th century" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-l9Oit_h8Iat9_85-G_X1F1X9mKzB6T7_8m6m7G5T5_8m6m7G5T5_8m6m7G5T5_8m6m7G5T5_8m6m7G5T5_8m6m7G5T5_8m6m7G5T5_8m6m7G5T5"/>
+<div class="absolute inset-0 technical-overlay pointer-events-none opacity-40"></div>
+<div class="absolute inset-0 bg-primary/20"></div>
+<div class="absolute inset-0 p-12 flex flex-col justify-end text-white">
+<div class="industrial-border pl-6">
+<h3 class="font-headline text-3xl font-bold mb-6">El Oro Negro de los Andes</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed opacity-90">
+<p>Desde el siglo XIX, el café ecuatoriano ha sido un puente cultural. Cultivado en las faldas de los volcanes, su perfil único es resultado de una geografía sin igual en el ecuador terrestre.</p>
+<p class="italic">С XIX века эквадорский кофе служил культурным мостом. Выращенный на склонах вулканов, его уникальный профиль — результат бесподобной географии на земном экваторе.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Historical Block 2: Cacao -->
+<div class="bg-primary-container p-12 flex flex-col justify-center relative">
+<div class="absolute top-8 right-8 text-surface-bright/10">
+<span class="material-symbols-outlined text-[120px]" data-icon="temp_preferences_eco">temp_preferences_eco</span>
+</div>
+<div class="industrial-border pl-6 border-secondary">
+<h3 class="font-headline text-3xl font-bold text-secondary-container mb-6">Cacao 'Nacional': El Alma del Chocolate</h3>
+<div class="space-y-8 text-surface-bright/80 leading-relaxed">
+<div>
+<p class="mb-2">Ecuador es la cuna del cacao. Investigaciones arqueológicas sitúan el origen del consumo de cacao en la Amazonía ecuatoriana hace más de 5,000 años.</p>
+<p class="text-sm italic font-light">Эквадор — колыбель какао. Археологические исследования подтверждают, что употребление какао началось в эквадорской Амазонии более 5000 лет назад.</p>
+</div>
+<div class="grid grid-cols-2 gap-4 pt-8 border-t border-white/10">
+<div>
+<span class="block font-label text-[10px] uppercase tracking-widest text-secondary">Genética Histórica</span>
+<span class="text-xl font-bold">Fino de Aroma</span>
+</div>
+<div>
+<span class="block font-label text-[10px] uppercase tracking-widest text-secondary">Antigüedad</span>
+<span class="text-xl font-bold">5,300+ Años</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: Producto Bento Grid -->
+<section class="py-32 px-12 max-w-screen-2xl mx-auto">
+<div class="mb-20 text-center">
+<span class="font-label text-secondary font-bold tracking-[0.2em] uppercase text-sm">Nuestro Portafolio / Наш портфель</span>
+<h2 class="font-headline text-5xl font-bold text-primary mt-4">Excelencia desde el Origen</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 h-auto md:h-[800px]">
+<!-- Arabica Card -->
+<div class="md:col-span-8 relative group overflow-hidden rounded-xl">
+<img alt="" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="professional coffee cupping setup with roasted beans in small ceramic dishes on a textured wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIWOxz_UzN5vfvmgKJnRfhFaDSJsLo5g-i4bMSqZEL_mUoMgMD9zfXpFbBZUcQjj-oKV6IM-TUdyLXYg0N214fuGtrb5mV-rErfTyX_xQxTl0hvUJYBFE32d4IuUefBWkLdujzzmdU7x6fUii69EG9VdBfiOPe7pZUUcQiJOFTvCveyM2zhk555iQtl2vlkjMhrRRtek89fVi90R97tXt-lJwXBzkJNJ5PAS6VM9nh_CsJBNITjkbxel48qh6coCrPtR0HWKAx4QGg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute inset-0 technical-overlay opacity-20 pointer-events-none"></div>
+<div class="absolute bottom-0 left-0 p-12 w-full">
+<div class="glass-card p-8 rounded-lg max-w-lg">
+<h3 class="font-headline text-3xl font-bold text-primary mb-2">Café Arábica Malla 15-17</h3>
+<p class="font-body text-tertiary mb-6">Арабика Сетка 15-17. Cultivado a 1,200m+ con perfiles de taza cítricos y florales.</p>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-primary/5 p-3 rounded">
+<span class="block font-label text-xs uppercase opacity-60">Humedad</span>
+<span class="font-label font-bold text-secondary">10.5% - 12%</span>
+</div>
+<div class="bg-primary/5 p-3 rounded">
+<span class="block font-label text-xs uppercase opacity-60">Defectos</span>
+<span class="font-label font-bold text-secondary">0-5 (Grado 1)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Cacao Card -->
+<div class="md:col-span-4 relative group overflow-hidden rounded-xl">
+<img alt="" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="split open fresh cacao pod showing white beans inside against a tropical dark green leaf background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcMw4tevN7IGajBEQZfB7QSnhSAzvWdq_pa-eixsoe95wBehpOIARLLNVE9tJVR0YJivl4nF8UepnNNSXg1TcckKFemcTkShgE5x7llFMd9UNf1Ow3Jt0FoFOmIoEtILBb9zKsjbRpldyApkueQIp0UvRs_OfGLVnVuC998Lc_VALKYP1XzNmfX4VOJBxxhiSYliYauSdywzldb1TmD9OsBLr9xXrWVj6M2SuZsnvN3Iuu6dT3RhW7HyXACOSC-TKoyJ35YJvEgh0z"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent"></div>
+<div class="absolute inset-0 technical-overlay opacity-30 pointer-events-none"></div>
+<div class="absolute inset-0 p-8 flex flex-col justify-end">
+<div class="bg-surface-bright/90 p-6 rounded-lg border-b-4 border-secondary">
+<h3 class="font-headline text-2xl font-bold text-primary mb-1">Cacao Fino de Aroma</h3>
+<p class="text-sm mb-4">Национальный Какао. &gt;75% fermentación controlada.</p>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-secondary" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-secondary" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-secondary" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-secondary" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-secondary" data-icon="star" data-weight="fill">star</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Robusta Card -->
+<div class="md:col-span-12 relative h-64 group overflow-hidden rounded-xl">
+<img alt="" class="absolute inset-0 w-full h-full object-cover" data-alt="close-up of raw unroasted green coffee beans piled together with high detail and natural texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBilGJeGKqs8n40a6n4QsPNpnKHszCS7f2fEAmFHx7I8qLf225eTpr06_mc68JjI8mTrQJxcjurPgPA7uAIWTN4KaDGlBogftypV3vk0Sb8eEfDW_nfbngoEL9NstOIKkpjLX6DX48PRQRST-Kh34AuC6vaWbaruMf6a1N-khaE3ECX9BNMgILE0E0RGPb1xomzgcJ-hK21CDghK7wmRxie4gBzhhycERNvrbR04cgWZVKotT0AhCayJ8kZFqjXobpFEEkglosZOLmd"/>
+<div class="absolute inset-0 bg-secondary/20 mix-blend-overlay"></div>
+<div class="absolute inset-0 technical-overlay opacity-10 pointer-events-none"></div>
+<div class="absolute inset-0 flex items-center justify-between px-12">
+<h3 class="font-headline text-4xl font-bold text-surface-bright drop-shadow-lg">Robusta Conilón Especial</h3>
+<button class="bg-surface-bright text-primary px-8 py-3 font-label font-bold uppercase tracking-widest hover:bg-secondary-container transition-colors shadow-lg">Especificaciones Técnicas</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Logística Ecuador Express -->
+<section class="py-32 bg-primary text-surface-bright relative overflow-hidden">
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[40rem]" data-icon="public">public</span>
+</div>
+<!-- Technical Blueprint Texture -->
+<div class="absolute inset-0 blueprint-pattern opacity-[0.05]"></div>
+<div class="max-w-screen-xl mx-auto px-12 relative z-10">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
+<div>
+<span class="font-label text-secondary-container font-bold tracking-[0.2em] uppercase text-sm">Logística Transcontinental</span>
+<h2 class="font-headline text-5xl font-bold mt-4 mb-8">Ruta Ecuador Express: Guayaquil — San Petersburgo</h2>
+<p class="text-xl text-on-primary-container leading-relaxed mb-10">
+                            Optimizamos la cadena de suministro B2B con alianzas estratégicas con MSC y Maersk, garantizando tiempos récord y trazabilidad térmica.
+                        </p>
+<div class="space-y-6">
+<div class="flex items-start gap-4 p-4 border-l-2 border-secondary bg-white/5 backdrop-blur-sm">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined" data-icon="sailing">sailing</span>
+</div>
+<div>
+<h4 class="font-bold text-lg">Zarpe Directo</h4>
+<p class="opacity-60 text-sm">Puerto de Guayaquil (Contecon/TPG) sin trasbordos innecesarios.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 border-l-2 border-secondary bg-white/5 backdrop-blur-sm">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined" data-icon="ac_unit">ac_unit</span>
+</div>
+<div>
+<h4 class="font-bold text-lg">Control de Atmósfera</h4>
+<p class="opacity-60 text-sm">Contenedores Food-Grade con monitoreo de humedad IoT.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="glass-card p-2 border-0 rounded-2xl overflow-hidden shadow-2xl relative">
+<div class="bg-surface-container-highest h-96 rounded-xl relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="stylized world map with glowing connection lines between South America and Northern Europe on a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0E1bPvOHKC0T5Bzmens19zppWE5sVTVi9PnIR3q1UvJRvTOe6HzjtbG68kXOG8jJRZmV3nnGotUnJYBMQuFVoZ5IiXA9SAemMMaT13_W7YQGj_3XLc0s_o5ppYTPczpv9-8xt1oDg66x9V7f1EM6mT8MCIH_c5gNPydakqQTPNf8IezTJ3KXGjSCs-QCB1pWBqfI47PJRoThFeoyY4bHZJnFRxV-R4tAww5lGkz0s1HFuKXFBWsT8Wcufmir4p_N8kgsOK4rPUz8b"/>
+<div class="absolute inset-0 technical-overlay opacity-30"></div>
+<div class="absolute top-1/2 left-1/4 w-3 h-3 bg-secondary-container rounded-full animate-ping"></div>
+<div class="absolute top-1/4 right-1/4 w-3 h-3 bg-secondary-container rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Trazabilidad EUDR -->
+<section class="py-32 px-12 max-w-screen-xl mx-auto relative">
+<div class="absolute top-0 left-0 w-32 h-32 opacity-[0.05]">
+<svg class="w-full h-full" viewbox="0 0 100 100"><path d="M0 0 L100 100 M0 100 L100 0" stroke="currentColor" stroke-width="0.5"></path></svg>
+</div>
+<div class="flex flex-col items-center text-center mb-16">
+<h2 class="font-headline text-5xl font-bold text-primary">Mi Finca, Mi Huella</h2>
+<p class="font-headline text-xl italic text-secondary mt-2">Моя ферма, мой след</p>
+<div class="max-w-2xl mt-6 text-tertiary/70">
+                    Nuestra plataforma de trazabilidad cumple 100% con las normativas EUDR. Proporcionamos geolocalización precisa de cada lote para garantizar cero deforestación.
+                </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-surface-container-low p-10 rounded-xl hover:bg-surface-container-high transition-colors border-t-2 border-transparent hover:border-secondary">
+<span class="material-symbols-outlined text-primary text-4xl mb-6" data-icon="location_on">location_on</span>
+<h4 class="font-bold text-xl mb-4">Georreferenciación</h4>
+<p class="text-sm opacity-70">Polígonos exactos de las fincas de nuestros socios productores en las estribaciones de los Andes.</p>
+</div>
+<div class="bg-surface-container-low p-10 rounded-xl hover:bg-surface-container-high transition-colors border-t-2 border-transparent hover:border-secondary">
+<span class="material-symbols-outlined text-primary text-4xl mb-6" data-icon="history_edu">history_edu</span>
+<h4 class="font-bold text-xl mb-4">Certificación de Lote</h4>
+<p class="text-sm opacity-70">Documentación digital accesible vía QR para cada saco exportado a la Unión Económica Euroasiática.</p>
+</div>
+<div class="bg-surface-container-low p-10 rounded-xl hover:bg-surface-container-high transition-colors border-t-2 border-transparent hover:border-secondary">
+<span class="material-symbols-outlined text-primary text-4xl mb-6" data-icon="nature_people">nature_people</span>
+<h4 class="font-bold text-xl mb-4">Impacto Social</h4>
+<p class="text-sm opacity-70">Verificación de comercio justo y apoyo técnico directo a comunidades rurales.</p>
+</div>
+</div>
+</section>
+<!-- Section 6: Modelo Transparente -->
+<section class="py-32 bg-surface-container-lowest blueprint-pattern">
+<div class="max-w-screen-xl mx-auto px-12">
+<div class="flex flex-col md:flex-row gap-20">
+<div class="md:w-1/3">
+<h2 class="font-headline text-4xl font-bold text-primary sticky top-32">Nuestro Modelo de Operación</h2>
+<div class="mt-8 flex items-center gap-4 text-secondary font-label font-bold bg-white/50 p-6 rounded shadow-sm">
+<span class="text-5xl">04</span>
+<span class="uppercase tracking-widest text-xs">Pasos hacia la<br/>exportación</span>
+</div>
+</div>
+<div class="md:w-2/3 space-y-24">
+<div class="relative pl-12 border-l border-outline-variant">
+<div class="absolute -left-3 top-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold">1</div>
+<h3 class="font-headline text-2xl font-bold mb-4">Selección en Finca / Выбор на ферме</h3>
+<p class="text-lg opacity-70">Nuestros agrónomos catan y seleccionan los mejores micro-lotes directamente en origen, asegurando consistencia física y sensorial.</p>
+</div>
+<div class="relative pl-12 border-l border-outline-variant">
+<div class="absolute -left-3 top-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold">2</div>
+<h3 class="font-headline text-2xl font-bold mb-4">Procesamiento y Maquila</h3>
+<p class="text-lg opacity-70">Trilla y clasificación electrónica para cumplir con los estándares de malla y grado solicitados por el cliente B2B.</p>
+</div>
+<div class="relative pl-12 border-l border-outline-variant">
+<div class="absolute -left-3 top-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold">3</div>
+<h3 class="font-headline text-2xl font-bold mb-4">Consolidación Aduanera</h3>
+<p class="text-lg opacity-70">Gestión documental completa: Certificados Fitosanitarios, Origen y cumplimiento de normativas de importación rusas.</p>
+</div>
+<div class="relative pl-12 border-l border-outline-variant">
+<div class="absolute -left-3 top-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold">4</div>
+<h3 class="font-headline text-2xl font-bold mb-4">Entrega en Destino / Доставка</h3>
+<p class="text-lg opacity-70">Seguimiento hasta la descarga en puertos bálticos o terminales terrestres designadas.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 7: Beneficios CTAs -->
+<section class="py-24 industrial-gradient text-surface-bright relative">
+<div class="absolute inset-0 technical-overlay opacity-20 pointer-events-none"></div>
+<div class="max-w-screen-xl mx-auto px-12 text-center relative z-10">
+<h2 class="font-headline text-4xl md:text-5xl font-bold mb-12">Impulsando el Crecimiento Conjunto</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="border border-white/20 p-12 rounded-xl backdrop-blur-sm group hover:border-secondary transition-colors">
+<span class="material-symbols-outlined text-secondary-container text-5xl mb-6 group-hover:scale-110 transition-transform" data-icon="handshake">handshake</span>
+<h4 class="font-headline text-2xl font-bold mb-4">Precio Justo / Справедливая цена</h4>
+<p class="opacity-80">Eliminamos intermediarios innecesarios para maximizar el retorno al productor y la competitividad para el importador.</p>
+</div>
+<div class="border border-white/20 p-12 rounded-xl backdrop-blur-sm group hover:border-secondary transition-colors">
+<span class="material-symbols-outlined text-secondary-container text-5xl mb-6 group-hover:scale-110 transition-transform" data-icon="trending_up">trending_up</span>
+<h4 class="font-headline text-2xl font-bold mb-4">Suministro Estable</h4>
+<p class="opacity-80">Contratos a largo plazo que aseguran volúmenes constantes incluso en temporadas de alta volatilidad.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 8: Formulario de Contacto -->
+<section class="py-32 bg-surface relative">
+<div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-secondary/20 to-transparent"></div>
+<div class="max-w-screen-xl mx-auto px-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-20">
+<div>
+<h2 class="font-headline text-4xl font-bold text-primary mb-6">Inicie su Próxima Importación</h2>
+<p class="text-lg mb-10 opacity-70">Nuestro equipo bilingüe está listo para asesorarle en español y ruso.</p>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="mail">mail</span>
+<span class="font-label font-bold">export@terralatitude.com</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="call">call</span>
+<span class="font-label font-bold">+593 99 999 9999</span>
+</div>
+<div class="pt-8">
+<a class="inline-flex items-center gap-3 bg-[#25D366] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:scale-105 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+                                    WhatsApp Directo
+                                </a>
+</div>
+</div>
+</div>
+<form class="space-y-8 bg-surface-container-low p-10 rounded-xl shadow-inner border border-outline-variant/20 relative">
+<div class="absolute top-4 right-4 opacity-10">
+<span class="material-symbols-outlined text-6xl" data-icon="contract_edit">contract_edit</span>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest font-bold opacity-60">Nombre / Имя</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-secondary transition-colors p-2" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest font-bold opacity-60">Empresa / Компания</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-secondary transition-colors p-2" type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest font-bold opacity-60">Email / Электронная почта</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-secondary transition-colors p-2" type="email"/>
+</div>
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest font-bold opacity-60">Mensaje / Сообщение</label>
+<textarea class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-secondary transition-colors p-2" rows="4"></textarea>
+</div>
+<button class="industrial-gradient text-on-primary w-full py-4 font-bold rounded shadow-xl uppercase tracking-widest hover:brightness-110 transition-all">Enviar Consulta / Отправить</button>
+</form>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#00342b] dark:bg-[#1a1a1a] text-[#fdc34d] font-['Manrope'] text-sm uppercase tracking-widest relative overflow-hidden">
+<div class="absolute inset-0 technical-overlay opacity-10 pointer-events-none"></div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 w-full max-w-screen-2xl mx-auto relative z-10">
+<div class="col-span-1 md:col-span-1">
+<div class="font-['Noto_Serif'] text-xl text-[#fbf9f9] mb-6">Terra Latitude</div>
+<p class="normal-case tracking-normal opacity-60 mb-6">Heritage &amp; Precision in every bean.</p>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-2xl" data-icon="share">share</span>
+</div>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-[#fbf9f9]">Productos</h5>
+<ul class="space-y-4">
+<li><a class="text-[#fbf9f9] opacity-60 hover:text-[#fdc34d] transition-all hover:translate-x-1 inline-block" href="#">Café Arábica</a></li>
+<li><a class="text-[#fbf9f9] opacity-60 hover:text-[#fdc34d] transition-all hover:translate-x-1 inline-block" href="#">Café Robusta</a></li>
+<li><a class="text-[#fbf9f9] opacity-60 hover:text-[#fdc34d] transition-all hover:translate-x-1 inline-block" href="#">Cacao Fino</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-[#fbf9f9]">Legal</h5>
+<ul class="space-y-4">
+<li><a class="text-[#fbf9f9] opacity-60 hover:text-[#fdc34d] transition-all hover:translate-x-1 inline-block" href="#">Privacy</a></li>
+<li><a class="text-[#fbf9f9] opacity-60 hover:text-[#fdc34d] transition-all hover:translate-x-1 inline-block" href="#">Export Certs</a></li>
+<li><a class="text-[#fbf9f9] opacity-60 hover:text-[#fdc34d] transition-all hover:translate-x-1 inline-block" href="#">Partners</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-[#fbf9f9]">Sede</h5>
+<p class="normal-case tracking-normal opacity-60">
+                    Av. de las Américas, Guayaquil, Ecuador<br/>
+                    Business Center, Floor 12
+                </p>
+</div>
+</div>
+<div class="border-t border-white/10 py-8 px-12 text-center text-[10px] opacity-40">
+            © 2024 Terra Latitude S.A.S. | Heritage &amp; Precision
+        </div>
+</footer>
+</body></html>

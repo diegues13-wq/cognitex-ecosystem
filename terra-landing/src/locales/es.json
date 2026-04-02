@@ -1,0 +1,108 @@
+{
+  "nav": {
+    "origin": "El Origen",
+    "products": "Catálogo",
+    "sustainability": "Trazabilidad",
+    "contact": "Negociaciones"
+  },
+  "hero": {
+    "title": "Terra Latitude: Origen en el centro del planeta",
+    "subtitle": "Conectamos el café y cacao más exclusivo del Ecuador directo al mercado global.",
+    "cta_contact": "Contáctanos",
+    "specs": "Especificaciones B2B",
+    "spec1": "Tránsito San Petersburgo",
+    "spec1_val": "28 Días",
+    "spec2": "Trazabilidad EUDR",
+    "spec2_val": "Lotes Verificados"
+  },
+  "legitimacy": {
+    "title": "Gobernanza y Transparencia",
+    "desc": "Respaldados por las instituciones reguladoras del Ecuador para garantizar exportaciones seguras y legítimas."
+  },
+  "heritage": {
+    "label": "Crónicas del Origen / Хроники происхождения",
+    "title": "Herencia y Legado: La Historia del Café y Cacao en el Centro del Mundo",
+    "subtitle": "Наследие и легенда: История кофе и какао в Центре Мира",
+    "coffee_title": "El Oro Negro de los Andes",
+    "coffee_desc_es": "Desde el siglo XIX, el café ecuatoriano ha sido un puente cultural. Cultivado en las faldas de los volcanes, su perfil único es resultado de una geografía sin igual en el ecuador terrestre.",
+    "coffee_desc_ru": "С XIX века эквадорский кофе служил культурным мостом. Выращенный на склонах вулканов, его уникальный профиль — результат бесподобной географии на земном экваторе.",
+    "cacao_title": "Cacao 'Nacional': El Alma del Chocolate",
+    "cacao_desc_es": "Ecuador es la cuna del cacao. Investigaciones arqueológicas sitúan el origen del consumo de cacao en la Amazonía ecuatoriana hace más de 5,000 años.",
+    "cacao_desc_ru": "Эквадор — колыбель какао. Археологические исследования подтверждают, что употребление какао началось в эквадорской Амазонии более 5000 лет назад.",
+    "cacao_spec1": "Genética Histórica",
+    "cacao_spec1_val": "Fino de Aroma",
+    "cacao_spec2": "Antigüedad",
+    "cacao_spec2_val": "5,300+ Años"
+  },
+  "products": {
+    "label": "Nuestro Portafolio / Наш портфель",
+    "title": "Excelencia desde el Origen",
+    "arabica_title": "Café Arábica Malla 15-17",
+    "arabica_desc": "Арабика Сетка 15-17. Cultivado a 1,200m+ con perfiles de taza cítricos y florales.",
+    "arabica_spec1": "Humedad",
+    "arabica_spec1_val": "10.5% - 12%",
+    "arabica_spec2": "Defectos",
+    "arabica_spec2_val": "0-5 (Grado 1)",
+    "cacao_title": "Cacao Fino de Aroma",
+    "cacao_desc": "Национальный Какао. >75% fermentación controlada.",
+    "robusta_title": "Robusta Conilón Especial",
+    "robusta_cta": "Especificaciones Técnicas"
+  },
+  "logistics": {
+    "label": "Logística Transcontinental",
+    "title": "Ruta Ecuador Express: Guayaquil — San Petersburgo",
+    "desc": "Optimizamos la cadena de suministro B2B con alianzas estratégicas con MSC y Maersk, garantizando tiempos récord y trazabilidad térmica.",
+    "feature1_title": "Zarpe Directo",
+    "feature1_desc": "Puerto de Guayaquil (Contecon/TPG) sin trasbordos innecesarios.",
+    "feature2_title": "Control de Atmósfera",
+    "feature2_desc": "Contenedores Food-Grade con monitoreo de humedad IoT."
+  },
+  "eudr": {
+    "title": "Mi Finca, Mi Huella",
+    "subtitle": "Моя ферма, мой след",
+    "desc": "Nuestra plataforma de trazabilidad cumple 100% con las normativas EUDR. Proporcionamos geolocalización precisa de cada lote para garantizar cero deforestación.",
+    "card1_title": "Georreferenciación",
+    "card1_desc": "Polígonos exactos de las fincas de nuestros socios productores en las estribaciones de los Andes.",
+    "card2_title": "Certificación de Lote",
+    "card2_desc": "Documentación digital accessible vía QR para cada saco exportado a la Unión Económica Euroasiática.",
+    "card3_title": "Impacto Social",
+    "card3_desc": "Verificación de comercio justo y apoyo técnico directo a comunidades rurales."
+  },
+  "model": {
+    "title": "Nuestro Modelo de Operación",
+    "label": "Pasos hacia la exportación",
+    "step1_title": "Selección en Finca / Выбор на ферме",
+    "step1_desc": "Nuestros agrónomos catan y seleccionan los mejores micro-lotes directamente en origen, asegurando consistencia física y sensorial.",
+    "step2_title": "Procesamiento y Maquila",
+    "step2_desc": "Trilla y clasificación electrónica para cumplir con los estándares de malla y grado solicitados por el cliente B2B.",
+    "step3_title": "Consolidación Aduanera",
+    "step3_desc": "Gestión documental completa: Certificados Fitosanitarios, Origen y cumplimiento de normativas de importación rusas.",
+    "step4_title": "Entrega en Destino / Доставка",
+    "step4_desc": "Seguimiento hasta la descarga en puertos bálticos o terminales terrestres designadas."
+  },
+  "benefits": {
+    "title": "Impulsando el Crecimiento Conjunto",
+    "card1_title": "Precio Justo / Справедливая цена",
+    "card1_desc": "Eliminamos intermediarios innecesarios para maximizar el retorno al productor y la competitividad para el importador.",
+    "card2_title": "Suministro Estable",
+    "card2_desc": "Contratos a largo plazo que aseguran volúmenes constantes incluso en temporadas de alta volatilidad."
+  },
+  "contact": {
+    "title": "Inicie su Próxima Importación",
+    "desc": "Nuestro equipo bilingüe está listo para asesorarle en español y ruso.",
+    "whatsapp": "WhatsApp Directo",
+    "form_name": "Nombre / Имя",
+    "form_company": "Empresa / Компания",
+    "form_email": "Email / Электронная почта",
+    "form_message": "Mensaje / Сообщение",
+    "form_submit": "Enviar Consulta / Отправить"
+  },
+  "footer": {
+    "slogan": "Heritage & Precision in every bean.",
+    "products": "Productos",
+    "legal": "Legal",
+    "hq": "Sede",
+    "hq_address": "Av. de las Américas, Guayaquil, Ecuador | Business Center, Floor 12",
+    "copyright": "© 2026 Terra Latitude S.A.S. | Heritage & Precision"
+  }
+}
