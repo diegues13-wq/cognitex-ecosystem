@@ -1,0 +1,47 @@
+# ============================================================
+#  Terra Latitude SPA — Apache Routing (Namecheap cPanel)
+#  Necesario para que React funcione en hosting compartido
+# ============================================================
+
+Options -MultiViews
+RewriteEngine On
+
+# Si el archivo/carpeta existe, servirlo directamente
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Cualquier otra ruta → index.html (React se encarga del routing)
+RewriteRule ^ index.html [QSA,L]
+
+# ── Cache de Assets ──────────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Assets con hash (generados por Vite) → 1 año de cache
+  ExpiresByType application/javascript  "access plus 1 year"
+  ExpiresByType text/css                "access plus 1 year"
+  ExpiresByType image/png               "access plus 1 month"
+  ExpiresByType image/jpeg              "access plus 1 month"
+  ExpiresByType image/webp              "access plus 1 month"
+  ExpiresByType font/woff2              "access plus 1 year"
+
+  # JSON de traducciones → 1 hora
+  ExpiresByType application/json        "access plus 1 hour"
+</IfModule>
+
+# ── Compresión Gzip ──────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE font/woff2
+</IfModule>
+
+# ── Security Headers ─────────────────────────────────────────
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options        "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-XSS-Protection       "1; mode=block"
+  Header always set Referrer-Policy        "strict-origin-when-cross-origin"
+</IfModule>

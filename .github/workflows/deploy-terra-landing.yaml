@@ -1,4 +1,12 @@
-name: Deploy Terra Landing → Netlify (www.terralatitude.com)
+name: Deploy Terra Landing → Cloudflare Pages (www.terralatitude.com)
+
+# ┌─────────────────────────────────────────────────────────────┐
+# │  NOTA: Cloudflare Pages ya tiene CI/CD nativo con GitHub.  │
+# │  Este workflow es OPCIONAL y sirve para:                    │
+# │  - Tener logs de build en GitHub Actions                    │
+# │  - Deploy manual desde GitHub ("workflow_dispatch")         │
+# │  - Notificaciones/integraciones personalizadas              │
+# └─────────────────────────────────────────────────────────────┘
 
 on:
   push:
@@ -6,19 +14,17 @@ on:
     paths:
       - "terra-landing/**"
       - ".github/workflows/deploy-terra-landing.yaml"
-  workflow_dispatch:           # Permite lanzar el deploy manualmente
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    name: Build & Deploy
+  deploy:
+    name: Build & Deploy to Cloudflare Pages
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Obtener el código
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
 
-      # 2. Configurar Node con caché de npm
       - name: ⚙️ Setup Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -26,27 +32,18 @@ jobs:
           cache: "npm"
           cache-dependency-path: terra-landing/package-lock.json
 
-      # 3. Instalar dependencias (usando lockfile exacto)
       - name: 📦 Install dependencies
         working-directory: ./terra-landing
         run: npm ci
 
-      # 4. Compilar para producción
       - name: 🏗️ Build
         working-directory: ./terra-landing
         run: npm run build
 
-      # 5. Desplegar a Netlify
-      - name: 🚀 Deploy to Netlify
-        uses: nwtgck/actions-netlify@v3
+      # Deploy a Cloudflare Pages usando Wrangler
+      - name: 🚀 Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          publish-dir:      "./terra-landing/dist"
-          production-branch: main
-          github-token:      ${{ secrets.GITHUB_TOKEN }}
-          deploy-message:    "🌿 Deploy #${{ github.run_number }} — ${{ github.sha }}"
-          enable-pull-request-comment: false
-          enable-commit-comment: true
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID:    ${{ secrets.NETLIFY_SITE_ID }}
-        timeout-minutes: 5
+          apiToken:  ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ./terra-landing/dist --project-name=terra-landing --branch=main
