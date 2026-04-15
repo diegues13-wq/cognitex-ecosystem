@@ -1,5 +1,0 @@
-# ============================================================
-#  Cloudflare Pages — SPA Routing
-#  React / Vite SPA: todas las rutas → index.html (200, no 301)
-# ============================================================
-/*    /index.html    200
