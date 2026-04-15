@@ -7,7 +7,7 @@ const HeroSection = () => {
   return (
     <section className="snap-section relative overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: "url('/bg_hero.png')" }}></div>
+        <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: "url('/bg_hero.webp')" }}></div>
         <div className="absolute inset-0 bg-black/25 mix-blend-multiply"></div>
         <div className="absolute bottom-0 w-full h-1/3 bg-gradient-to-t from-[#1a1100]/90 to-transparent"></div>
       </div>

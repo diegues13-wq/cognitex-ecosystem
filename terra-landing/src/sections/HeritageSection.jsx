@@ -18,7 +18,7 @@ const HeritageSection = () => {
         {/* CAFÉ */}
         <div className="w-full lg:w-1/2 relative group flex flex-col justify-end h-1/2 lg:h-full overflow-y-auto lg:overflow-hidden">
           <div className="absolute inset-0 bg-black z-0">
-            <div className="absolute inset-0 bg-[url('/bg_coffee_legend.png')] bg-cover bg-center mix-blend-luminosity opacity-40 group-hover:scale-105 transition-transform duration-1000"></div>
+            <div className="absolute inset-0 bg-[url('/bg_coffee_legend.webp')] bg-cover bg-center mix-blend-luminosity opacity-40 group-hover:scale-105 transition-transform duration-1000"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent"></div>
             <div className="absolute inset-0 bg-amber-600/20 mix-blend-multiply"></div>
           </div>
@@ -46,7 +46,7 @@ const HeritageSection = () => {
         {/* CACAO */}
         <div className="w-full lg:w-1/2 relative group flex flex-col justify-end h-1/2 lg:h-full border-t lg:border-t-0 border-white/10 lg:border-l overflow-y-auto lg:overflow-hidden">
           <div className="absolute inset-0 bg-black z-0">
-            <div className="absolute inset-0 bg-[url('/bg_cacao_legend.png')] bg-cover bg-center mix-blend-luminosity opacity-40 group-hover:scale-105 transition-transform duration-1000"></div>
+            <div className="absolute inset-0 bg-[url('/bg_cacao_legend.webp')] bg-cover bg-center mix-blend-luminosity opacity-40 group-hover:scale-105 transition-transform duration-1000"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-[#010a05] via-[#021f0f]/90 to-transparent"></div>
             <div className="absolute inset-0 bg-emerald-500/15 mix-blend-color"></div>
           </div>
