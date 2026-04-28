@@ -14,10 +14,10 @@ const InteractiveEcosystem = ({ translations }) => {
         <section id="ecosystem" className="py-24 px-6 relative z-10 bg-black border-y border-white/5 overflow-hidden">
             {/* Ambient Background matching the active phase */}
             <AnimatePresence>
-                <motion.div 
+                <motion.div
                     key={activePhase.id}
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.1 }}
+                    animate={{ opacity: 0.12 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1 }}
                     className={`absolute inset-0 ${activePhase.bg} blur-[150px] pointer-events-none`}
@@ -26,30 +26,28 @@ const InteractiveEcosystem = ({ translations }) => {
             <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
 
             <div className="max-w-7xl mx-auto relative z-10">
-                <SectionHeader 
+                <SectionHeader
                     kicker={translations.subtitle}
                     title={translations.title}
                     description={translations.description}
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-                    
-                    {/* LEFT PANEL: The Pipeline/Timeline */}
-                    <div className="lg:col-span-4 flex flex-col gap-4 relative">
-                        {/* Connecting vertical line */}
+
+                    {/* LEFT PANEL: Pipeline/Timeline */}
+                    <div className="lg:col-span-4 flex flex-col gap-3 relative">
                         <div className="absolute left-[31px] top-8 bottom-8 w-px bg-white/10 hidden lg:block z-0"></div>
-                        
+
                         {translations.phases.map((phase) => {
                             const isActive = activePhase.id === phase.id;
                             const IconCmp = iconMap[phase.icon] || Factory;
-                            
                             return (
                                 <button
                                     key={phase.id}
                                     onClick={() => setActivePhase(phase)}
                                     className={`relative z-10 flex items-center p-4 rounded-2xl border text-left transition-all duration-300 cursor-pointer ${
-                                        isActive 
-                                        ? `${phase.bg.replace('/20','/10')} ${phase.border} shadow-[0_0_20px_rgba(255,255,255,0.03)] scale-[1.02]` 
+                                        isActive
+                                        ? `${phase.bg.replace('/20','/10')} ${phase.border} shadow-[0_0_20px_rgba(255,255,255,0.03)] scale-[1.02]`
                                         : 'bg-industrial-900/50 border-white/5 hover:border-white/20 hover:bg-industrial-800'
                                     }`}
                                 >
@@ -74,7 +72,7 @@ const InteractiveEcosystem = ({ translations }) => {
                         })}
                     </div>
 
-                    {/* RIGHT PANEL: Dynamic Content Stage */}
+                    {/* RIGHT PANEL: Dynamic Content */}
                     <div className="lg:col-span-8 relative min-h-[420px]">
                         <AnimatePresence mode="wait">
                             <motion.div
@@ -85,9 +83,8 @@ const InteractiveEcosystem = ({ translations }) => {
                                 transition={{ duration: 0.3, ease: "easeOut" }}
                                 className={`w-full h-full bg-industrial-950/80 backdrop-blur-xl border ${activePhase.border} rounded-3xl p-6 md:p-12 flex flex-col justify-center relative shadow-2xl overflow-hidden`}
                             >
-                                {/* Inner large glowing orb */}
                                 <div className={`absolute -right-24 -top-24 w-72 h-72 rounded-full ${activePhase.bg} blur-[80px] opacity-60 pointer-events-none`}></div>
-                                
+
                                 <div className="relative z-10">
                                     <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
                                         <div className={`p-4 rounded-2xl border ${activePhase.border} ${activePhase.bg} ${activePhase.color} self-start`}>
@@ -103,22 +100,20 @@ const InteractiveEcosystem = ({ translations }) => {
                                         </div>
                                     </div>
 
-                                    {/* Sub-grid: Technologies & Benefit */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                                        
-                                        {/* Technologies (Pillars 4.0) */}
+                                        {/* Technologies */}
                                         <div className="bg-black/50 border border-white/5 p-6 rounded-2xl">
                                             <h4 className={`font-bold mb-4 flex items-center gap-2 ${activePhase.color}`}>
-                                                <Zap size={18} /> 
-                                                Tecnologías Integradas
+                                                <Zap size={18} />
+                                                {translations.technologies_label}
                                             </h4>
                                             <ul className="space-y-4">
                                                 {activePhase.technologies.map((tech, i) => (
-                                                    <motion.li 
+                                                    <motion.li
                                                         initial={{ opacity: 0, x: -10 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ delay: 0.1 + (i * 0.1) }}
-                                                        key={i} 
+                                                        key={i}
                                                         className="flex items-start gap-3 text-sm text-gray-300"
                                                     >
                                                         <CheckCircle2 size={18} className={`shrink-0 mt-0.5 ${activePhase.color}`} />
@@ -128,17 +123,16 @@ const InteractiveEcosystem = ({ translations }) => {
                                             </ul>
                                         </div>
 
-                                        {/* Core Benefit */}
+                                        {/* Operational Impact */}
                                         <div className={`bg-gradient-to-br from-black/80 to-industrial-950 border border-white/10 p-6 rounded-2xl relative overflow-hidden group flex flex-col justify-center`}>
                                             <div className={`absolute inset-0 ${activePhase.bg} opacity-5 group-hover:opacity-15 transition-opacity duration-500`}></div>
-                                            <h4 className="font-mono text-white/50 mb-3 text-[10px] tracking-[0.2em] font-bold uppercase">
-                                                Impacto Operativo B2B
+                                            <h4 className="font-mono text-white/40 mb-3 text-[10px] tracking-[0.2em] font-bold uppercase">
+                                                {translations.impact_label}
                                             </h4>
                                             <p className="text-white text-lg md:text-xl leading-relaxed font-medium relative z-10 italic">
                                                 "{activePhase.benefit}"
                                             </p>
                                         </div>
-                                        
                                     </div>
                                 </div>
                             </motion.div>

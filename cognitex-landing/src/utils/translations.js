@@ -8,18 +8,26 @@ export const translations = {
             contact: 'CONTACTO',
         },
         hero: {
-            status: 'SISTEMA ONLINE • V4.0.1 ALPHA',
+            status: 'COGNITEX AI NETWORK • ONLINE',
             titleLine1: 'Inteligencia Artificial',
             titleLine2: 'Aplicada a la Industria',
-            subtitle: 'El Cerebro Digital de tu Industria. Decisiones en Tiempo Real, Resultados Reales.',
-            slogan: 'Tu industria en la palma de tu mano',
-            cta: 'CUÉNTANOS TU DESAFÍO INDUSTRIAL',
-            description: 'Cognitex Industrial es una empresa de ingeniería y desarrollo tecnológico enfocada en Industria 4.0. Integramos analítica avanzada e IA para optimizar procesos.'
+            subtitle: 'El Cerebro Digital de tu Operación. Decisiones Autónomas, Resultados Extraordinarios.',
+            slogan: 'Del dato bruto al dominio operativo.',
+            cta: 'CUÉNTANOS TU DESAFÍO',
+            description: 'Plataformas de supervisión inteligente que unifican hardware de borde, analítica en tiempo real e IA experta para crear operaciones que se auto-optimizan.',
+            stat1_val: '850+',
+            stat1_label: 'Activos Monitoreados',
+            stat2_val: '1.2M',
+            stat2_label: 'Eventos/Seg',
+            stat3_val: '99.97%',
+            stat3_label: 'Uptime SLA',
+            stat4_val: '12+',
+            stat4_label: 'Sectores Industriales',
         },
         about: {
             title: 'QUIÉNES SOMOS',
-            subtitle: 'INGENIERÍA ECUATORIANA DE CLASE MUNDIAL',
-            description: 'En Cognitex Industrial, somos una empresa 100% ecuatoriana dedicada a transformar la industria nacional. Más que proveedores, somos tu socio estratégico para el desarrollo de proyectos de automatización industrial a todo nivel dentro del Ecuador. Nuestro compromiso es potenciar las capacidades operativas de tu empresa, optimizando recursos y maximizando tus ganancias. Construimos el cerebro digital de tu planta para que domines la Industria 4.0 sin detener tu operación.',
+            subtitle: 'INTELIGENCIA INDUSTRIAL DE VANGUARDIA GLOBAL',
+            description: 'En Cognitex Industrial no somos simplemente un proveedor tecnológico: somos el cerebro digital que transforma la infraestructura industrial en activos inteligentes de alto rendimiento. Con un ecosistema tecnológico de clase mundial, integramos hardware de borde, computación en la nube y sistemas de IA experta para llevar tu operación al límite de lo posible. Nuestro compromiso es inmutable: cero tiempo de inactividad no planificado, eficiencia máxima y decisiones autónomas que multiplican tu rentabilidad.',
             slogan: 'Transformamos hardware tradicional en activos inteligentes que multiplican tu rentabilidad.'
         },
         services: {
@@ -28,22 +36,22 @@ export const translations = {
             items: [
                 {
                     title: 'Business Intelligence & AI',
-                    desc: 'Tus datos tienen voz. Nosotros les damos el micrófono. Dashboards inteligentes y modelos predictivos para decisiones estratégicas.',
+                    desc: 'Tus datos tienen voz — nosotros les damos el micrófono. Dashboards de mando ejecutivo y modelos predictivos para decisiones estratégicas en tiempo real.',
                     icon: 'BrainCircuit'
                 },
                 {
                     title: 'Supervisión de Procesos',
-                    desc: 'Omnisciencia Operativa. Todo tu proceso, un solo vistazo. Monitoreo en tiempo real de líneas de producción.',
+                    desc: 'Visibilidad total, control absoluto. Monitoreo en tiempo real de cada línea de producción con alertas predictivas antes de que ocurra cualquier falla.',
                     icon: 'Activity'
                 },
                 {
                     title: 'Automatización a Medida',
-                    desc: 'Hardware que piensa. Software que actúa. Diseño e implementación de soluciones bajo estándares industriales.',
+                    desc: 'Hardware que piensa. Software que actúa. Diseño e implementación de soluciones de automatización bajo estándares industriales internacionales.',
                     icon: 'Cpu'
                 },
                 {
                     title: 'Consultoría de Eficiencia',
-                    desc: 'Eficiencia Matemática. Eliminamos la incertidumbre. Optimización de OEE y reducción de desperdicios.',
+                    desc: 'Eficiencia matemática, sin margen para la incertidumbre. Optimización de OEE, reducción de desperdicios y roadmap hacia la Industria 4.0.',
                     icon: 'Factory'
                 }
             ]
@@ -52,14 +60,16 @@ export const translations = {
             title: 'EL MOTOR COGNITEX',
             subtitle: 'CICLO DE VIDA DEL DATO',
             description: 'Unificamos hardware, nube e inteligencia artificial en un flujo de valor continuo. Selecciona cada fase para descubrir cómo transformamos tu industria.',
+            technologies_label: 'Tecnologías Integradas',
+            impact_label: 'Impacto Operativo',
             phases: [
                 {
                     id: 'fase0',
-                    tab: 'Gestión de Proyectos',
+                    tab: 'Consultoría',
                     name: 'Ingeniería & Consultoría 4.0',
                     icon: 'Briefcase',
-                    technologies: ['Consultoría de Eficiencia', 'Gestión Ágil (Scrum/Kanban)', 'Implementación Llave en Mano'],
-                    benefit: 'Auditoría detallada con ROI proyectado y ejecución impecable bajo estándares industriales.',
+                    technologies: ['Auditoría de Eficiencia Industrial', 'Gestión Ágil (Scrum/Kanban)', 'Implementación Llave en Mano'],
+                    benefit: 'Auditoría detallada con ROI proyectado y ejecución impecable bajo estándares industriales internacionales.',
                     color: 'text-amber-400',
                     border: 'border-amber-500',
                     bg: 'bg-amber-500/20'
@@ -69,8 +79,8 @@ export const translations = {
                     tab: 'Captura',
                     name: 'Hardware Edge & Sensórica',
                     icon: 'Factory',
-                    technologies: ['IIoT (Internet Industrial)', 'Retrofitting de Maquinaria', 'Integración PLC & SCADA'],
-                    benefit: 'Descubrimiento de datos ocultos y visibilidad operativa en tiempo real.',
+                    technologies: ['IIoT (Internet Industrial de las Cosas)', 'Retrofitting de Maquinaria Legada', 'Integración PLC & SCADA'],
+                    benefit: 'Descubrimiento de datos ocultos y visibilidad operativa en tiempo real desde el piso de planta.',
                     color: 'text-gray-300',
                     border: 'border-gray-500',
                     bg: 'bg-gray-500/20'
@@ -80,8 +90,8 @@ export const translations = {
                     tab: 'Procesamiento',
                     name: 'Cloud Computing & Seguridad',
                     icon: 'CloudLightning',
-                    technologies: ['Infraestructura Serverless', 'Ciberseguridad Industrial', 'Data Lakes & Pipelines'],
-                    benefit: 'Infraestructura resiliente, escalable y protegida contra ciberamenazas.',
+                    technologies: ['Infraestructura Serverless Escalable', 'Ciberseguridad Industrial (ICS/OT)', 'Data Lakes & Pipelines en Tiempo Real'],
+                    benefit: 'Infraestructura resiliente, globalmente distribuida y protegida contra ciberamenazas industriales.',
                     color: 'text-neon-cyan',
                     border: 'border-neon-cyan',
                     bg: 'bg-neon-cyan/20'
@@ -91,8 +101,8 @@ export const translations = {
                     tab: 'Analítica',
                     name: 'Visualización & BI',
                     icon: 'LayoutDashboard',
-                    technologies: ['Big Data & Análisis Crítico', 'Dashboards Dinámicos', 'Digital Twins (Simulación)'],
-                    benefit: 'Toma de decisiones ágil y control milimétrico de mermas y OEE.',
+                    technologies: ['Big Data & Análisis Crítico de Proceso', 'Dashboards de Mando Ejecutivo', 'Gemelos Digitales (Digital Twins)'],
+                    benefit: 'Toma de decisiones ágil y control milimétrico de mermas, OEE y KPIs de planta en tiempo real.',
                     color: 'text-neon-green',
                     border: 'border-neon-green',
                     bg: 'bg-neon-green/20'
@@ -102,8 +112,8 @@ export const translations = {
                     tab: 'Autonomía',
                     name: 'IA & Sistemas Expertos',
                     icon: 'BrainCircuit',
-                    technologies: ['Machine Learning', 'Sistemas IA expertos en su Proceso', 'Sistemas Expertos de Control'],
-                    benefit: 'Operación autónoma, predicción de fallos mecánicos y máximo ROI.',
+                    technologies: ['Machine Learning sobre Datos de Proceso', 'IA Experta Especializada en tu Operación', 'Control Autónomo & Mantenimiento Predictivo'],
+                    benefit: 'Operación autónoma, predicción de fallos con semanas de anticipación y máximo ROI demostrado.',
                     color: 'text-neon-purple',
                     border: 'border-neon-purple',
                     bg: 'bg-neon-purple/20'
@@ -113,16 +123,16 @@ export const translations = {
         agroSentinel: {
             title: 'AGRO-SENTINEL',
             subtitle: 'Agricultura de Precisión 4.0',
-            description: 'Plataforma IoT integral para el monitoreo de invernaderos. Fusionamos Edge Computing y Cloud AI para maximizar el rendimiento de sus cultivos.',
+            description: 'Plataforma IoT integral para el monitoreo de invernaderos y cultivos. Fusionamos Edge Computing y Cloud AI para maximizar el rendimiento y reducir pérdidas.',
             architecture: [
-                { title: 'Edge (Gateway)', desc: 'Raspberry Pi industrial. Captura térmica y telemetría Modbus en tiempo real.' },
-                { title: 'Cloud (GCP)', desc: 'Serverless backend. Procesamiento de alarmas y almacenamiento en BigQuery.' },
-                { title: 'Web Dashboard', desc: 'Visualización React. Chat con IA para consultar el estado del cultivo.' }
+                { title: 'Edge (Gateway)', desc: 'Gateway industrial de alta resistencia. Captura térmica y telemetría Modbus en tiempo real.' },
+                { title: 'Cloud (GCP)', desc: 'Backend serverless escalable. Procesamiento de alarmas y almacenamiento en BigQuery.' },
+                { title: 'Web Dashboard', desc: 'Visualización React. Chat con IA para consultar el estado del cultivo en lenguaje natural.' }
             ],
             features: [
-                { title: 'Análisis Térmico', desc: 'Detección temprana de plagas mediante visión por computador (Vertex AI).' },
-                { title: 'Chat con tus Datos', desc: 'Pregunta a la IA: "¿Cómo está la humedad?" y recibe respuestas naturales.' },
-                { title: 'Alertas en Vivo', desc: 'Notificaciones instantáneas vía WhatsApp/Email ante anomalías.' }
+                { title: 'Análisis Térmico', desc: 'Detección temprana de plagas mediante visión por computador con Vertex AI.' },
+                { title: 'Chat con tus Datos', desc: 'Pregunta a la IA: "¿Cómo está la humedad?" y recibe respuestas precisas en lenguaje natural.' },
+                { title: 'Alertas en Vivo', desc: 'Notificaciones instantáneas vía WhatsApp/Email ante cualquier anomalía detectada.' }
             ],
             cta: 'INICIAR CONSOLA'
         },
@@ -134,29 +144,51 @@ export const translations = {
                 agro: {
                     title: 'Agro-Sentinel',
                     subtitle: 'Agricultura de Precisión',
-                    description: 'Monitoreo de salud de cultivos, predicción de plagas y control ambiental impulsado por IA.'
+                    description: 'Monitoreo de salud de cultivos, predicción de plagas y control ambiental inteligente impulsado por IA.'
                 },
                 industry: {
                     title: 'Industry-Sentinel',
                     subtitle: 'Manufactura 4.0',
-                    description: 'Seguimiento OEE en tiempo real, mantenimiento predictivo (RUL) y automatización de procesos.'
+                    description: 'Seguimiento de OEE en tiempo real, mantenimiento predictivo por vida útil remanente (RUL) y automatización de procesos.'
                 },
                 personal: {
                     title: 'Personal-Sentinel',
                     subtitle: 'Seguridad EHS',
-                    description: 'Monitoreo biométrico de seguridad, predicción de fatiga y gestión inteligente de la fuerza laboral.'
+                    description: 'Monitoreo biométrico de seguridad laboral, predicción de fatiga y gestión inteligente de la fuerza de trabajo.'
                 }
             }
         },
         contact: {
             title: 'Cuéntanos tu Desafío Industrial',
             modalTitle: 'Cuéntanos tu Desafío Industrial',
-            subtitle: 'Nuestro equipo de ingeniería analizará tu requerimiento y se pondrá en contacto.',
+            subtitle: 'Nuestro equipo de ingeniería global analizará tu requerimiento y se pondrá en contacto en menos de 24 horas.',
             name: 'NOMBRE COMPLETO',
+            company: 'EMPRESA / ORGANIZACIÓN',
             email: 'EMAIL CORPORATIVO',
             message: 'DETALLES DEL REQUERIMIENTO',
             send: 'ENVIAR REQUERIMIENTO',
+            loading: 'Enviando...',
+            success_title: '¡Mensaje Recibido!',
+            success_msg: 'Nuestro equipo de ingeniería se pondrá en contacto contigo en menos de 24 horas.',
+            error_msg: 'Ha ocurrido un error al enviar el mensaje. Por favor intenta nuevamente o contáctanos directamente por WhatsApp.',
             whatsapp: 'Contactar por WhatsApp'
+        },
+        footer: {
+            tagline: 'AI Supervision Systems',
+            description: 'Plataformas de inteligencia industrial que transforman operaciones en ventajas competitivas.',
+            nav_title: 'Navegación',
+            nav_about: 'Quiénes Somos',
+            nav_ecosystem: 'Ciclo del Dato',
+            nav_services: 'Servicios',
+            nav_platforms: 'Productos',
+            products_title: 'Plataformas',
+            contact_title: 'Contacto',
+            legal: 'Legal',
+            privacy: 'Privacidad',
+            terms: 'Términos de Uso',
+            status: 'TODOS LOS SISTEMAS NOMINALES',
+            copyright: '© 2026 COGNITEX INDUSTRIAL INC.',
+            network: 'PARTE DE LA RED SENTINEL',
         }
     },
     en: {
@@ -168,18 +200,26 @@ export const translations = {
             contact: 'CONTACT',
         },
         hero: {
-            status: 'SYSTEM ONLINE • V4.0.1 ALPHA',
+            status: 'COGNITEX AI NETWORK • ONLINE',
             titleLine1: 'Artificial Intelligence',
             titleLine2: 'Applied to Industry',
-            subtitle: 'The Digital Brain of Your Industry. Real-Time Decisions, Tangible Results.',
-            slogan: 'Your industry in the palm of your hand',
-            cta: 'TELL US YOUR INDUSTRIAL CHALLENGE',
-            description: 'Cognitex Industrial is an engineering and technology development firm focused on Industry 4.0. We integrate advanced analytics and AI to optimize processes.'
+            subtitle: 'The Digital Brain of Your Operation. Autonomous Decisions, Extraordinary Results.',
+            slogan: 'From raw data to operational dominance.',
+            cta: 'TELL US YOUR CHALLENGE',
+            description: 'Intelligent supervision platforms that unify edge hardware, real-time analytics, and expert AI to create operations that self-optimize.',
+            stat1_val: '850+',
+            stat1_label: 'Assets Monitored',
+            stat2_val: '1.2M',
+            stat2_label: 'Events/Sec',
+            stat3_val: '99.97%',
+            stat3_label: 'Uptime SLA',
+            stat4_val: '12+',
+            stat4_label: 'Industrial Sectors',
         },
         about: {
             title: 'WHO WE ARE',
-            subtitle: 'WORLD-CLASS ECUADORIAN ENGINEERING',
-            description: 'At Cognitex Industrial, we are a 100% Ecuadorian company dedicated to transforming the national industry. More than just providers, we are your strategic partner for developing industrial automation projects at all levels within Ecuador. Our commitment is to boost your company\'s operational capabilities, optimizing resources and maximizing your profits. We build the digital brain of your plant so you can master Industry 4.0 without halting your operations.',
+            subtitle: 'GLOBAL-GRADE INDUSTRIAL INTELLIGENCE',
+            description: 'At Cognitex Industrial, we are not just a technology provider — we are the digital brain that transforms industrial infrastructure into high-performance intelligent assets. With a world-class technology ecosystem, we integrate edge hardware, cloud computing, and expert AI systems to push your operations to the edge of what is possible. Our commitment is unwavering: zero unplanned downtime, peak efficiency, and autonomous decisions that multiply your profitability.',
             slogan: 'We transform traditional hardware into intelligent assets that multiply your profitability.'
         },
         services: {
@@ -188,22 +228,22 @@ export const translations = {
             items: [
                 {
                     title: 'Business Intelligence & AI',
-                    desc: 'Your data has a voice. We hand it the microphone. Strategic decision-making based on intelligent dashboards.',
+                    desc: 'Your data has a voice — we hand it the microphone. Executive command dashboards and predictive models for strategic decisions in real time.',
                     icon: 'BrainCircuit'
                 },
                 {
                     title: 'Process Supervision',
-                    desc: 'Operational Omniscience. Your entire process, one glance. Real-time monitoring of production lines.',
+                    desc: 'Total visibility, absolute control. Real-time monitoring of every production line with predictive alerts before any failure occurs.',
                     icon: 'Activity'
                 },
                 {
                     title: 'Custom Automation',
-                    desc: 'Hardware that thinks. Software that acts. Design and implementation of solutions under industrial standards.',
+                    desc: 'Hardware that thinks. Software that acts. Design and implementation of automation solutions under international industrial standards.',
                     icon: 'Cpu'
                 },
                 {
                     title: 'Efficiency Consulting',
-                    desc: 'Mathematical Efficiency. We eliminate uncertainty. OEE optimization and waste reduction.',
+                    desc: 'Mathematical efficiency, no room for uncertainty. OEE optimization, waste reduction, and a clear roadmap toward Industry 4.0.',
                     icon: 'Factory'
                 }
             ]
@@ -212,14 +252,16 @@ export const translations = {
             title: 'THE COGNITEX ENGINE',
             subtitle: 'THE DATA LIFECYCLE',
             description: 'We unify hardware, cloud, and artificial intelligence into a continuous value stream. Select each phase to discover how we transform your industry.',
+            technologies_label: 'Integrated Technologies',
+            impact_label: 'Operational Impact',
             phases: [
                 {
                     id: 'fase0',
-                    tab: 'Project Management',
+                    tab: 'Consulting',
                     name: 'Engineering & Consulting 4.0',
                     icon: 'Briefcase',
-                    technologies: ['Efficiency Consulting', 'Agile Management (Scrum/Kanban)', 'Turnkey Implementation'],
-                    benefit: 'Detailed audit with projected ROI and flawless execution under industrial standards.',
+                    technologies: ['Industrial Efficiency Audit', 'Agile Management (Scrum/Kanban)', 'Turnkey Implementation'],
+                    benefit: 'Detailed audit with projected ROI and flawless execution under international industrial standards.',
                     color: 'text-amber-400',
                     border: 'border-amber-500',
                     bg: 'bg-amber-500/20'
@@ -229,8 +271,8 @@ export const translations = {
                     tab: 'Capture',
                     name: 'Hardware Edge & Sensorics',
                     icon: 'Factory',
-                    technologies: ['IIoT (Industrial Internet)', 'Machinery Retrofitting', 'PLC & SCADA Integration'],
-                    benefit: 'Discovery of hidden data and real-time operational visibility.',
+                    technologies: ['IIoT (Industrial Internet of Things)', 'Legacy Machinery Retrofitting', 'PLC & SCADA Integration'],
+                    benefit: 'Discovery of hidden data and real-time operational visibility directly from the plant floor.',
                     color: 'text-gray-300',
                     border: 'border-gray-500',
                     bg: 'bg-gray-500/20'
@@ -240,8 +282,8 @@ export const translations = {
                     tab: 'Processing',
                     name: 'Cloud Computing & Security',
                     icon: 'CloudLightning',
-                    technologies: ['Serverless Infrastructure', 'Industrial Cybersecurity', 'Data Lakes & Pipelines'],
-                    benefit: 'Resilient, scalable infrastructure protected against cyber threats.',
+                    technologies: ['Scalable Serverless Infrastructure', 'Industrial Cybersecurity (ICS/OT)', 'Real-Time Data Lakes & Pipelines'],
+                    benefit: 'Resilient, globally distributed infrastructure protected against industrial cyber threats.',
                     color: 'text-neon-cyan',
                     border: 'border-neon-cyan',
                     bg: 'bg-neon-cyan/20'
@@ -251,8 +293,8 @@ export const translations = {
                     tab: 'Analytics',
                     name: 'Visualization & BI',
                     icon: 'LayoutDashboard',
-                    technologies: ['Big Data & Critical Analysis', 'Dynamic Dashboards', 'Digital Twins (Simulation)'],
-                    benefit: 'Agile decision making and millimeter control of waste and OEE.',
+                    technologies: ['Big Data & Critical Process Analysis', 'Executive Command Dashboards', 'Digital Twins (Simulation)'],
+                    benefit: 'Agile decision-making and millimeter control of waste, OEE, and plant KPIs in real time.',
                     color: 'text-neon-green',
                     border: 'border-neon-green',
                     bg: 'bg-neon-green/20'
@@ -262,8 +304,8 @@ export const translations = {
                     tab: 'Autonomy',
                     name: 'AI & Expert Systems',
                     icon: 'BrainCircuit',
-                    technologies: ['Machine Learning', 'Process Expert AI Systems', 'Expert Control Systems'],
-                    benefit: 'Autonomous operation, mechanical failure prediction and maximum ROI.',
+                    technologies: ['Machine Learning on Process Data', 'Expert AI Specialized in Your Operation', 'Autonomous Control & Predictive Maintenance'],
+                    benefit: 'Autonomous operation, failure prediction weeks in advance, and maximum demonstrated ROI.',
                     color: 'text-neon-purple',
                     border: 'border-neon-purple',
                     bg: 'bg-neon-purple/20'
@@ -273,16 +315,16 @@ export const translations = {
         agroSentinel: {
             title: 'AGRO-SENTINEL',
             subtitle: 'Precision Agriculture 4.0',
-            description: 'Comprehensive IoT platform for greenhouse monitoring. We fuse Edge Computing and Cloud AI to maximize your crop yields.',
+            description: 'Comprehensive IoT platform for greenhouse and crop monitoring. We fuse Edge Computing and Cloud AI to maximize yields and reduce losses.',
             architecture: [
-                { title: 'Edge (Gateway)', desc: 'Industrial Raspberry Pi. Real-time thermal capture and Modbus telemetry.' },
-                { title: 'Cloud (GCP)', desc: 'Serverless backend. Alarm processing and BigQuery warehousing.' },
-                { title: 'Web Dashboard', desc: 'React visualization. Chat with AI to query crop status.' }
+                { title: 'Edge (Gateway)', desc: 'High-resilience industrial gateway. Real-time thermal capture and Modbus telemetry.' },
+                { title: 'Cloud (GCP)', desc: 'Scalable serverless backend. Alarm processing and BigQuery warehousing.' },
+                { title: 'Web Dashboard', desc: 'React visualization. Chat with AI to query crop status in natural language.' }
             ],
             features: [
-                { title: 'Thermal Analysis', desc: 'Early pest detection using Computer Vision (Vertex AI).' },
-                { title: 'Chat with Data', desc: 'Ask AI: "How is the humidity?" and get natural responses.' },
-                { title: 'Live Alerts', desc: 'Instant notifications via WhatsApp/Email on anomalies.' }
+                { title: 'Thermal Analysis', desc: 'Early pest detection using Computer Vision with Vertex AI.' },
+                { title: 'Chat with Data', desc: 'Ask AI: "How is the humidity?" and get precise natural language responses.' },
+                { title: 'Live Alerts', desc: 'Instant notifications via WhatsApp/Email for any detected anomaly.' }
             ],
             cta: 'LAUNCH CONSOLE'
         },
@@ -294,29 +336,51 @@ export const translations = {
                 agro: {
                     title: 'Agro-Sentinel',
                     subtitle: 'Precision Agriculture',
-                    description: 'AI-driven monitoring for crop health, pest prediction, and environmental control.'
+                    description: 'AI-driven crop health monitoring, pest prediction, and intelligent environmental control.'
                 },
                 industry: {
                     title: 'Industry-Sentinel',
                     subtitle: 'Manufacturing 4.0',
-                    description: 'Real-time OEE tracking, predictive maintenance (RUL), and process automation.'
+                    description: 'Real-time OEE tracking, remaining useful life (RUL) predictive maintenance, and process automation.'
                 },
                 personal: {
                     title: 'Personal-Sentinel',
                     subtitle: 'Workforce EHS',
-                    description: 'Biometric safety monitoring, fatigue prediction, and smart workforce allocation.'
+                    description: 'Biometric safety monitoring, fatigue prediction, and intelligent workforce management.'
                 }
             }
         },
         contact: {
             title: 'Tell Us Your Industrial Challenge',
             modalTitle: 'Tell Us Your Industrial Challenge',
-            subtitle: 'Our engineering team will analyze your requirement and get in touch.',
+            subtitle: 'Our global engineering team will analyze your requirements and get back to you within 24 hours.',
             name: 'FULL NAME',
+            company: 'COMPANY / ORGANIZATION',
             email: 'WORK EMAIL',
             message: 'REQUIREMENT DETAILS',
             send: 'SUBMIT REQUIREMENT',
+            loading: 'Sending...',
+            success_title: 'Message Received!',
+            success_msg: 'Our engineering team will get in touch within 24 hours.',
+            error_msg: 'An error occurred while sending your message. Please try again or contact us directly via WhatsApp.',
             whatsapp: 'Contact via WhatsApp'
+        },
+        footer: {
+            tagline: 'AI Supervision Systems',
+            description: 'Industrial intelligence platforms that transform operations into competitive advantages.',
+            nav_title: 'Navigation',
+            nav_about: 'Who We Are',
+            nav_ecosystem: 'The Engine',
+            nav_services: 'Services',
+            nav_platforms: 'Products',
+            products_title: 'Platforms',
+            contact_title: 'Contact',
+            legal: 'Legal',
+            privacy: 'Privacy',
+            terms: 'Terms of Use',
+            status: 'ALL SYSTEMS NOMINAL',
+            copyright: '© 2026 COGNITEX INDUSTRIAL INC.',
+            network: 'PART OF THE SENTINEL NETWORK',
         }
     }
 };

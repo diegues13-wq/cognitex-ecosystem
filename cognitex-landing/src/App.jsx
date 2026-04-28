@@ -50,12 +50,13 @@ function App() {
         <Platforms t={t.platforms} />
       </main>
 
-      <Footer />
+      <Footer t={t.footer} />
 
       <ContactModal
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
         t={t.contact}
+        language={language}
       />
     </div>
   );
