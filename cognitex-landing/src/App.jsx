@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState } from 'react';
 import { translations } from './utils/translations';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -8,15 +8,6 @@ import Services from './components/Services';
 import Platforms from './components/Platforms';
 import Footer from './components/Footer';
 import ContactModal from './components/ContactModal';
-
-// Lazy Load Heavy Components
-const CEOProfile = lazy(() => import('./components/CEOProfile'));
-
-const LoadingFallback = () => (
-  <div className="py-20 flex justify-center items-center">
-    <div className="w-8 h-8 border-4 border-neon-cyan/30 border-t-neon-cyan rounded-full animate-spin"></div>
-  </div>
-);
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -54,14 +45,7 @@ function App() {
 
         <InteractiveEcosystem translations={t.ecosystem} />
 
-        <Suspense fallback={<LoadingFallback />}>
-        </Suspense>
-
         <Services t={t.services} />
-
-        <Suspense fallback={<LoadingFallback />}>
-          <CEOProfile translations={t.leadership} />
-        </Suspense>
 
         <Platforms t={t.platforms} />
       </main>
