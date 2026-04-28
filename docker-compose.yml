@@ -22,3 +22,9 @@ services:
     ports:
       - "5174:80"
     restart: always
+
+  terra-landing:
+    build: ./terra-landing
+    ports:
+      - "5177:80"
+    restart: always
