@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X, Languages, MessageCircle } from 'lucide-react';
 import cognitexLogo from '../assets/cognitex_icon.png';
@@ -22,7 +21,7 @@ const Navbar = ({
                     <div className="flex items-center gap-5">
                         <div className="relative group">
                             <div className="absolute inset-0 bg-neon-cyan/20 blur-xl rounded-full group-hover:bg-neon-cyan/40 transition-all duration-500"></div>
-                            <img src={cognitexLogo} alt="Cognitex Industrial - Automatización e Industria 4.0 en Ecuador" className="w-24 h-24 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]" />
+                            <img src={cognitexLogo} alt="Cognitex Industrial - AI Supervision Systems" className="w-24 h-24 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]" />
                         </div>
                         <div className="leading-tight">
                             <div className="text-2xl font-black tracking-tighter text-white">COGNITEX <span className="text-neon-cyan">INDUSTRIAL</span></div>
