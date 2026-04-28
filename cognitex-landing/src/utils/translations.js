@@ -126,15 +126,6 @@ export const translations = {
             ],
             cta: 'INICIAR CONSOLA'
         },
-        leadership: {
-            title: 'LIDERAZGO',
-            role: 'CEO & Founder',
-            education: [
-                'Ingeniero en Mecatrónica (ESPE - Ecuador)',
-                'Máster en Sistemas Automáticos y Electrónica Industrial (UPC - España)',
-                'Especialista en Sistemas avanzados de manufactura (UPC - España)'
-            ]
-        },
         platforms: {
             title: 'PRODUCTOS',
             subtitle: 'Ecosistema Sentinel',
@@ -294,15 +285,6 @@ export const translations = {
                 { title: 'Live Alerts', desc: 'Instant notifications via WhatsApp/Email on anomalies.' }
             ],
             cta: 'LAUNCH CONSOLE'
-        },
-        leadership: {
-            title: 'LEADERSHIP',
-            role: 'CEO & Founder',
-            education: [
-                'Mechatronics Engineer (ESPE - Ecuador)',
-                'Master in Automatic Systems and Industrial Electronics (UPC - Spain)',
-                'Specialist in Advanced Manufacturing Systems (UPC - Spain)'
-            ]
         },
         platforms: {
             title: 'PRODUCTS',
