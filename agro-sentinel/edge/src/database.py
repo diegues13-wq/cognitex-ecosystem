@@ -1,11 +1,20 @@
 import sqlite3
 import json
+from pathlib import Path
 from datetime import datetime, timezone
 
-DB_PATH = "edge_buffer.db"
+# Absolute path: <repo>/agro-sentinel/edge/data/edge_buffer.db (VULN-15)
+# Using an absolute path prevents the DB being created in a random working directory
+# depending on how the process is launched (systemd, cron, CLI).
+_BASE_DIR = Path(__file__).resolve().parent.parent   # agro-sentinel/edge/
+DB_PATH   = str(_BASE_DIR / "data" / "edge_buffer.db")
 
 
 def init_db():
+    # Ensure the data directory exists with restricted permissions
+    data_dir = Path(DB_PATH).parent
+    data_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     # payload stored as JSON blob so all sensor fields travel together
@@ -21,7 +30,7 @@ def init_db():
     c.execute('CREATE INDEX IF NOT EXISTS idx_unsynced ON readings (synced, id)')
     conn.commit()
     conn.close()
-    print(f"[{datetime.now()}] Database initialized.")
+    print(f"[{datetime.now()}] Database initialised at {DB_PATH}")
 
 
 def buffer_reading(sensor_id: str, payload: dict):
