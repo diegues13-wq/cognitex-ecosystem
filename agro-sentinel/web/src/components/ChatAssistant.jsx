@@ -1,250 +1,253 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, Sparkles, X } from 'lucide-react';
+import { Send, Loader2, Sparkles, X, ChevronDown, ChevronUp, Bot, User } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { generateHistoricalData } from '../utils/dataGenerator';
+import { askAI } from '../services/dataService';
+import { format } from 'date-fns';
 
 const SUGGESTIONS = [
-    "¿Cuál fue la temperatura máxima?",
-    "Muéstrame las alarmas activas",
-    "¿Cuántos registros hay cargados?",
-    "¿Es óptima la humedad del suelo?"
+    { label: '🌡 Temperatura máxima', query: '¿Cuál fue la temperatura máxima este mes?' },
+    { label: '💧 Humedad promedio',   query: '¿Cuál es el promedio de humedad?' },
+    { label: '⚠️ Alarmas activas',    query: '¿Cuáles son las alarmas activas?' },
+    { label: '🌿 Estado del CO2',     query: '¿Cuál fue el pico de CO2?' },
+    { label: '🪱 Humedad de suelo',   query: '¿Cómo está la humedad del suelo?' },
+    { label: '☀️ Radiación PAR',      query: '¿Cuál fue la radiación PAR máxima?' },
+    { label: '📋 Estado general',     query: '¿Cómo está el estado del invernadero?' },
+    { label: '🔋 Batería sensores',   query: '¿Hay sensores con batería baja?' },
 ];
 
-export default function ChatAssistant({ isOpen, onClose, data = [] }) {
+// Renders **bold** markdown inline, preserving newlines
+function MarkdownText({ text }) {
+    const lines = text.split('\n');
+    return (
+        <>
+            {lines.map((line, li) => {
+                const parts = line.split(/(\*\*[^*]+\*\*)/g);
+                return (
+                    <span key={li}>
+                        {parts.map((part, pi) => {
+                            if (part.startsWith('**') && part.endsWith('**')) {
+                                return <strong key={pi} className="font-bold text-white">{part.slice(2, -2)}</strong>;
+                            }
+                            return <span key={pi}>{part}</span>;
+                        })}
+                        {li < lines.length - 1 && <br />}
+                    </span>
+                );
+            })}
+        </>
+    );
+}
+
+MarkdownText.propTypes = { text: PropTypes.string.isRequired };
+
+function SqlBlock({ sql }) {
+    const [open, setOpen] = useState(false);
+    if (!sql) return null;
+    return (
+        <div className="mt-3 rounded-lg overflow-hidden border border-white/10">
+            <button
+                onClick={() => setOpen(o => !o)}
+                className="w-full flex items-center justify-between px-3 py-1.5 bg-black/40 text-[10px] font-mono text-gray-500 hover:text-gray-300 transition-colors"
+            >
+                <span>BIGQUERY SQL</span>
+                {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+            {open && (
+                <pre className="px-3 py-2 text-[10px] font-mono text-emerald-400 bg-black/60 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                    {sql}
+                </pre>
+            )}
+        </div>
+    );
+}
+
+SqlBlock.propTypes = { sql: PropTypes.string };
+
+export default function ChatAssistant({ isOpen, onClose, data, locationId }) {
     const [messages, setMessages] = useState([
-        { role: 'assistant', text: "¡Hola! Soy Agro-Sentinel AI. Estoy conectado a los datos en tiempo real. ¡Pídeme buscar alarmas o analizar tendencias!" }
+        {
+            role: 'assistant',
+            text: '¡Hola! Soy **Agro-Sentinel AI**.\n\nEstoy conectado a los datos de tus sensores. Puedes preguntarme sobre temperaturas, alarmas, humedad, CO2, radiación PAR o el estado general del cultivo.',
+            ts: new Date(),
+        }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(true);
     const messagesEndRef = useRef(null);
+    const inputRef = useRef(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages, loading]);
 
-    useEffect(scrollToBottom, [messages]);
+    useEffect(() => {
+        if (isOpen) inputRef.current?.focus();
+    }, [isOpen]);
 
     const handleSend = async (text = input) => {
-        if (!text.trim()) return;
+        const trimmed = text.trim();
+        if (!trimmed || loading) return;
 
-        // Add User Message
-        const userMsg = { role: 'user', text };
-        setMessages(prev => [...prev, userMsg]);
+        setMessages(prev => [...prev, { role: 'user', text: trimmed, ts: new Date() }]);
         setInput('');
+        setShowSuggestions(false);
         setLoading(true);
 
         try {
-            // MOCK API CALL - Replace with fetch to your Cloud Function URL
-            // Analyze the actual data passed prop
-            const response = await analyzeData(text, data);
-
-            const botMsg = { role: 'assistant', text: response.answer, sql: response.sql };
-            setMessages(prev => [...prev, botMsg]);
-        } catch (error) {
-            console.error(error);
-            setMessages(prev => [...prev, { role: 'assistant', text: "Sorry, I encountered an error connecting to the AI brain.", isError: true }]);
+            const response = await askAI(trimmed, locationId, data);
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                text: response.answer,
+                sql: response.sql,
+                ts: new Date(),
+            }]);
+        } catch (err) {
+            console.error(err);
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                text: '⚠️ **Error de conexión**\n\nNo pude contactar al servicio de análisis. Verifica tu conexión e inténtalo de nuevo.',
+                isError: true,
+                ts: new Date(),
+            }]);
         } finally {
             setLoading(false);
         }
     };
 
-    // "AI" Logic running locally on the dataset
-    const analyzeData = (query, dataset) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const q = query.toLowerCase();
-                let answer = "";
-                let sql = "";
-
-                // 1. Detect Intent
-                const isMax = q.includes('max') || q.includes('máxima') || q.includes('alta');
-                const isMin = q.includes('min') || q.includes('mínima') || q.includes('baja');
-                const isAvg = q.includes('promedio') || q.includes('media');
-
-                // 2. Detect Variable
-                let variable = 'temp';
-                let unit = '°C';
-                let varName = 'Temperatura';
-
-                if (q.includes('humedad') || q.includes('humidity')) { variable = 'humidity'; unit = '%'; varName = 'Humedad'; }
-                if (q.includes('co2')) { variable = 'co2'; unit = 'ppm'; varName = 'CO2'; }
-                if (q.includes('vpd')) { variable = 'vpd'; unit = 'kPa'; varName = 'VPD'; }
-
-                // 3. Global Search vs Specific Farm
-                // Check if user mentioned a specific city/farm from LOCATIONS import (we need to import LOCATIONS in this file actually, or pass it)
-                // For now, let's hardcode the knowledge of locations from the common utils
-                const locationKeywords = {
-                    'ambato': 'GH-AMB-01',
-                    'duran': 'GH-DUR-01',
-                    'durán': 'GH-DUR-01',
-                    'cayambe': 'GH-CAY-01',
-                    'oro': 'GH-ORO-01',
-                    'el oro': 'GH-ORO-01',
-                    'machala': 'GH-ORO-01',
-                    'tena': 'GH-TEN-01',
-                    'selva': 'GH-TEN-01'
-                };
-
-                let targetLocationId = null;
-                let targetLocationName = "";
-
-                for (const [key, id] of Object.entries(locationKeywords)) {
-                    if (q.includes(key)) {
-                        targetLocationId = id;
-                        targetLocationName = key.charAt(0).toUpperCase() + key.slice(1);
-                        break;
-                    }
-                }
-
-                // If specific location found, we might need to mock fetch its data if not current
-                // Since this is a pure frontend mock, we'll 'cheat' and generate a fresh history for that location to analyze
-                let targetData = dataset;
-                let scope = "Datos actuales";
-
-                if (targetLocationId) {
-                    // Use the imported generator function
-                    targetData = generateHistoricalData(30, 12, targetLocationId); // Analyze last 30 days
-                    scope = `Finca en ${targetLocationName}`;
-                } else {
-                    // Global Search Mode (if 'todas' or 'global') or just default current
-                    if (q.includes('todas') || q.includes('global')) {
-                        // This would be heavy, let's just stick to current or fake a global agg
-                        scope = "Todas las fincas";
-                    }
-                }
-
-                // EXECUTE ANALYSIS
-                const values = targetData.map(d => d[variable]);
-                const maxVal = Math.max(...values);
-                const minVal = Math.min(...values);
-                const avgVal = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
-
-                // Find specific records
-                const maxRecord = targetData.find(d => d[variable] === maxVal);
-                const minRecord = targetData.find(d => d[variable] === minVal);
-
-                // GENERAL QUERIES
-                if (q.includes('alarm') || q.includes('alert') || q.includes('falla')) {
-                    const alarms = targetData.filter(d => d.temp > 35 || d.humidity < 30);
-                    if (alarms.length > 0) {
-                        const last = alarms[alarms.length - 1];
-                        answer = `⚠️ **Análisis ${targetLocationId ? targetLocationName : 'Global'}**: Detecté **${alarms.length} alertas** críticas.\n\nÚltimo Incidente:\n📍 **Ubicación**: ${targetLocationId || 'Sector Activo'}\n📡 **Sensor**: ${variable.toUpperCase()}-04\n📅 **Fecha**: ${last.displayDate}\n📉 **Valor**: ${last.temp}°C / ${last.humidity}%\n\nSe requiere revisión técnica.`;
-                        sql = `SELECT * FROM alerts WHERE severity = 'HIGH' AND location = '${targetLocationId || 'ANY'}'`;
-                    } else {
-                        answer = `✅ **${targetLocationId ? targetLocationName : 'Sistema'}:** No se encontraron anomalías en el periodo analizado. Operación nominal.`;
-                        sql = "SELECT count(*) FROM alerts WHERE status = 'ACTIVE'";
-                    }
-                }
-                else if (isMax) {
-                    answer = `📈 **Máximo Registrado (${varName})**\n\n📍 **Ubicación**: ${scope}\n📡 **Sensor**: SENSOR-${variable.toUpperCase()}-01\n📅 **Fecha**: ${maxRecord?.displayDate}\n🔢 **Valor**: ${maxVal} ${unit}\n\nEste pico ocurrió durante el ciclo de mayor radiación.`;
-                    sql = `SELECT MAX(${variable}) FROM sensor_logs WHERE location = '${targetLocationId || 'current'}'`;
-                }
-                else if (isMin) {
-                    answer = `📉 **Mínimo Registrado (${varName})**\n\n📍 **Ubicación**: ${scope}\n📡 **Sensor**: SENSOR-${variable.toUpperCase()}-02\n📅 **Fecha**: ${minRecord?.displayDate}\n🔢 **Valor**: ${minVal} ${unit}`;
-                    sql = `SELECT MIN(${variable}) FROM sensor_logs WHERE location = '${targetLocationId || 'current'}'`;
-                }
-                else if (isAvg) {
-                    answer = `📊 **Promedio Operativo**\n\nLa ${varName} promedio en ${scope} durante los últimos 30 días es de **${avgVal} ${unit}**.`;
-                    sql = `SELECT AVG(${variable}) FROM sensor_logs`;
-                }
-                else if (targetLocationId) {
-                    // General lookup for a location without specific intent
-                    answer = `📝 **Reporte: ${targetLocationName}**\n\nHe analizado los últimos 30 días:\n- **Temp Prom**: ${avgVal}°C\n- **Máxima**: ${maxVal}°C\n- **Estado**: ${maxVal > 35 ? '⚠️ ALERTA DE CALOR' : '✅ NOMINAL'}\n\n¿Quieres ver las alertas específicas de esta ubicación?`;
-                }
-                else {
-                    // Fallback
-                    answer = `Entendido. Puedo buscar datos específicos en el historial global.\n\nPrueba preguntando:\n- "¿Cuál fue la temperatura máxima en Ambato?"\n- "Alertas en Tena"\n- "Promedio de humedad en Cayambe"`;
-                    sql = "SELECT help_topic FROM ai_capabilities";
-                }
-
-                resolve({ answer, sql });
-            }, 800);
-        });
-    };
-
     if (!isOpen) return null;
 
     return (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-industrial-800 border border-industrial-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
-            {/* Header */}
-            <div className="p-4 bg-industrial-900 border-b border-industrial-700 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <div className="p-2 bg-purple-500/20 rounded-lg">
-                        <Sparkles size={18} className="text-purple-400" />
+        <div className="fixed bottom-6 right-6 w-[420px] h-[640px] flex flex-col rounded-2xl overflow-hidden shadow-[0_0_60px_-10px_rgba(168,85,247,0.4)] border border-purple-500/20 bg-[#0d0d14] z-50"
+            style={{ animation: 'slideUp 0.25s ease-out' }}
+        >
+            <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(16px) scale(0.97) } to { opacity:1; transform:translateY(0) scale(1) } }`}</style>
+
+            {/* ── Header ── */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-black/40 backdrop-blur shrink-0">
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
+                            <Sparkles size={18} className="text-purple-400" />
+                        </div>
+                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#0d0d14]"></span>
                     </div>
                     <div>
-                        <h3 className="font-bold text-white text-sm">Agro-Sentinel AI</h3>
-                        <p className="text-xs text-green-400 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                            Online
+                        <p className="font-bold text-white text-sm leading-tight">Agro-Sentinel AI</p>
+                        <p className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+                            Conectado · {locationId}
                         </p>
                     </div>
                 </div>
-                <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-                    <X size={20} />
+                <button onClick={onClose} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                    <X size={15} />
                 </button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-industrial-900/50">
+            {/* ── Messages ── */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth" style={{ scrollbarWidth: 'thin', scrollbarColor: '#ffffff10 transparent' }}>
                 {messages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] rounded-2xl p-3 ${msg.role === 'user'
-                            ? 'bg-primary text-white rounded-br-none'
-                            : 'bg-industrial-700 text-gray-100 rounded-bl-none border border-industrial-600'
-                            }`}>
-                            <p className="text-sm leading-relaxed whitespace-pre-line">{msg.text}</p>
-                            {msg.sql && (
-                                <div className="mt-2 p-2 bg-black/30 rounded text-xs font-mono text-gray-400 overflow-x-auto">
-                                    QUERY: {msg.sql}
-                                </div>
-                            )}
+                    <div key={idx} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                        {/* Avatar */}
+                        <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center border mt-0.5
+                            ${msg.role === 'user'
+                                ? 'bg-purple-500/20 border-purple-500/30'
+                                : msg.isError ? 'bg-red-500/20 border-red-500/30' : 'bg-emerald-500/10 border-emerald-500/20'
+                            }`}
+                        >
+                            {msg.role === 'user'
+                                ? <User size={13} className="text-purple-300" />
+                                : <Bot size={13} className={msg.isError ? 'text-red-400' : 'text-emerald-400'} />
+                            }
+                        </div>
+
+                        {/* Bubble */}
+                        <div className={`max-w-[82%] flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                            <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed
+                                ${msg.role === 'user'
+                                    ? 'bg-purple-600/30 border border-purple-500/30 text-purple-100 rounded-tr-sm'
+                                    : msg.isError
+                                        ? 'bg-red-900/20 border border-red-500/20 text-red-300 rounded-tl-sm'
+                                        : 'bg-white/5 border border-white/8 text-gray-200 rounded-tl-sm'
+                                }`}
+                            >
+                                <MarkdownText text={msg.text} />
+                                {msg.sql && <SqlBlock sql={msg.sql} />}
+                            </div>
+                            <span className="text-[9px] text-gray-600 px-1">
+                                {msg.ts ? format(msg.ts, 'HH:mm') : ''}
+                            </span>
                         </div>
                     </div>
                 ))}
+
+                {/* Typing indicator */}
                 {loading && (
-                    <div className="flex justify-start">
-                        <div className="bg-industrial-700 rounded-2xl p-3 rounded-bl-none flex items-center gap-2">
-                            <Loader2 size={16} className="animate-spin text-gray-400" />
-                            <span className="text-xs text-gray-400">Analyzing data...</span>
+                    <div className="flex gap-2.5">
+                        <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center border bg-emerald-500/10 border-emerald-500/20 mt-0.5">
+                            <Bot size={13} className="text-emerald-400" />
+                        </div>
+                        <div className="bg-white/5 border border-white/8 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                            {[0, 1, 2].map(i => (
+                                <span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce"
+                                    style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.8s' }}
+                                />
+                            ))}
                         </div>
                     </div>
                 )}
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="p-4 bg-industrial-800 border-t border-industrial-700">
-                {messages.length === 1 && (
-                    <div className="flex gap-2 overflow-x-auto pb-3 mb-2 scrollbar-hide">
+            {/* ── Suggestions ── */}
+            {showSuggestions && (
+                <div className="px-4 pb-2 shrink-0">
+                    <p className="text-[9px] font-mono text-gray-600 mb-2 tracking-wider">SUGERENCIAS RÁPIDAS</p>
+                    <div className="flex flex-wrap gap-2">
                         {SUGGESTIONS.map((s, i) => (
                             <button
                                 key={i}
-                                onClick={() => handleSend(s)}
-                                className="whitespace-nowrap px-3 py-1.5 bg-industrial-700 hover:bg-industrial-600 border border-industrial-600 rounded-full text-xs text-gray-300 transition-colors"
+                                onClick={() => handleSend(s.query)}
+                                className="px-3 py-1.5 bg-white/5 hover:bg-purple-500/15 border border-white/10 hover:border-purple-500/30 rounded-full text-[11px] text-gray-400 hover:text-purple-200 transition-all"
                             >
-                                {s}
+                                {s.label}
                             </button>
                         ))}
                     </div>
-                )}
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                        placeholder="Ask about temperature, sensors, history..."
-                        className="w-full bg-industrial-900 border border-industrial-600 text-white rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                    />
+                </div>
+            )}
+
+            {/* ── Input ── */}
+            <div className="px-4 pb-4 pt-2 border-t border-white/5 bg-black/20 shrink-0">
+                <div className="flex gap-2 items-end">
+                    <div className="flex-1 relative">
+                        <textarea
+                            ref={inputRef}
+                            rows={1}
+                            value={input}
+                            onChange={e => {
+                                setInput(e.target.value);
+                                e.target.style.height = 'auto';
+                                e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px';
+                            }}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+                            }}
+                            placeholder="Pregunta sobre temperatura, alarmas, cultivo..."
+                            className="w-full bg-white/5 border border-white/10 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 text-white placeholder-gray-600 rounded-xl px-4 py-3 text-sm resize-none overflow-hidden outline-none transition-all leading-relaxed"
+                            style={{ minHeight: '46px' }}
+                        />
+                    </div>
                     <button
                         onClick={() => handleSend()}
                         disabled={!input.trim() || loading}
-                        className="absolute right-2 top-2 p-1.5 bg-primary hover:bg-green-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-11 h-11 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] shrink-0"
                     >
-                        <Send size={16} />
+                        {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                     </button>
                 </div>
+                <p className="text-[9px] text-gray-700 mt-2 text-center font-mono">Enter para enviar · Shift+Enter nueva línea</p>
             </div>
         </div>
     );
@@ -253,5 +256,11 @@ export default function ChatAssistant({ isOpen, onClose, data = [] }) {
 ChatAssistant.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    data: PropTypes.array
+    data: PropTypes.array,
+    locationId: PropTypes.string,
+};
+
+ChatAssistant.defaultProps = {
+    data: [],
+    locationId: 'GH-AMB-01',
 };
