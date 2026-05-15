@@ -1,35 +1,66 @@
 import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase';
+import { auth, isMockAuth } from './firebase';
 import Dashboard from './Dashboard';
 import logo from './assets/cognitex_icon.png';
 
-function App() {
-    const [user, setUser]       = useState(null);
-    const [loading, setLoading] = useState(true);   // true until Firebase resolves auth state
-    const [email, setEmail]     = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError]     = useState('');
-    const [signingIn, setSigningIn] = useState(false);
+// ── Mock-mode local sign-in (no Firebase project required) ────────────────────
+// Used only when VITE_FIREBASE_API_KEY is not set (local development / MOCK mode).
+// Any non-empty credentials are accepted — all data is simulated anyway.
+function useMockAuth() {
+    const [user, setUser]   = useState(null);
+    const [loading]         = useState(false);
+    const login  = ()       => setUser({ displayName: 'Dev User', email: 'dev@local', uid: 'mock' });
+    const logout = ()       => setUser(null);
+    return { user, loading, login, logout };
+}
 
-    // Restore session from Firebase — runs once on mount (VULN-04)
+// ── Firebase-mode auth ────────────────────────────────────────────────────────
+function useFirebaseAuth() {
+    const [user, setUser]       = useState(null);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            setUser(firebaseUser);
+        const unsub = onAuthStateChanged(auth, (fbUser) => {
+            setUser(fbUser);
             setLoading(false);
         });
-        return unsubscribe;
+        return unsub;
     }, []);
+
+    const login  = (email, password) => signInWithEmailAndPassword(auth, email, password);
+    const logout = ()                => signOut(auth);
+    return { user, loading, login, logout };
+}
+
+export default function App() {
+    const mock     = useMockAuth();
+    const firebase = useFirebaseAuth();
+    const { user, loading, login, logout } = isMockAuth ? mock : firebase;
+
+    const [email,    setEmail]    = useState('');
+    const [password, setPassword] = useState('');
+    const [error,    setError]    = useState('');
+    const [busy,     setBusy]     = useState(false);
 
     const handleLogin = async (e) => {
         e?.preventDefault();
         setError('');
-        setSigningIn(true);
+
+        if (isMockAuth) {
+            login();   // accept anything in mock mode
+            return;
+        }
+
+        if (!email.trim() || !password) {
+            setError('Completa todos los campos.');
+            return;
+        }
+
+        setBusy(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            // onAuthStateChanged will set user automatically
+            await login(email, password);
         } catch (err) {
-            // Map Firebase error codes to user-friendly messages without leaking internals
             const code = err.code || '';
             if (code === 'auth/user-not-found' || code === 'auth/wrong-password' ||
                 code === 'auth/invalid-credential') {
@@ -42,13 +73,10 @@ function App() {
                 setError('Error al iniciar sesión. Intenta de nuevo.');
             }
         } finally {
-            setSigningIn(false);
+            setBusy(false);
         }
     };
 
-    const handleLogout = () => signOut(auth);
-
-    // Blank screen while Firebase resolves the persisted session
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center bg-industrial-950">
@@ -57,9 +85,7 @@ function App() {
         );
     }
 
-    if (user) {
-        return <Dashboard onLogout={handleLogout} />;
-    }
+    if (user) return <Dashboard onLogout={logout} />;
 
     return (
         <div className="flex h-screen items-center justify-center bg-industrial-950 text-white relative overflow-hidden font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -90,16 +116,15 @@ function App() {
                         <div className="absolute bottom-10 py-2 px-6 rounded-full bg-white/5 border border-white/5 backdrop-blur-md">
                             <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                                <span className="text-[10px] text-gray-400 font-mono uppercase tracking-wider">System Online</span>
+                                <span className="text-[10px] text-gray-400 font-mono uppercase tracking-wider">
+                                    {isMockAuth ? 'Mock Mode · No auth required' : 'System Online'}
+                                </span>
                             </div>
                         </div>
                     </div>
 
                     {/* RIGHT PANEL — login form */}
-                    <form
-                        onSubmit={handleLogin}
-                        className="w-full md:w-1/2 bg-black/20 p-8 md:p-14 flex flex-col justify-center relative"
-                    >
+                    <form onSubmit={handleLogin} className="w-full md:w-1/2 bg-black/20 p-8 md:p-14 flex flex-col justify-center relative">
                         <div className="md:hidden flex flex-col items-center mb-10">
                             <img src={logo} alt="Agro-Sentinel" className="h-24 w-auto mb-4 drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]" />
                             <h2 className="text-3xl font-black text-white tracking-tight">AGRO<span className="text-emerald-400">SENTINEL</span></h2>
@@ -112,41 +137,48 @@ function App() {
 
                         <div className="mb-8 md:mb-12 text-center md:text-left">
                             <h2 className="text-2xl font-bold text-white mb-2">Bienvenido</h2>
-                            <p className="text-sm text-gray-400">Acceda al panel de control industrial.</p>
+                            <p className="text-sm text-gray-400">
+                                {isMockAuth
+                                    ? 'Modo simulación activo. Haz clic en Acceder para continuar.'
+                                    : 'Acceda al panel de control industrial.'}
+                            </p>
                         </div>
 
                         <div className="w-full space-y-6">
-                            <div className="group/input relative transition-all duration-300 focus-within:scale-[1.02]">
-                                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                    <span className="text-emerald-500 text-[10px] font-black tracking-widest">EMAIL</span>
-                                    <div className="h-4 w-px bg-white/10 ml-4" />
-                                </div>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    required
-                                    autoComplete="email"
-                                    className="w-full bg-industrial-900/80 border border-white/10 rounded-xl pl-28 pr-4 py-5 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:bg-industrial-900 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-300 text-sm font-medium tracking-wide shadow-inner"
-                                    placeholder="operador@empresa.com"
-                                />
-                            </div>
-
-                            <div className="group/input relative transition-all duration-300 focus-within:scale-[1.02]">
-                                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                    <span className="text-emerald-500 text-[10px] font-black tracking-widest">CONTRASEÑA</span>
-                                    <div className="h-4 w-px bg-white/10 ml-4" />
-                                </div>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
-                                    required
-                                    autoComplete="current-password"
-                                    className="w-full bg-industrial-900/80 border border-white/10 rounded-xl pl-36 pr-4 py-5 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:bg-industrial-900 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-300 text-sm font-medium tracking-wide shadow-inner"
-                                    placeholder="••••••••••••"
-                                />
-                            </div>
+                            {!isMockAuth && (
+                                <>
+                                    <div className="relative transition-all duration-300 focus-within:scale-[1.02]">
+                                        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                            <span className="text-emerald-500 text-[10px] font-black tracking-widest">EMAIL</span>
+                                            <div className="h-4 w-px bg-white/10 ml-4" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={e => setEmail(e.target.value)}
+                                            required
+                                            autoComplete="email"
+                                            className="w-full bg-industrial-900/80 border border-white/10 rounded-xl pl-28 pr-4 py-5 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm font-medium tracking-wide shadow-inner"
+                                            placeholder="operador@empresa.com"
+                                        />
+                                    </div>
+                                    <div className="relative transition-all duration-300 focus-within:scale-[1.02]">
+                                        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                            <span className="text-emerald-500 text-[10px] font-black tracking-widest">CONTRASEÑA</span>
+                                            <div className="h-4 w-px bg-white/10 ml-4" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            value={password}
+                                            onChange={e => setPassword(e.target.value)}
+                                            required
+                                            autoComplete="current-password"
+                                            className="w-full bg-industrial-900/80 border border-white/10 rounded-xl pl-36 pr-4 py-5 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm font-medium tracking-wide shadow-inner"
+                                            placeholder="••••••••••••"
+                                        />
+                                    </div>
+                                </>
+                            )}
 
                             {error && (
                                 <div className="flex items-center gap-3 text-red-400 text-xs font-bold bg-red-950/30 p-3 rounded-lg border border-red-500/20 justify-center">
@@ -157,11 +189,11 @@ function App() {
 
                             <button
                                 type="submit"
-                                disabled={signingIn}
-                                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black py-5 rounded-xl transform transition-all active:scale-[0.98] disabled:opacity-50 hover:to-emerald-400 hover:shadow-[0_10px_40px_-10px_rgba(16,185,129,0.4)] mt-4 border-t border-white/20 relative overflow-hidden"
+                                disabled={busy}
+                                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black py-5 rounded-xl transform transition-all active:scale-[0.98] disabled:opacity-50 hover:to-emerald-400 hover:shadow-[0_10px_40px_-10px_rgba(16,185,129,0.4)] mt-4 border-t border-white/20"
                             >
-                                <span className="relative z-10 uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3">
-                                    {signingIn
+                                <span className="uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3">
+                                    {busy
                                         ? <><span className="w-4 h-4 rounded-full border-2 border-white/50 border-t-white animate-spin" /> Verificando...</>
                                         : <>Acceder a la Plataforma <span className="text-lg leading-none">&rarr;</span></>
                                     }
@@ -174,5 +206,3 @@ function App() {
         </div>
     );
 }
-
-export default App;
