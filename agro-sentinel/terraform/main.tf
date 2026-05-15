@@ -98,6 +98,21 @@ resource "google_bigquery_table" "sensor_logs" {
     "name": "dew_point_c",
     "type": "FLOAT",
     "mode": "NULLABLE"
+  },
+  {
+    "name": "soil_temp_c",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "battery_level",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "rssi_dbm",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
   }
 ]
 EOF
@@ -254,6 +269,15 @@ resource "google_cloudfunctions2_function" "ai_function" {
         PROJECT_ID = var.project_id
     }
   }
+}
+
+# Allow unauthenticated HTTP calls to ask-ai from the frontend
+resource "google_cloud_run_service_iam_member" "ask_ai_invoker" {
+  location = var.region
+  project  = var.project_id
+  service  = google_cloudfunctions2_function.ai_function.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
 }
 
 output "ai_function_uri" {

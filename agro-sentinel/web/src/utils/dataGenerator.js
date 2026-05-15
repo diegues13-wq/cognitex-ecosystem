@@ -1,12 +1,19 @@
-import { subDays, format, addHours } from 'date-fns';
+import { subDays, format, addHours, addMinutes } from 'date-fns';
 
 export const LOCATIONS = [
-    { id: 'GH-AMB-01', name: 'Finca Ambato', city: 'Ambato', region: 'SIERRA', lat: -1.2491, lng: -78.6168, baseTemp: 15, baseHum: 50 },
-    { id: 'GH-DUR-01', name: 'Agro Duran', city: 'Duran', region: 'COAST', lat: -2.1701, lng: -79.8220, baseTemp: 28, baseHum: 75 },
-    { id: 'GH-CAY-01', name: 'Flores Cayambe', city: 'Cayambe', region: 'SIERRA', lat: 0.0414, lng: -78.1452, baseTemp: 12, baseHum: 55 },
-    { id: 'GH-ORO-01', name: 'Bananera El Oro', city: 'Machala', region: 'COAST', lat: -3.2581, lng: -79.9605, baseTemp: 26, baseHum: 80 },
-    { id: 'GH-TEN-01', name: 'Selva Viva Tena', city: 'Tena', region: 'AMAZON', lat: -0.9938, lng: -77.8129, baseTemp: 24, baseHum: 90 },
+    { id: 'GH-AMB-01', name: 'Finca Ambato',      city: 'Ambato',  region: 'SIERRA', lat: -1.2491, lng: -78.6168, baseTemp: 15, baseHum: 50,  crop: 'Rosas',      area_ha: 3.2 },
+    { id: 'GH-DUR-01', name: 'Agro Duran',         city: 'Duran',   region: 'COAST',  lat: -2.1701, lng: -79.8220, baseTemp: 28, baseHum: 75,  crop: 'Pimientos',  area_ha: 5.8 },
+    { id: 'GH-CAY-01', name: 'Flores Cayambe',     city: 'Cayambe', region: 'SIERRA', lat:  0.0414, lng: -78.1452, baseTemp: 12, baseHum: 55,  crop: 'Gypsophila', area_ha: 2.1 },
+    { id: 'GH-ORO-01', name: 'Bananera El Oro',    city: 'Machala', region: 'COAST',  lat: -3.2581, lng: -79.9605, baseTemp: 26, baseHum: 80,  crop: 'Banano',     area_ha: 12.4 },
+    { id: 'GH-TEN-01', name: 'Selva Viva Tena',    city: 'Tena',    region: 'AMAZON', lat: -0.9938, lng: -77.8129, baseTemp: 24, baseHum: 90,  crop: 'Cacao',      area_ha: 8.7 },
 ];
+
+// VPD helper (Magnus formula)
+function calcVPD(temp, humidity) {
+    const svp = 0.61078 * Math.exp((17.27 * temp) / (temp + 237.3));
+    const vp = svp * (humidity / 100.0);
+    return Math.max(0, svp - vp);
+}
 
 export function generateHistoricalData(days = 200, readingsPerDay = 12, locationId = 'GH-AMB-01') {
     const loc = LOCATIONS.find(l => l.id === locationId) || LOCATIONS[0];
@@ -16,80 +23,64 @@ export function generateHistoricalData(days = 200, readingsPerDay = 12, location
     const intervalHours = 24 / readingsPerDay;
 
     let currentDate = startDate;
-    let baseTemp = loc.baseTemp;
-
-    // Helper for GDD
-    const calculateGDD = (tMin, tMax, base = 10) => {
-        const avg = (tMin + tMax) / 2;
-        return Math.max(0, avg - base);
-    };
-
-    let accumulatedGDD = 0; // Cumulative counter
+    const baseTemp = loc.baseTemp;
+    let accumulatedGDD = 0;
+    let soil_moisture = 65 + (Math.random() * 10);
 
     for (let i = 0; i < days * readingsPerDay; i++) {
-        // Seasonal Drift (Sine wave over 365 days)
-        const dayOfYear = currentDate.getDay();
-        const seasonalOffset = 2 * Math.sin((dayOfYear / 365) * 2 * Math.PI); // Less seasoning in Ecuador
-
-        // Daily Cycle (Sine wave over 24 hours)
+        const dayOfYear = Math.floor(i / readingsPerDay);
+        const seasonalOffset = 2 * Math.sin((dayOfYear / 365) * 2 * Math.PI);
         const hour = currentDate.getHours();
         const isDay = hour >= 6 && hour <= 18;
-        const dailyOffset = 5 * Math.sin(((hour - 6) / 24) * 2 * Math.PI);
-        const noise = (Math.random() - 0.5) * 2;
+        const solarCurve = isDay ? Math.sin(((hour - 6) / 12) * Math.PI) : 0;
+        const dailyOffset = 5 * solarCurve;
+        const noise = () => (Math.random() - 0.5) * 2;
 
-        let temp = baseTemp + seasonalOffset + dailyOffset + noise;
+        let temp = baseTemp + seasonalOffset + dailyOffset + noise();
+        let humidity = Math.max(20, Math.min(99, loc.baseHum - (dailyOffset * 2.5) + noise() * 5));
+        let co2 = isDay ? 380 + (Math.random() * 120) : 580 + (Math.random() * 80);
+        // Soil moisture: slowly drifts, irrigation events bring it back up
+        soil_moisture += noise() * 0.3;
+        if (i % (readingsPerDay * 3) === 0) soil_moisture = 65 + Math.random() * 10; // irrigation cycle
+        soil_moisture = Math.max(25, Math.min(90, soil_moisture));
+        // PAR (Photosynthetically Active Radiation) µmol/m²/s
+        let par = isDay ? Math.round(solarCurve * (800 + Math.random() * 400)) : 0;
+        // Soil EC (electrical conductivity) mS/cm
+        let soil_ec = parseFloat((1.2 + noise() * 0.1).toFixed(2));
+        // Soil temperature (lags air temp by ~2h)
+        let soil_temp = parseFloat((temp - 2 + noise() * 0.5).toFixed(1));
+        // Device health
+        let battery = Math.max(5, Math.min(100, 85 + (isDay ? 5 : -2) * solarCurve + noise()));
+        let rssi = Math.max(-95, Math.min(-30, -62 + noise() * 8));
 
-        // Humidity (Inverse to Temp but based on region)
-        let humidity = loc.baseHum - (dailyOffset * 2.5) + ((Math.random() - 0.5) * 15);
-        humidity = Math.max(30, Math.min(99, humidity));
+        // Inject anomalies (exclusive, not cumulative)
+        const anomalyRoll = Math.random();
+        if (anomalyRoll < 0.03) temp = baseTemp + 20;           // Heat spike
+        else if (anomalyRoll < 0.05) humidity = Math.max(10, humidity - 35); // Dryness
+        else if (anomalyRoll < 0.06) co2 = 2100 + Math.random() * 300;       // CO2 leak
+        else if (anomalyRoll < 0.065) battery = 12;               // Low battery
+        else if (anomalyRoll < 0.07) rssi = -93;                  // Signal drop
+        else if (i % 80 === 0) soil_moisture = 22;                // Drought stress
 
-        // CO2 (Day depletion)
-        let co2 = isDay ? 400 + (Math.random() * 100) : 600 + (Math.random() * 50);
-
-        // DEVICE HEALTH SIMULATION
-        // Battery: Slowly degrading sine wave (charging cycle if solar) or linear drain
-        // Assuming solar panel: dips at night, charges at day. Overall trend down if winter.
-        let battery = 90 + (5 * Math.sin(((hour - 6) / 24) * 2 * Math.PI)) - (Math.random() * 2);
-        battery = Math.max(0, Math.min(100, battery));
-
-        // RSSI: Signal Strength (-30 excellent to -90 poor)
-        // Add some random interference
-        let rssi = -65 + ((Math.random() - 0.5) * 20); // Fluctuates between -55 and -75 typically
-
-        // INJECT ANOMALIES / ALARMS
-        let isAnomaly = Math.random() < 0.15;
-        if (i % 50 === 0) isAnomaly = true;
-
-        if (isAnomaly) {
-            const anomalyType = Math.floor(Math.random() * 5); // Increased types
-            if (anomalyType === 0) temp = baseTemp + 20; // Heat Spike
-            if (anomalyType === 1) humidity -= 30; // Dryness
-            if (anomalyType === 2) co2 = 2000; // Critical CO2
-            if (anomalyType === 3) battery = 15; // Low Battery Alert
-            if (anomalyType === 4) rssi = -95; // Connectivity Drop
-        }
-
-        // VPD Calculation
-        const svp = 0.61078 * Math.exp((17.27 * temp) / (temp + 237.3));
-        const vp = svp * (humidity / 100.0);
-        let vpd = Math.max(0, svp - vp);
-
-        // GDD Calculation (Simple approach: hourly contribution / 24)
-        // Daily GDD is typically calculated once a day, but for granular data we can accumulate fractional GDD
-        // Base temp 10C standard for many crops
+        const vpd = calcVPD(temp, humidity);
         const hourlyGDD = Math.max(0, temp - 10) / 24;
         accumulatedGDD += hourlyGDD;
 
         data.push({
             timestamp: currentDate.toISOString(),
             displayDate: format(currentDate, 'MMM dd HH:mm'),
+            time: format(currentDate, 'HH:mm'),
             temp: parseFloat(temp.toFixed(1)),
             humidity: parseFloat(humidity.toFixed(1)),
             vpd: parseFloat(vpd.toFixed(2)),
             co2: Math.round(co2),
+            soil_moisture: parseFloat(soil_moisture.toFixed(1)),
+            par: Math.round(par),
+            soil_ec: parseFloat(soil_ec),
+            soil_temp: parseFloat(soil_temp),
             battery: Math.round(battery),
             rssi: Math.round(rssi),
-            gdd: parseFloat(accumulatedGDD.toFixed(1))
+            gdd: parseFloat(accumulatedGDD.toFixed(1)),
         });
 
         currentDate = addHours(currentDate, intervalHours);
@@ -102,50 +93,36 @@ export function generateLast24hData(locationId = 'GH-AMB-01') {
     const loc = LOCATIONS.find(l => l.id === locationId) || LOCATIONS[0];
     const data = [];
     const now = new Date();
-    // Start 24 hours ago
     const startDate = subDays(now, 1);
-
     let currentDate = startDate;
-    let baseTemp = loc.baseTemp + 2; // Slightly warmer live
-    // const readings = []; // Unused
-    let accumulatedGDD = 1240; // Simulated accumulation from season start
+    let accumulatedGDD = 1240;
+    let soil_moisture = 62 + (Math.random() * 10);
 
-    // We generate hourly data
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < 48; i++) { // 30-min intervals = 48 points / 24h
         const hour = currentDate.getHours();
         const isDay = hour >= 6 && hour <= 18;
-        const dailyOffset = 5 * Math.sin(((hour - 6) / 24) * 2 * Math.PI);
-        const noise = (Math.random() - 0.5) * 1.5;
+        const solarCurve = isDay ? Math.sin(((hour - 6) / 12) * Math.PI) : 0;
+        const noise = () => (Math.random() - 0.5) * 1.5;
 
-        // Anomaly Injection
-        let isAnomaly = Math.random() < 0.2;
-        let temp = baseTemp + dailyOffset + noise;
-        let humidity = loc.baseHum - (dailyOffset * 2.5) + ((Math.random() - 0.5) * 10);
-        let co2 = isDay ? 400 + (Math.random() * 100) : 600 + (Math.random() * 50);
+        let temp = loc.baseTemp + 2 + (5 * solarCurve) + noise();
+        let humidity = Math.max(20, Math.min(99, loc.baseHum - (solarCurve * 2.5 * 5) + noise() * 3));
+        let co2 = isDay ? 380 + Math.random() * 100 : 560 + Math.random() * 60;
+        soil_moisture = Math.max(25, Math.min(90, soil_moisture + noise() * 0.2));
+        let par = isDay ? Math.round(solarCurve * (750 + Math.random() * 350)) : 0;
+        let soil_ec = parseFloat((1.2 + noise() * 0.08).toFixed(2));
+        let soil_temp = parseFloat((temp - 2 + noise() * 0.3).toFixed(1));
+        let battery = Math.max(10, Math.min(100, 85 + (isDay ? 3 : -1) * solarCurve));
+        let rssi = Math.max(-95, Math.min(-30, -60 + noise() * 6));
 
-        // Device Health
-        let battery = 90 + (5 * Math.sin(((hour - 6) / 24) * 2 * Math.PI));
-        let rssi = -60 + (Math.random() * 10 - 5);
+        const anomalyRoll = Math.random();
+        if (anomalyRoll < 0.04) temp += 15;
+        else if (anomalyRoll < 0.06) humidity = Math.max(12, humidity - 25);
+        else if (anomalyRoll < 0.065) co2 = 1900;
+        else if (anomalyRoll < 0.07) battery = 11;
+        else if (anomalyRoll < 0.075) rssi = -91;
 
-        if (isAnomaly) {
-            const type = Math.floor(Math.random() * 5);
-            if (type === 0) temp += 15;
-            if (type === 1) humidity -= 25;
-            if (type === 2) co2 = 1800;
-            if (type === 3) battery = 12; // Critical Battery
-            if (type === 4) rssi = -92; // Signal Lost
-        }
-
-        // Clamp
-        humidity = Math.max(10, Math.min(99, humidity));
-
-        // VPD
-        const svp = 0.61078 * Math.exp((17.27 * temp) / (temp + 237.3));
-        const vp = svp * (humidity / 100.0);
-        let vpd = Math.max(0, svp - vp);
-
-        // GDD
-        const hourlyGDD = Math.max(0, temp - 10) / 24;
+        const vpd = calcVPD(temp, humidity);
+        const hourlyGDD = Math.max(0, temp - 10) / 48;
         accumulatedGDD += hourlyGDD;
 
         data.push({
@@ -156,12 +133,48 @@ export function generateLast24hData(locationId = 'GH-AMB-01') {
             humidity: parseFloat(humidity.toFixed(1)),
             vpd: parseFloat(vpd.toFixed(2)),
             co2: Math.round(co2),
+            soil_moisture: parseFloat(soil_moisture.toFixed(1)),
+            par: Math.round(par),
+            soil_ec: parseFloat(soil_ec),
+            soil_temp: parseFloat(soil_temp),
             battery: Math.round(battery),
             rssi: Math.round(rssi),
-            gdd: parseFloat(accumulatedGDD.toFixed(1))
+            gdd: parseFloat(accumulatedGDD.toFixed(1)),
         });
 
-        currentDate = addHours(currentDate, 1);
+        currentDate = addMinutes(currentDate, 30);
     }
     return data;
+}
+
+// Generates a single new live point based on the previous reading (for real-time ticker)
+export function generateNextPoint(lastPoint, locationId) {
+    const loc = LOCATIONS.find(l => l.id === locationId) || LOCATIONS[0];
+    const now = new Date();
+    const hour = now.getHours();
+    const isDay = hour >= 6 && hour <= 18;
+    const solarCurve = isDay ? Math.sin(((hour - 6) / 12) * Math.PI) : 0;
+    const noise = () => (Math.random() - 0.5) * 0.8;
+
+    let temp = parseFloat(Math.max(5, Math.min(45, lastPoint.temp + noise())).toFixed(1));
+    let humidity = parseFloat(Math.max(20, Math.min(99, lastPoint.humidity + noise() * 1.5)).toFixed(1));
+    let co2 = Math.round(Math.max(300, Math.min(2500, lastPoint.co2 + (Math.random() - 0.5) * 15)));
+    let soil_moisture = parseFloat(Math.max(20, Math.min(92, lastPoint.soil_moisture + noise() * 0.3)).toFixed(1));
+    let par = isDay ? Math.round(Math.max(0, Math.min(2000, lastPoint.par + (Math.random() - 0.5) * 40))) : 0;
+    let soil_ec = parseFloat(Math.max(0.3, Math.min(3, lastPoint.soil_ec + noise() * 0.02)).toFixed(2));
+    let soil_temp = parseFloat(Math.max(5, Math.min(40, lastPoint.soil_temp + noise() * 0.3)).toFixed(1));
+    let battery = parseFloat(Math.max(0, Math.min(100, lastPoint.battery + (isDay ? 0.15 : -0.08))).toFixed(0));
+    let rssi = Math.round(Math.max(-95, Math.min(-30, lastPoint.rssi + (Math.random() - 0.5) * 4)));
+
+    const vpd = calcVPD(temp, humidity);
+    const gdd = parseFloat((lastPoint.gdd + Math.max(0, temp - 10) / 288).toFixed(1));
+
+    return {
+        timestamp: now.toISOString(),
+        displayDate: format(now, 'MMM dd HH:mm'),
+        time: format(now, 'HH:mm'),
+        temp, humidity, vpd: parseFloat(vpd.toFixed(2)),
+        co2, soil_moisture, par, soil_ec, soil_temp,
+        battery: parseInt(battery), rssi, gdd,
+    };
 }
