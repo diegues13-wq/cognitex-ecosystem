@@ -12,7 +12,7 @@ const SUGGESTIONS = [
 
 export default function ChatAssistant({ isOpen, onClose, data = [] }) {
     const [messages, setMessages] = useState([
-        { role: 'assistant', text: "¡Hola! Soy Agro-Sentinel AI. Estoy conectado a los datos en tiempo real. ¡Pídeme buscar alarmas o analizar tendencias!" }
+        { role: 'assistant', text: "¡Hola! Soy Industry-Sentinel AI. Estoy conectado a los datos en tiempo real. ¡Pídeme buscar alarmas o analizar tendencias!" }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
