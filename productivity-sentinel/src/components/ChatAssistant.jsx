@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, Cpu, X, ChevronDown, ChevronUp, Bot, User } from 'lucide-react';
+import { Send, Loader2, X, ChevronDown, ChevronUp, Bot, User, Brain } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { askAI } from '../services/dataService';
+import { askAI } from '../services/productivityService';
 import { format } from 'date-fns';
 
 const SUGGESTIONS = [
-    { label: '🌡 Temperatura máxima',  query: '¿Cuál fue la temperatura máxima del CNC?' },
-    { label: '📳 Vibración crítica',   query: '¿Hay vibración anómala en las máquinas?' },
-    { label: '📊 OEE actual',          query: '¿Cuál es el OEE promedio de la semana?' },
-    { label: '⚡ Consumo de potencia', query: '¿Cuál es el consumo de potencia del CNC?' },
-    { label: '⚠️ Anomalías activas',   query: '¿Cuáles son las anomalías detectadas?' },
-    { label: '🔄 RPM de producción',   query: '¿Cuál fue el RPM máximo registrado?' },
-    { label: '🏭 Estado general',      query: '¿Cómo está el estado de la planta?' },
-    { label: '🔧 Historial fallas',    query: '¿Cuántas fallas hubo esta semana?' },
+    { label: '🎯 Mi mayor restricción', query: '¿Cuál es mi restricción dominante esta semana?' },
+    { label: '🔁 Recurrencia',           query: '¿Qué fallos estoy repitiendo más?' },
+    { label: '✅ Ajustes',               query: '¿Cuántos ajustes he implementado?' },
+    { label: '📊 Causa raíz',            query: '¿Cuál es mi causa raíz más frecuente?' },
+    { label: '🧠 Síntesis semanal',      query: 'Dame la síntesis de la semana' },
+    { label: '📈 Progreso metas',        query: '¿Cómo voy con mis metas?' },
+    { label: '⚡ Adherencia',            query: '¿Cuántos días he registrado esta semana?' },
+    { label: '🧩 Pareto',               query: '¿Cuáles son las 2 causas que explican el 80% de mis fallos?' },
 ];
 
 // Renders **bold** markdown inline, preserving newlines
@@ -49,11 +49,11 @@ function SqlBlock({ sql }) {
                 onClick={() => setOpen(o => !o)}
                 className="w-full flex items-center justify-between px-3 py-1.5 bg-black/40 text-[10px] font-mono text-gray-500 hover:text-gray-300 transition-colors"
             >
-                <span>BIGQUERY SQL</span>
+                <span>ANÁLISIS DETALLADO</span>
                 {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
             {open && (
-                <pre className="px-3 py-2 text-[10px] font-mono text-cyan-400 bg-black/60 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                <pre className="px-3 py-2 text-[10px] font-mono text-violet-400 bg-black/60 overflow-x-auto whitespace-pre-wrap leading-relaxed">
                     {sql}
                 </pre>
             )}
@@ -63,11 +63,11 @@ function SqlBlock({ sql }) {
 
 SqlBlock.propTypes = { sql: PropTypes.string };
 
-export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
+export default function ChatAssistant({ isOpen, onClose, entries }) {
     const [messages, setMessages] = useState([
         {
             role: 'assistant',
-            text: '¡Hola! Soy **Industry-Sentinel AI**.\n\nEstoy conectado a los sensores de la planta. Puedes preguntarme sobre temperatura, vibración, OEE, consumo de potencia o el estado general de la maquinaria.',
+            text: '¡Hola! Soy **Productivity AI**.\n\nAnalizo tu lazo de mejora personal. Puedes preguntarme sobre tus patrones de fallos, restricciones dominantes, tasa de recurrencia o el progreso de tus metas.',
             ts: new Date(),
         }
     ]);
@@ -95,7 +95,7 @@ export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
         setLoading(true);
 
         try {
-            const response = await askAI(trimmed, machineId, data);
+            const response = await askAI(trimmed, entries);
             setMessages(prev => [...prev, {
                 role: 'assistant',
                 text: response.answer,
@@ -118,60 +118,67 @@ export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed bottom-6 right-6 w-[420px] h-[640px] flex flex-col rounded-2xl overflow-hidden shadow-[0_0_60px_-10px_rgba(34,211,238,0.4)] border border-cyan-500/20 bg-[#0d0d14] z-50"
-            style={{ animation: 'slideUp 0.25s ease-out' }}
+        <div
+            className="fixed bottom-6 right-6 w-[420px] h-[640px] flex flex-col rounded-2xl overflow-hidden border border-violet-500/20 bg-[#0d0d14] z-50"
+            style={{
+                boxShadow: '0 0 60px -10px rgba(124,58,237,0.4)',
+                animation: 'slideUp 0.25s ease-out',
+            }}
         >
             <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(16px) scale(0.97) } to { opacity:1; transform:translateY(0) scale(1) } }`}</style>
 
-            {/* ── Header ── */}
+            {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-black/40 backdrop-blur shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="relative">
-                        <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
-                            <Cpu size={18} className="text-cyan-400" />
+                        <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                            <Brain size={18} className="text-violet-400" />
                         </div>
-                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#0d0d14]"></span>
+                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#0d0d14]" />
                     </div>
                     <div>
-                        <p className="font-bold text-white text-sm leading-tight">Industry-Sentinel AI</p>
-                        <p className="text-[10px] font-mono text-cyan-400 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse inline-block"></span>
-                            Conectado · {machineId}
+                        <p className="font-bold text-white text-sm leading-tight">Productivity AI</p>
+                        <p className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                            Analizando tu lazo
                         </p>
                     </div>
                 </div>
-                <button onClick={onClose} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                <button
+                    onClick={onClose}
+                    className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center text-gray-400 hover:text-white transition-all"
+                >
                     <X size={15} />
                 </button>
             </div>
 
-            {/* ── Messages ── */}
+            {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth" style={{ scrollbarWidth: 'thin', scrollbarColor: '#ffffff10 transparent' }}>
                 {messages.map((msg, idx) => (
                     <div key={idx} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                         {/* Avatar */}
-                        <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center border mt-0.5
-                            ${msg.role === 'user'
-                                ? 'bg-cyan-500/20 border-cyan-500/30'
-                                : msg.isError ? 'bg-red-500/20 border-red-500/30' : 'bg-cyan-500/10 border-cyan-500/20'
-                            }`}
-                        >
+                        <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center border mt-0.5 ${
+                            msg.role === 'user'
+                                ? 'bg-violet-500/20 border-violet-500/30'
+                                : msg.isError
+                                    ? 'bg-red-500/20 border-red-500/30'
+                                    : 'bg-violet-500/10 border-violet-500/20'
+                        }`}>
                             {msg.role === 'user'
-                                ? <User size={13} className="text-cyan-300" />
-                                : <Bot size={13} className={msg.isError ? 'text-red-400' : 'text-cyan-400'} />
+                                ? <User size={13} className="text-violet-300" />
+                                : <Bot size={13} className={msg.isError ? 'text-red-400' : 'text-violet-400'} />
                             }
                         </div>
 
                         {/* Bubble */}
                         <div className={`max-w-[82%] flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                            <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed
-                                ${msg.role === 'user'
-                                    ? 'bg-cyan-600/30 border border-cyan-500/30 text-cyan-100 rounded-tr-sm'
+                            <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                                msg.role === 'user'
+                                    ? 'bg-violet-600/30 border border-violet-500/30 text-violet-100 rounded-tr-sm'
                                     : msg.isError
                                         ? 'bg-red-900/20 border border-red-500/20 text-red-300 rounded-tl-sm'
                                         : 'bg-white/5 border border-white/8 text-gray-200 rounded-tl-sm'
-                                }`}
-                            >
+                            }`}>
                                 <MarkdownText text={msg.text} />
                                 {msg.sql && <SqlBlock sql={msg.sql} />}
                             </div>
@@ -185,12 +192,14 @@ export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
                 {/* Typing indicator */}
                 {loading && (
                     <div className="flex gap-2.5">
-                        <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center border bg-cyan-500/10 border-cyan-500/20 mt-0.5">
-                            <Bot size={13} className="text-cyan-400" />
+                        <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center border bg-violet-500/10 border-violet-500/20 mt-0.5">
+                            <Bot size={13} className="text-violet-400" />
                         </div>
                         <div className="bg-white/5 border border-white/8 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
                             {[0, 1, 2].map(i => (
-                                <span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce"
+                                <span
+                                    key={i}
+                                    className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce"
                                     style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.8s' }}
                                 />
                             ))}
@@ -200,7 +209,7 @@ export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* ── Suggestions ── */}
+            {/* Suggestions */}
             {showSuggestions && (
                 <div className="px-4 pb-2 shrink-0">
                     <p className="text-[9px] font-mono text-gray-600 mb-2 tracking-wider">SUGERENCIAS RÁPIDAS</p>
@@ -209,7 +218,7 @@ export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
                             <button
                                 key={i}
                                 onClick={() => handleSend(s.query)}
-                                className="px-3 py-1.5 bg-white/5 hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-500/30 rounded-full text-[11px] text-gray-400 hover:text-cyan-200 transition-all"
+                                className="px-3 py-1.5 bg-white/5 hover:bg-violet-500/15 border border-white/10 hover:border-violet-500/30 rounded-full text-[11px] text-gray-400 hover:text-violet-200 transition-all"
                             >
                                 {s.label}
                             </button>
@@ -218,7 +227,7 @@ export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
                 </div>
             )}
 
-            {/* ── Input ── */}
+            {/* Input */}
             <div className="px-4 pb-4 pt-2 border-t border-white/5 bg-black/20 shrink-0">
                 <div className="flex gap-2 items-end">
                     <div className="flex-1 relative">
@@ -234,15 +243,15 @@ export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
                             onKeyDown={e => {
                                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
                             }}
-                            placeholder="Pregunta sobre temperatura, OEE, vibración..."
-                            className="w-full bg-white/5 border border-white/10 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 text-white placeholder-gray-600 rounded-xl px-4 py-3 text-sm resize-none overflow-hidden outline-none transition-all leading-relaxed"
+                            placeholder="Pregunta sobre tu lazo de mejora..."
+                            className="w-full bg-white/5 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 text-white placeholder-gray-600 rounded-xl px-4 py-3 text-sm resize-none overflow-hidden outline-none transition-all leading-relaxed"
                             style={{ minHeight: '46px' }}
                         />
                     </div>
                     <button
                         onClick={() => handleSend()}
                         disabled={!input.trim() || loading}
-                        className="w-11 h-11 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all shadow-[0_0_15px_rgba(34,211,238,0.3)] hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] shrink-0"
+                        className="w-11 h-11 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] hover:shadow-[0_0_25px_rgba(124,58,237,0.5)] shrink-0"
                     >
                         {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                     </button>
@@ -256,11 +265,9 @@ export default function ChatAssistant({ isOpen, onClose, data, machineId }) {
 ChatAssistant.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    data: PropTypes.array,
-    machineId: PropTypes.string,
+    entries: PropTypes.array,
 };
 
 ChatAssistant.defaultProps = {
-    data: [],
-    machineId: 'MACH-01',
+    entries: [],
 };

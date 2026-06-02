@@ -1,203 +1,253 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, Sparkles, X, Heart, ShieldAlert } from 'lucide-react';
+import { Send, Loader2, ShieldAlert, X, ChevronDown, ChevronUp, Bot, User } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { generateHistoricalData } from '../utils/dataGenerator';
+import { askAI } from '../services/dataService';
+import { format } from 'date-fns';
 
 const SUGGESTIONS = [
-    "¿Cuál fue la fatiga máxima?",
-    "Muéstrame alertas de ritmo cardíaco",
-    "¿Hay eventos de Man Down?",
-    "¿Cuál es el promedio de temperatura corporal?"
+    { label: '💓 Ritmo cardíaco',      query: '¿Cuál fue la frecuencia cardíaca máxima hoy?' },
+    { label: '😴 Nivel de fatiga',     query: '¿Cuál es el promedio de fatiga del turno?' },
+    { label: '🌡 Temperatura corporal', query: '¿Hay casos de estrés térmico?' },
+    { label: '🔋 Batería wearables',   query: '¿Hay wearables con batería baja?' },
+    { label: '🚨 Incidentes activos',  query: '¿Hubo incidentes de seguridad hoy?' },
+    { label: '👷 Estado del equipo',   query: '¿Cómo está el estado del personal de turno?' },
+    { label: '📊 Resumen EHS',         query: '¿Cuál es el resumen de seguridad del día?' },
+    { label: '⚠️ Alertas críticas',    query: '¿Cuáles son las alertas críticas activas?' },
 ];
 
-export default function ChatAssistant({ isOpen, onClose, data = [] }) {
+// Renders **bold** markdown inline, preserving newlines
+function MarkdownText({ text }) {
+    const lines = text.split('\n');
+    return (
+        <>
+            {lines.map((line, li) => {
+                const parts = line.split(/(\*\*[^*]+\*\*)/g);
+                return (
+                    <span key={li}>
+                        {parts.map((part, pi) => {
+                            if (part.startsWith('**') && part.endsWith('**')) {
+                                return <strong key={pi} className="font-bold text-white">{part.slice(2, -2)}</strong>;
+                            }
+                            return <span key={pi}>{part}</span>;
+                        })}
+                        {li < lines.length - 1 && <br />}
+                    </span>
+                );
+            })}
+        </>
+    );
+}
+
+MarkdownText.propTypes = { text: PropTypes.string.isRequired };
+
+function SqlBlock({ sql }) {
+    const [open, setOpen] = useState(false);
+    if (!sql) return null;
+    return (
+        <div className="mt-3 rounded-lg overflow-hidden border border-white/10">
+            <button
+                onClick={() => setOpen(o => !o)}
+                className="w-full flex items-center justify-between px-3 py-1.5 bg-black/40 text-[10px] font-mono text-gray-500 hover:text-gray-300 transition-colors"
+            >
+                <span>BIGQUERY SQL</span>
+                {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+            {open && (
+                <pre className="px-3 py-2 text-[10px] font-mono text-orange-400 bg-black/60 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                    {sql}
+                </pre>
+            )}
+        </div>
+    );
+}
+
+SqlBlock.propTypes = { sql: PropTypes.string };
+
+export default function ChatAssistant({ isOpen, onClose, data, workerId }) {
     const [messages, setMessages] = useState([
-        { role: 'assistant', text: "¡Hola! Soy Safety-Sentinel AI. Monitoreo la salud y seguridad de los operarios en tiempo real." }
+        {
+            role: 'assistant',
+            text: '¡Hola! Soy **Personal-Sentinel AI**.\n\nMonitoreo la salud y seguridad del personal en tiempo real. Puedes preguntarme sobre ritmo cardíaco, fatiga, temperatura corporal o el estado del equipo.',
+            ts: new Date(),
+        }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(true);
     const messagesEndRef = useRef(null);
+    const inputRef = useRef(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages, loading]);
 
-    useEffect(scrollToBottom, [messages]);
+    useEffect(() => {
+        if (isOpen) inputRef.current?.focus();
+    }, [isOpen]);
 
     const handleSend = async (text = input) => {
-        if (!text.trim()) return;
+        const trimmed = text.trim();
+        if (!trimmed || loading) return;
 
-        const userMsg = { role: 'user', text };
-        setMessages(prev => [...prev, userMsg]);
+        setMessages(prev => [...prev, { role: 'user', text: trimmed, ts: new Date() }]);
         setInput('');
+        setShowSuggestions(false);
         setLoading(true);
 
         try {
-            const response = await analyzeData(text, data);
-            const botMsg = { role: 'assistant', text: response.answer, sql: response.sql };
-            setMessages(prev => [...prev, botMsg]);
-        } catch (error) {
-            console.error(error);
+            const response = await askAI(trimmed, workerId, data);
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                text: response.answer,
+                sql: response.sql,
+                ts: new Date(),
+            }]);
+        } catch (err) {
+            console.error(err);
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                text: '⚠️ **Error de conexión**\n\nNo pude contactar al servicio de análisis. Verifica tu conexión e inténtalo de nuevo.',
+                isError: true,
+                ts: new Date(),
+            }]);
         } finally {
             setLoading(false);
         }
     };
 
-    const analyzeData = (query, dataset) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const q = query.toLowerCase();
-                let answer = "";
-                let sql = "";
-
-                const isMax = q.includes('max') || q.includes('máxima') || q.includes('alta');
-                const isMin = q.includes('min') || q.includes('mínima') || q.includes('baja');
-                const isAvg = q.includes('promedio') || q.includes('media');
-
-                let variable = 'vpd'; // HR stored in vpd
-                let unit = 'BPM';
-                let varName = 'Ritmo Cardíaco';
-
-                if (q.includes('fatiga') || q.includes('fatigue')) { variable = 'humidity'; unit = '%'; varName = 'Nivel Fatiga'; }
-                if (q.includes('temp') || q.includes('fieb')) { variable = 'temp'; unit = '°C'; varName = 'Temp. Corporal'; }
-                if (q.includes('man down') || q.includes('caída')) { variable = 'co2'; unit = ''; varName = 'Man Down'; }
-
-                let targetWorkerId = null;
-                const workers = {
-                    'perez': 'WRK-001',
-                    'rodriguez': 'WRK-002',
-                    'smith': 'WRK-003',
-                    'chen': 'WRK-004'
-                };
-
-                for (const [key, id] of Object.entries(workers)) {
-                    if (q.includes(key)) targetWorkerId = id;
-                }
-
-                let targetData = dataset;
-                let scope = "Turno Actual";
-
-                if (targetWorkerId) {
-                    targetData = generateHistoricalData(30, 12, targetWorkerId);
-                    scope = `Historial ${targetWorkerId}`;
-                }
-
-                const values = targetData.map(d => d[variable]);
-                const maxVal = Math.max(...values);
-                const minVal = Math.min(...values);
-                const avgVal = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
-
-                const maxRecord = targetData.find(d => d[variable] === maxVal);
-
-                if (q.includes('alarm') || q.includes('alert') || q.includes('riesgo')) {
-                    const alarms = targetData.filter(d => d.vpd > 120 || d.co2 === 1);
-                    if (alarms.length > 0) {
-                        const last = alarms[alarms.length - 1];
-                        answer = `⚠️ **ALERTA DE SEGURIDAD**: Detecté **${alarms.length} eventos** críticos.\n\nÚltimo Evento:\n👷 **Operario**: ${targetWorkerId || 'Zona Fundición'}\n💓 **Ritmo**: ${last.vpd} BPM\n🚨 **Estado**: ${last.co2 === 1 ? 'MAN DOWN' : 'TAQUICARDIA'}\n📅 **Hora**: ${last.displayDate}`;
-                        sql = `SELECT * FROM ehs_alerts WHERE severity = 'HIGH'`;
-                    } else {
-                        answer = `✅ **Sin Novedades:** El personal se encuentra dentro de los parámetros seguros. No hay reportes de fatiga o estrés térmico.`;
-                        sql = "SELECT count(*) FROM incidents WHERE status = 'OPEN'";
-                    }
-                }
-                else if (isMax) {
-                    answer = `📈 **Máximo Registrado (${varName})**\n\n👷 **Operario**: ${scope}\n📅 **Fecha**: ${maxRecord?.displayDate}\n🔢 **Valor**: ${maxVal} ${unit}`;
-                    sql = `SELECT MAX(${variable}) FROM worker_logs`;
-                }
-                else if (isAvg) {
-                    answer = `📊 **Promedio del Turno**\n\nEl ${varName} promedio es de **${avgVal} ${unit}**.`;
-                    sql = `SELECT AVG(${variable}) FROM worker_logs`;
-                }
-                else {
-                    answer = `Estoy monitoreando la seguridad del equipo. Puedes preguntar:\n- "¿Hubo alertas de ritmo cardíaco hoy?"\n- "Promedio de fatiga en turno noche"\n- "Estado de Perez"`;
-                    sql = "SELECT help_topic FROM ai_safety_manual";
-                }
-
-                resolve({ answer, sql });
-            }, 800);
-        });
-    };
-
     if (!isOpen) return null;
 
     return (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-industrial-800 border border-industrial-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
-            <div className="p-4 bg-industrial-900 border-b border-industrial-700 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <div className="p-2 bg-orange-500/20 rounded-lg">
-                        <ShieldAlert size={18} className="text-orange-400" />
+        <div className="fixed bottom-6 right-6 w-[420px] h-[640px] flex flex-col rounded-2xl overflow-hidden shadow-[0_0_60px_-10px_rgba(249,115,22,0.4)] border border-orange-500/20 bg-[#0d0d14] z-50"
+            style={{ animation: 'slideUp 0.25s ease-out' }}
+        >
+            <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(16px) scale(0.97) } to { opacity:1; transform:translateY(0) scale(1) } }`}</style>
+
+            {/* ── Header ── */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-black/40 backdrop-blur shrink-0">
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <div className="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                            <ShieldAlert size={18} className="text-orange-400" />
+                        </div>
+                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#0d0d14]"></span>
                     </div>
                     <div>
-                        <h3 className="font-bold text-white text-sm">Safety AI</h3>
-                        <p className="text-xs text-emerald-400 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Monitoreo Activo
+                        <p className="font-bold text-white text-sm leading-tight">Personal-Sentinel AI</p>
+                        <p className="text-[10px] font-mono text-orange-400 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse inline-block"></span>
+                            Conectado · {workerId}
                         </p>
                     </div>
                 </div>
-                <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-                    <X size={20} />
+                <button onClick={onClose} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                    <X size={15} />
                 </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-industrial-900/50">
+            {/* ── Messages ── */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth" style={{ scrollbarWidth: 'thin', scrollbarColor: '#ffffff10 transparent' }}>
                 {messages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] rounded-2xl p-3 ${msg.role === 'user'
-                            ? 'bg-orange-600 text-white rounded-br-none'
-                            : 'bg-industrial-700 text-gray-100 rounded-bl-none border border-industrial-600'
-                            }`}>
-                            <p className="text-sm leading-relaxed whitespace-pre-line">{msg.text}</p>
-                            {msg.sql && (
-                                <div className="mt-2 p-2 bg-black/30 rounded text-xs font-mono text-gray-400 overflow-x-auto">
-                                    QUERY: {msg.sql}
-                                </div>
-                            )}
+                    <div key={idx} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                        {/* Avatar */}
+                        <div className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center border mt-0.5
+                            ${msg.role === 'user'
+                                ? 'bg-orange-500/20 border-orange-500/30'
+                                : msg.isError ? 'bg-red-500/20 border-red-500/30' : 'bg-orange-500/10 border-orange-500/20'
+                            }`}
+                        >
+                            {msg.role === 'user'
+                                ? <User size={13} className="text-orange-300" />
+                                : <Bot size={13} className={msg.isError ? 'text-red-400' : 'text-orange-400'} />
+                            }
+                        </div>
+
+                        {/* Bubble */}
+                        <div className={`max-w-[82%] flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                            <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed
+                                ${msg.role === 'user'
+                                    ? 'bg-orange-600/30 border border-orange-500/30 text-orange-100 rounded-tr-sm'
+                                    : msg.isError
+                                        ? 'bg-red-900/20 border border-red-500/20 text-red-300 rounded-tl-sm'
+                                        : 'bg-white/5 border border-white/8 text-gray-200 rounded-tl-sm'
+                                }`}
+                            >
+                                <MarkdownText text={msg.text} />
+                                {msg.sql && <SqlBlock sql={msg.sql} />}
+                            </div>
+                            <span className="text-[9px] text-gray-600 px-1">
+                                {msg.ts ? format(msg.ts, 'HH:mm') : ''}
+                            </span>
                         </div>
                     </div>
                 ))}
+
+                {/* Typing indicator */}
                 {loading && (
-                    <div className="flex justify-start">
-                        <div className="bg-industrial-700 rounded-2xl p-3 rounded-bl-none flex items-center gap-2">
-                            <Loader2 size={16} className="animate-spin text-gray-400" />
-                            <span className="text-xs text-gray-400">Analyzing EHS data...</span>
+                    <div className="flex gap-2.5">
+                        <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center border bg-orange-500/10 border-orange-500/20 mt-0.5">
+                            <Bot size={13} className="text-orange-400" />
+                        </div>
+                        <div className="bg-white/5 border border-white/8 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                            {[0, 1, 2].map(i => (
+                                <span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce"
+                                    style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.8s' }}
+                                />
+                            ))}
                         </div>
                     </div>
                 )}
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-4 bg-industrial-800 border-t border-industrial-700">
-                {messages.length === 1 && (
-                    <div className="flex gap-2 overflow-x-auto pb-3 mb-2 scrollbar-hide">
+            {/* ── Suggestions ── */}
+            {showSuggestions && (
+                <div className="px-4 pb-2 shrink-0">
+                    <p className="text-[9px] font-mono text-gray-600 mb-2 tracking-wider">SUGERENCIAS RÁPIDAS</p>
+                    <div className="flex flex-wrap gap-2">
                         {SUGGESTIONS.map((s, i) => (
                             <button
                                 key={i}
-                                onClick={() => handleSend(s)}
-                                className="whitespace-nowrap px-3 py-1.5 bg-industrial-700 hover:bg-industrial-600 border border-industrial-600 rounded-full text-xs text-gray-300 transition-colors"
+                                onClick={() => handleSend(s.query)}
+                                className="px-3 py-1.5 bg-white/5 hover:bg-orange-500/15 border border-white/10 hover:border-orange-500/30 rounded-full text-[11px] text-gray-400 hover:text-orange-200 transition-all"
                             >
-                                {s}
+                                {s.label}
                             </button>
                         ))}
                     </div>
-                )}
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                        placeholder="Pregunta sobre seguridad, fatiga..."
-                        className="w-full bg-industrial-900 border border-industrial-600 text-white rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
-                    />
+                </div>
+            )}
+
+            {/* ── Input ── */}
+            <div className="px-4 pb-4 pt-2 border-t border-white/5 bg-black/20 shrink-0">
+                <div className="flex gap-2 items-end">
+                    <div className="flex-1 relative">
+                        <textarea
+                            ref={inputRef}
+                            rows={1}
+                            value={input}
+                            onChange={e => {
+                                setInput(e.target.value);
+                                e.target.style.height = 'auto';
+                                e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px';
+                            }}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+                            }}
+                            placeholder="Pregunta sobre seguridad, fatiga, biometría..."
+                            className="w-full bg-white/5 border border-white/10 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 text-white placeholder-gray-600 rounded-xl px-4 py-3 text-sm resize-none overflow-hidden outline-none transition-all leading-relaxed"
+                            style={{ minHeight: '46px' }}
+                        />
+                    </div>
                     <button
                         onClick={() => handleSend()}
                         disabled={!input.trim() || loading}
-                        className="absolute right-2 top-2 p-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-11 h-11 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_25px_rgba(249,115,22,0.5)] shrink-0"
                     >
-                        <Send size={16} />
+                        {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                     </button>
                 </div>
+                <p className="text-[9px] text-gray-700 mt-2 text-center font-mono">Enter para enviar · Shift+Enter nueva línea</p>
             </div>
         </div>
     );
@@ -206,5 +256,11 @@ export default function ChatAssistant({ isOpen, onClose, data = [] }) {
 ChatAssistant.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    data: PropTypes.array
+    data: PropTypes.array,
+    workerId: PropTypes.string,
+};
+
+ChatAssistant.defaultProps = {
+    data: [],
+    workerId: 'WRK-001',
 };

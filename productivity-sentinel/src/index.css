@@ -1,0 +1,62 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+:root {
+    --color-primary: #7c3aed;
+}
+
+@layer base {
+  body {
+    @apply bg-industrial-950 text-slate-100 antialiased;
+    selection-color: #7c3aed;
+  }
+}
+
+@layer utilities {
+  .bg-industrial-950 {
+    background-color: #020617;
+  }
+  .bg-industrial-900 {
+    background-color: #0f172a;
+  }
+  .bg-industrial-800 {
+    background-color: #1e293b;
+  }
+  .bg-industrial-700 {
+    background-color: #334155;
+  }
+  .border-industrial-700 {
+    border-color: #334155;
+  }
+
+  .glass-panel {
+    @apply bg-industrial-800/80 backdrop-blur-md border border-industrial-700 shadow-xl;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0f172a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #7c3aed;
+  }
+}
