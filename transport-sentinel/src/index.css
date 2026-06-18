@@ -1,0 +1,118 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+    body {
+        @apply bg-occ-950 text-slate-100 antialiased;
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        selection-color: #1d6fa5;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    input, textarea {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: #1d6fa5 #040d1a;
+    }
+
+    *::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: #040d1a;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: #1d6fa5;
+        border-radius: 2px;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+        background: #38a8e0;
+    }
+}
+
+@layer components {
+    .glass-panel {
+        @apply bg-occ-800/60 backdrop-blur-xl border border-occ-700/40;
+    }
+
+    .glass-panel-dark {
+        @apply bg-occ-900/80 backdrop-blur-xl border border-occ-700/30;
+    }
+
+    .rail-glow {
+        text-shadow: 0 0 20px rgba(29, 111, 165, 0.8);
+    }
+
+    .rail-border-glow {
+        box-shadow: 0 0 20px rgba(29, 111, 165, 0.3), inset 0 0 20px rgba(29, 111, 165, 0.05);
+    }
+
+    .status-dot-active {
+        @apply w-2 h-2 rounded-full bg-green-400;
+        box-shadow: 0 0 6px #4ade80;
+    }
+
+    .status-dot-warning {
+        @apply w-2 h-2 rounded-full bg-amber-400;
+        box-shadow: 0 0 6px #fbbf24;
+    }
+
+    .status-dot-alert {
+        @apply w-2 h-2 rounded-full bg-red-500;
+        box-shadow: 0 0 6px #ef4444;
+        animation: blink 1s step-end infinite;
+    }
+
+    .occ-card {
+        @apply bg-occ-800/50 border border-occ-700/40 rounded-xl backdrop-blur-sm;
+        transition: border-color 0.2s;
+    }
+
+    .occ-card:hover {
+        @apply border-occ-600/60;
+    }
+
+    .kpi-value {
+        @apply text-3xl font-bold font-mono tracking-tight;
+    }
+
+    .mono-label {
+        @apply text-[10px] font-mono uppercase tracking-widest text-slate-400;
+    }
+
+    /* Leaflet container style override for dark theme */
+    .leaflet-container {
+        background: #010b18 !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .leaflet-tile-pane {
+        filter: invert(1) hue-rotate(180deg) brightness(0.7) saturate(0.6);
+    }
+
+    .leaflet-control-attribution {
+        background: rgba(4, 13, 26, 0.8) !important;
+        color: #64748b !important;
+    }
+
+    .leaflet-popup-content-wrapper {
+        background: #081526 !important;
+        color: #e2e8f0 !important;
+        border: 1px solid #163060 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 0 20px rgba(29, 111, 165, 0.3) !important;
+    }
+
+    .leaflet-popup-tip {
+        background: #081526 !important;
+    }
+}

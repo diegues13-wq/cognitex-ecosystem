@@ -155,6 +155,11 @@ export const translations = {
                     title: 'Personal-Sentinel',
                     subtitle: 'Seguridad EHS',
                     description: 'Monitoreo biométrico de seguridad laboral, predicción de fatiga y gestión inteligente de la fuerza de trabajo.'
+                },
+                transport: {
+                    title: 'Transport-Sentinel',
+                    subtitle: 'Explotación Ferroviaria 4.0',
+                    description: 'Centro de Control de Operaciones ferroviario con IA: puntualidad OTP, mantenimiento predictivo RAMS y analítica de energía para flotas de pasajeros y carga.'
                 }
             }
         },
@@ -347,6 +352,11 @@ export const translations = {
                     title: 'Personal-Sentinel',
                     subtitle: 'Workforce EHS',
                     description: 'Biometric safety monitoring, fatigue prediction, and intelligent workforce management.'
+                },
+                transport: {
+                    title: 'Transport-Sentinel',
+                    subtitle: 'Railway Operations 4.0',
+                    description: 'AI-powered railway Operations Control Center: OTP punctuality tracking, RAMS predictive maintenance, and energy analytics for passenger and freight fleets.'
                 }
             }
         },
