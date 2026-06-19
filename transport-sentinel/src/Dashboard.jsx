@@ -37,48 +37,68 @@ const VIEW_COMPONENTS = {
     ai:          AIView,
 };
 
+const LOADING_FALLBACK = (
+    <div className="h-full flex items-center justify-center">
+        <div className="text-center space-y-2">
+            <div className="w-6 h-6 border-2 border-[#1d6fa5]/40 border-t-[#1d6fa5] rounded-full animate-spin mx-auto" />
+            <p className="text-[10px] font-mono text-[#2a4a6b]">Cargando módulo…</p>
+        </div>
+    </div>
+);
+
 export default function Dashboard({ user, onLogout }) {
     const [activeView,    setActiveView]    = useState('cco');
     const [activeProject, setActiveProject] = useState(null);
     const [fleetType,     setFleetType]     = useState('todos');
     const [timeMode,      setTimeMode]      = useState('live');
 
-    // Data state
-    const [snapshot,    setSnapshot]    = useState([]);
-    const [kpis,        setKpis]        = useState({});
+    // Core fleet state (always loaded — needed by sidebar KPIs + CCO)
+    const [snapshot, setSnapshot] = useState([]);
+    const [kpis,     setKpis]     = useState({});
+    const [alerts,   setAlerts]   = useState([]);
+
+    // Per-view data (only populated when view is first opened)
     const [history,     setHistory]     = useState([]);
     const [workOrders,  setWorkOrders]  = useState([]);
     const [incidents,   setIncidents]   = useState([]);
-    const [alerts,      setAlerts]      = useState([]);
     const [energyData,  setEnergyData]  = useState([]);
     const [paxData,     setPaxData]     = useState([]);
     const [cargoData,   setCargoData]   = useState([]);
     const [ramsMetrics, setRamsMetrics] = useState([]);
 
-    const loadData = useCallback(() => {
+    // Initial load — core fleet data only (fast path, keeps first render light)
+    const loadCoreData = useCallback(() => {
         setSnapshot(generateFleetSnapshot(fleetType));
         setKpis(generateFleetKPIs(fleetType));
+        setAlerts(generateAlerts(fleetType));
+    }, [fleetType]);
+
+    // Secondary load — per-view data deferred so it doesn't block CCO render
+    const loadViewData = useCallback(() => {
         setHistory(generateHistoricalData(30));
         setWorkOrders(generateMaintenanceOrders());
         setIncidents(generateIncidents());
-        setAlerts(generateAlerts());
         setEnergyData(generateEnergyData(30));
         setPaxData(generateCommercialData('pasajeros', 30));
         setCargoData(generateCommercialData('carga', 30));
         setRamsMetrics(generateRAMSMetrics());
-    }, [fleetType]);
+    }, []);
 
     useEffect(() => {
-        const t = setTimeout(loadData, 80);
-        return () => clearTimeout(t);
-    }, [loadData]);
+        // Core data: 80ms delay (first paint completes before any data computation)
+        const t1 = setTimeout(loadCoreData, 80);
+        // View data: 500ms delay (CCO is already interactive by this point)
+        const t2 = setTimeout(loadViewData, 500);
+        return () => { clearTimeout(t1); clearTimeout(t2); };
+    }, [loadCoreData, loadViewData]);
 
+    // Live mode: refresh core fleet data every 5s
     useEffect(() => {
         if (timeMode !== 'live') return;
         const id = setInterval(() => {
             setSnapshot(generateFleetSnapshot(fleetType));
             setKpis(generateFleetKPIs(fleetType));
-            setAlerts(generateAlerts());
+            setAlerts(generateAlerts(fleetType));
         }, 5000);
         return () => clearInterval(id);
     }, [timeMode, fleetType]);
@@ -93,9 +113,9 @@ export default function Dashboard({ user, onLogout }) {
         if (viewId !== 'proyecto') setActiveProject(null);
     }, []);
 
-    const isMockAuth = !user?.uid || user?.uid?.startsWith?.('mock');
-
+    const isMock = !user?.uid || user?.uid?.startsWith?.('mock');
     const ActiveView = VIEW_COMPONENTS[activeView];
+
     const viewProps = {
         snapshot, kpis, history, workOrders, incidents,
         alerts, energyData, paxData, cargoData, ramsMetrics,
@@ -103,7 +123,9 @@ export default function Dashboard({ user, onLogout }) {
     };
 
     return (
-        <div className="h-screen bg-occ-950 flex flex-col overflow-hidden">
+        <div className="h-screen flex flex-col overflow-hidden" style={{ background: '#060c17' }}>
+
+            {/* Alert ticker — full width */}
             <AlertTicker alerts={alerts} />
 
             <div className="flex flex-1 overflow-hidden min-h-0">
@@ -112,7 +134,7 @@ export default function Dashboard({ user, onLogout }) {
                     onNavigate={handleNavigate}
                     kpis={kpis}
                     onLogout={onLogout}
-                    isMockAuth={isMockAuth}
+                    isMockAuth={isMock}
                     onProjectSelect={handleProjectSelect}
                 />
 
@@ -122,33 +144,20 @@ export default function Dashboard({ user, onLogout }) {
                         onFleetTypeChange={setFleetType}
                         timeMode={timeMode}
                         onTimeModeChange={setTimeMode}
-                        kpis={kpis}
-                        alerts={alerts}
                     />
 
-                    <div className="flex-1 overflow-hidden min-h-0 p-3">
+                    <div className="flex-1 overflow-hidden min-h-0 p-2.5">
                         {activeView === 'proyecto' && activeProject ? (
                             <ProjectView
                                 project={activeProject}
                                 onBack={() => handleNavigate('cco')}
                             />
                         ) : ActiveView ? (
-                            <Suspense fallback={
-                                <div className="h-full flex items-center justify-center">
-                                    <div className="text-center space-y-3">
-                                        <div className="w-8 h-8 border-2 border-rail/40 border-t-rail rounded-full animate-spin mx-auto" />
-                                        <p className="text-[11px] font-mono text-slate-500">Cargando módulo…</p>
-                                    </div>
-                                </div>
-                            }>
+                            <Suspense fallback={LOADING_FALLBACK}>
                                 <ActiveView {...viewProps} />
                             </Suspense>
                         ) : (
-                            <Suspense fallback={
-                                <div className="h-full flex items-center justify-center">
-                                    <p className="text-[11px] font-mono text-slate-500">Cargando…</p>
-                                </div>
-                            }>
+                            <Suspense fallback={LOADING_FALLBACK}>
                                 <CCOView {...viewProps} />
                             </Suspense>
                         )}

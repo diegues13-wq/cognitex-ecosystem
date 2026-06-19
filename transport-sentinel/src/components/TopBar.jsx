@@ -1,58 +1,52 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Radio, Train } from 'lucide-react';
+import { Radio, Train } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 const FLEET_TABS = [
-    { id: 'todos',      label: 'TODOS' },
-    { id: 'pasajeros',  label: 'PASAJEROS' },
-    { id: 'carga',      label: 'CARGA' },
+    { id: 'todos',     label: 'TODOS' },
+    { id: 'pasajeros', label: 'PASAJEROS' },
+    { id: 'carga',     label: 'CARGA' },
 ];
 
 const MODE_TABS = [
-    { id: 'LIVE',      label: 'EN VIVO' },
-    { id: 'HISTORICO', label: 'HISTÓRICO' },
+    { id: 'live',      label: 'EN VIVO' },
+    { id: 'historico', label: 'HISTÓRICO' },
 ];
 
-export default function TopBar({ fleetType, onFleetTypeChange, mode, onModeChange, title, onMenuToggle, isMobileMenuOpen }) {
+export default function TopBar({ fleetType, onFleetTypeChange, timeMode, onTimeModeChange }) {
     const [time, setTime] = useState(new Date());
 
     useEffect(() => {
-        const interval = setInterval(() => setTime(new Date()), 1000);
-        return () => clearInterval(interval);
+        const id = setInterval(() => setTime(new Date()), 1000);
+        return () => clearInterval(id);
     }, []);
 
     const pad = n => String(n).padStart(2, '0');
     const timeStr = `${pad(time.getHours())}:${pad(time.getMinutes())}:${pad(time.getSeconds())}`;
-    const dateStr = time.toLocaleDateString('es-VE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+    const dateStr = time.toLocaleDateString('es', { weekday: 'short', day: '2-digit', month: 'short' });
 
     return (
-        <header className="h-12 bg-occ-900/95 border-b border-occ-700/40 backdrop-blur-xl flex items-center px-3 gap-3 flex-shrink-0">
-            {/* Mobile menu toggle */}
-            <button
-                onClick={onMenuToggle}
-                className="lg:hidden text-slate-500 hover:text-slate-300 p-1"
-            >
-                {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
+        /* SOLID background — no backdrop-blur (Skia AVX2 → SIGILL) */
+        <header className="h-11 bg-[#05090f] border-b border-[#122030] flex items-center px-3 gap-3 flex-shrink-0">
 
-            {/* Title / breadcrumb */}
-            <div className="flex items-center gap-2 min-w-0">
-                <Train size={14} className="text-rail flex-shrink-0" />
-                <span className="text-xs font-mono text-slate-400 truncate hidden sm:block">{title}</span>
+            {/* Brand mark */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+                <Train size={13} className="text-[#1d6fa5]" />
+                <span className="text-[10px] font-mono text-[#2a6090] tracking-widest hidden sm:block">CCO</span>
             </div>
 
-            <div className="flex-1" />
+            <div className="w-px h-5 bg-[#122030]" />
 
-            {/* Fleet type toggle */}
-            <div className="flex bg-occ-800/80 rounded-lg p-0.5 border border-occ-700/40">
+            {/* Fleet type */}
+            <div className="flex bg-[#08111c] rounded p-0.5 border border-[#122030] gap-0.5">
                 {FLEET_TABS.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => onFleetTypeChange(tab.id)}
-                        className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-md transition-all duration-150 ${
+                        className={`px-2.5 py-1 text-[9px] font-mono font-bold rounded transition-colors duration-100 ${
                             fleetType === tab.id
-                                ? 'bg-rail text-white shadow-[0_0_10px_rgba(29,111,165,0.4)]'
-                                : 'text-slate-500 hover:text-slate-300'
+                                ? 'bg-[#1d6fa5] text-white'
+                                : 'text-[#2a4a6b] hover:text-slate-300'
                         }`}
                     >
                         {tab.label}
@@ -61,40 +55,39 @@ export default function TopBar({ fleetType, onFleetTypeChange, mode, onModeChang
             </div>
 
             {/* Mode toggle */}
-            <div className="flex bg-occ-800/80 rounded-lg p-0.5 border border-occ-700/40">
+            <div className="flex bg-[#08111c] rounded p-0.5 border border-[#122030] gap-0.5">
                 {MODE_TABS.map(tab => (
                     <button
                         key={tab.id}
-                        onClick={() => onModeChange(tab.id)}
-                        className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-md transition-all duration-150 flex items-center gap-1.5 ${
-                            mode === tab.id
-                                ? 'bg-occ-700 text-slate-200'
-                                : 'text-slate-500 hover:text-slate-300'
+                        onClick={() => onTimeModeChange(tab.id)}
+                        className={`px-2.5 py-1 text-[9px] font-mono font-bold rounded transition-colors duration-100 flex items-center gap-1.5 ${
+                            timeMode === tab.id
+                                ? 'bg-[#0e2035] text-[#38a8e0]'
+                                : 'text-[#2a4a6b] hover:text-slate-300'
                         }`}
                     >
-                        {tab.id === 'LIVE' && mode === 'LIVE' && (
-                            <Radio size={9} className="text-green-400 animate-pulse-slow" />
+                        {tab.id === 'live' && timeMode === 'live' && (
+                            <Radio size={8} className="text-green-400 animate-pulse-slow" />
                         )}
                         {tab.label}
                     </button>
                 ))}
             </div>
 
+            <div className="flex-1" />
+
             {/* Clock */}
-            <div className="hidden md:flex flex-col items-end">
-                <span className="text-xs font-mono text-slate-200 font-bold tracking-widest">{timeStr}</span>
-                <span className="text-[9px] font-mono text-slate-500 capitalize">{dateStr}</span>
+            <div className="hidden md:flex flex-col items-end flex-shrink-0">
+                <span className="text-[11px] font-mono text-slate-200 font-bold tracking-widest">{timeStr}</span>
+                <span className="text-[8px] font-mono text-[#2a4a6b] capitalize">{dateStr}</span>
             </div>
         </header>
     );
 }
 
 TopBar.propTypes = {
-    fleetType:        PropTypes.string.isRequired,
-    onFleetTypeChange:PropTypes.func.isRequired,
-    mode:             PropTypes.string.isRequired,
-    onModeChange:     PropTypes.func.isRequired,
-    title:            PropTypes.string,
-    onMenuToggle:     PropTypes.func,
-    isMobileMenuOpen: PropTypes.bool,
+    fleetType:         PropTypes.string.isRequired,
+    onFleetTypeChange: PropTypes.func.isRequired,
+    timeMode:          PropTypes.string.isRequired,
+    onTimeModeChange:  PropTypes.func.isRequired,
 };
