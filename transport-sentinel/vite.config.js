@@ -11,7 +11,6 @@ export default defineConfig({
                     'vendor-recharts': ['recharts'],
                     'vendor-lucide':   ['lucide-react'],
                     'vendor-firebase':   ['firebase/app', 'firebase/auth'],
-                    'vendor-googlemaps': ['@react-google-maps/api'],
                 },
             },
         },
