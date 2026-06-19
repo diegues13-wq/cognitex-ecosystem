@@ -1,11 +1,17 @@
+import { useState, useEffect } from 'react';
 import { Activity, Clock, Route } from 'lucide-react';
 import { SvgAreaChart, SvgBarChart } from '../components/SvgCharts.jsx';
 import PropTypes from 'prop-types';
-import { ROUTES } from '../utils/dataGenerator.js';
 
 export default function OperationsView({ history, kpis }) {
-    const routePerf = ROUTES.map(route => ({
-        name: route.shortName,
+    const [routes, setRoutes] = useState([]);
+
+    useEffect(() => {
+        import('../services/api.js').then(({ fetchRoutes }) => fetchRoutes()).then(setRoutes);
+    }, []);
+
+    const routePerf = routes.map(route => ({
+        name: route.name,
         otp: Math.round(75 + Math.random() * 22),
         retrasoMedio: parseFloat((1 + Math.random() * 10).toFixed(1)),
         viajes: route.type === 'carga' ? Math.round(2 + Math.random() * 4) : Math.round(10 + Math.random() * 20),

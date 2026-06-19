@@ -1,7 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { AlertTriangle, Clock, Train, Activity, CheckCircle } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { ROUTES } from '../utils/dataGenerator.js';
 
 // Both map and graph are lazy — separate chunks, compiled only when rendered
 const TrainMap   = lazy(() => import('../components/TrainMap.jsx'));
@@ -17,10 +16,15 @@ export default function CCOView({ snapshot, alerts, kpis, fleetType }) {
     const [schedule, setSchedule] = useState(null);
     const [selectedRoute, setSelectedRoute] = useState('RT-001');
     const [loadingSchedule, setLoadingSchedule] = useState(true);
+    const [routes, setRoutes] = useState([]);
+
+    useEffect(() => {
+        import('../services/api.js').then(({ fetchRoutes }) => fetchRoutes()).then(setRoutes);
+    }, []);
 
     useEffect(() => {
         setLoadingSchedule(true);
-        import('../services/dataService.js').then(({ fetchTrainSchedule }) =>
+        import('../services/api.js').then(({ fetchTrainSchedule }) =>
             fetchTrainSchedule(selectedRoute)
         ).then(s => {
             setSchedule(s);
@@ -91,7 +95,7 @@ export default function CCOView({ snapshot, alerts, kpis, fleetType }) {
                                 onChange={e => setSelectedRoute(e.target.value)}
                                 className="bg-occ-700/50 border border-occ-700/40 text-slate-300 text-[10px] font-mono rounded px-2 py-0.5 outline-none cursor-pointer"
                             >
-                                {ROUTES.filter(r => r.type !== 'carga').map(r => (
+                                {routes.filter(r => r.type !== 'carga').map(r => (
                                     <option key={r.id} value={r.id}>{r.name}</option>
                                 ))}
                             </select>

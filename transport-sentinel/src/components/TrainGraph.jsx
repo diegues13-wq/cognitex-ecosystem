@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { ROUTES } from '../utils/dataGenerator.js';
 
 const WIDTH = 820;
 const HEIGHT = 260;
@@ -31,7 +30,8 @@ export default function TrainGraph({ routeId = 'RT-001', schedule = null, trains
     const [tooltip, setTooltip] = useState(null);
     const svgRef = useRef(null);
 
-    const route = ROUTES.find(r => r.id === routeId) || ROUTES[0];
+    // Route data comes from the schedule object (fetched from API)
+    const route = schedule?.route || { id: routeId, name: routeId, distanceKm: 1000, stops: [] };
     const maxKm = route.distanceKm;
 
     const hours = Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => START_HOUR + i);

@@ -1,6 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { ROUTES } from '../utils/dataGenerator.js';
 
 // ── Map parameters ─────────────────────────────────────────────────────────────
 const CENTER  = { lat: 15, lng: -85 };
@@ -57,8 +56,13 @@ const STATUS_LABEL = { EN_SERVICIO: 'En Servicio', EN_MANTENIMIENTO: 'Mantenimie
 export default function TrainMap({ trains }) {
     const [selected, setSelected] = useState(null);
     const [imgError, setImgError] = useState(false);
+    const [routeList, setRouteList] = useState([]);
 
-    const paths = useMemo(() => ROUTES.map(r => {
+    useEffect(() => {
+        import('../services/api.js').then(({ fetchRoutes }) => fetchRoutes()).then(setRouteList).catch(() => {});
+    }, []);
+
+    const paths = useMemo(() => routeList.map(r => {
         const pts = r.stops.map(s => project(s.lat, s.lng));
         return {
             id:     r.id,
