@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { AlertTriangle, Clock, Train, Activity, CheckCircle } from 'lucide-react';
 import PropTypes from 'prop-types';
-import TrainMap from '../components/TrainMap.jsx';
 import TrainGraph from '../components/TrainGraph.jsx';
+
+const TrainMap = lazy(() => import('../components/TrainMap.jsx'));
 import { fetchTrainSchedule } from '../services/dataService.js';
 import { ROUTES } from '../utils/dataGenerator.js';
 
@@ -74,7 +75,9 @@ export default function CCOView({ snapshot, alerts, kpis, fleetType }) {
                 <div className="flex flex-col gap-3 min-h-0">
                     {/* Map */}
                     <div className="flex-1 min-h-[280px]">
-                        <TrainMap trains={snapshot} fleetType={fleetType} />
+                        <Suspense fallback={<div className="h-full flex items-center justify-center text-slate-500 text-xs font-mono bg-occ-900/50 rounded-xl">Cargando mapa…</div>}>
+                            <TrainMap trains={snapshot} fleetType={fleetType} />
+                        </Suspense>
                     </div>
 
                     {/* Train Graph */}
