@@ -3,8 +3,8 @@ import { GoogleMap, useJsApiLoader, Polyline, Marker, InfoWindow } from '@react-
 import PropTypes from 'prop-types';
 import { ROUTES } from '../utils/dataGenerator.js';
 
-const MAP_CENTER = { lat: 10.32, lng: -68.5 };
-const MAP_ZOOM = 7;
+const MAP_CENTER = { lat: 15, lng: -85 };
+const MAP_ZOOM = 3;
 
 const MAP_STYLE = [
     { elementType: 'geometry',                     stylers: [{ color: '#040d1a' }] },
