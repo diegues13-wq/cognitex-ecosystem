@@ -1,196 +1,120 @@
-import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import { MapPin } from 'lucide-react';
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { ROUTES } from '../utils/dataGenerator.js';
 
-// Fix Leaflet default icon issue with bundlers
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
+// Geographic bounds of the Venezuelan rail network
+const MIN_LNG = -71.65, MAX_LNG = -66.83;
+const MIN_LAT = 10.05,  MAX_LAT = 10.65;
 
-const STATUS_STYLES = {
-    EN_SERVICIO:      { fill: '#22c55e', border: '#4ade80', glow: 'rgba(34,197,94,0.8)' },
-    EN_MANTENIMIENTO: { fill: '#f59e0b', border: '#fbbf24', glow: 'rgba(245,158,11,0.8)' },
-    STANDBY:          { fill: '#64748b', border: '#94a3b8', glow: 'rgba(100,116,139,0.6)' },
-};
+const W = 820, H = 200;
+const PL = 18, PR = 18, PT = 22, PB = 28;
+const UW = W - PL - PR;
+const UH = H - PT - PB;
 
-const ROUTE_COLORS = {
-    'RT-001': '#38a8e0',
-    'RT-002': '#1d6fa5',
-    'RT-003': '#3b82f6',
-    'RT-004': '#f59e0b',
-    'RT-005': '#f97316',
-    'RT-006': '#a855f7',
-};
-
-function createTrainIcon(train) {
-    const sc = STATUS_STYLES[train.status] || STATUS_STYLES.STANDBY;
-    const isPax = train.type === 'pasajeros';
-    const size = isPax ? 14 : 12;
-
-    return L.divIcon({
-        html: `
-            <div style="
-                width:${size}px;height:${size}px;border-radius:50%;
-                background:${sc.fill};border:2px solid ${sc.border};
-                box-shadow:0 0 8px ${sc.glow},0 0 16px ${sc.glow}40;
-                position:relative;
-            ">
-                ${train.delayMin > 3 ? `<div style="position:absolute;top:-3px;right:-3px;width:6px;height:6px;background:#ef4444;border-radius:50%;border:1px solid #fca5a5;"></div>` : ''}
-            </div>`,
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
-        className: '',
-    });
+function proj(lat, lng) {
+    return {
+        x: PL + (lng - MIN_LNG) / (MAX_LNG - MIN_LNG) * UW,
+        y: PT + (1 - (lat - MIN_LAT) / (MAX_LAT - MIN_LAT)) * UH,
+    };
 }
 
-function createStationIcon() {
-    return L.divIcon({
-        html: `<div style="width:6px;height:6px;border-radius:50%;background:#1d6fa5;border:1.5px solid #38a8e0;"></div>`,
-        iconSize: [6, 6],
-        iconAnchor: [3, 3],
-        className: '',
-    });
-}
+const ROUTE_STROKE = { pasajeros: '#3b82f6', carga: '#f59e0b', mixto: '#a855f7' };
+const STATUS_COLOR = { EN_SERVICIO: '#22c55e', EN_MANTENIMIENTO: '#f59e0b', STANDBY: '#475569' };
 
-function RecenterMap({ center }) {
-    const map = useMap();
-    useEffect(() => { map.setView(center, map.getZoom()); }, [center, map]);
-    return null;
-}
+export default function TrainMap({ trains }) {
+    const paths = useMemo(() => ROUTES.map(r => {
+        const pts = r.stops.map(s => proj(s.lat, s.lng));
+        return {
+            id: r.id,
+            d: pts.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(''),
+            stroke: ROUTE_STROKE[r.type] || '#3b82f6',
+            dashed: r.type === 'carga',
+        };
+    }), []);
 
-export default function TrainMap({ trains = [], fleetType = 'todos' }) {
-    const center = [10.2, -67.8];
-    const stationIcon = createStationIcon();
-    const filtered = fleetType === 'todos' ? trains : trains.filter(t => t.type === fleetType);
+    const stations = useMemo(() => {
+        const seen = new Set();
+        return ROUTES.flatMap(r => r.stops).filter(s => {
+            if (seen.has(s.id)) return false;
+            seen.add(s.id);
+            return true;
+        }).map(s => ({ ...s, ...proj(s.lat, s.lng) }));
+    }, []);
 
-    // Build route polylines from ROUTES static data
-    const routeLines = ROUTES.map(route => ({
-        id: route.id,
-        color: ROUTE_COLORS[route.id] || '#1d6fa5',
-        positions: route.stops.map(s => [s.lat, s.lng]),
-        stations: route.stops,
-        name: route.name,
-        type: route.type,
-    }));
-
-    const visibleRoutes = fleetType === 'todos' ? routeLines
-        : routeLines.filter(r => r.type === fleetType || r.type === 'mixto');
+    const dots = useMemo(() => trains.map(t => ({
+        id: t.id,
+        callsign: t.callsign,
+        status: t.status,
+        color: STATUS_COLOR[t.status] || '#475569',
+        active: t.status === 'EN_SERVICIO',
+        ...proj(t.lat, t.lng),
+    })), [trains]);
 
     return (
-        <div className="relative w-full h-full rounded-xl overflow-hidden border border-occ-700/40">
-            {/* Map overlay header */}
-            <div className="absolute top-3 left-3 z-[400] bg-occ-900/90 px-3 py-1.5 rounded-lg backdrop-blur border border-occ-700/40 shadow-lg">
-                <div className="flex items-center gap-2">
-                    <MapPin size={11} className="text-rail-glow" />
-                    <span className="text-[10px] font-mono font-bold text-rail-glow tracking-widest uppercase">Posiciones en Tiempo Real</span>
-                </div>
-                <div className="flex items-center gap-3 mt-1 text-[9px] font-mono text-slate-500">
-                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" /> En servicio</span>
-                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> Mantenimiento</span>
-                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block" /> Standby</span>
-                </div>
-            </div>
-
-            {/* Train count badge */}
-            <div className="absolute top-3 right-3 z-[400] bg-occ-900/90 px-2.5 py-1 rounded-lg backdrop-blur border border-occ-700/40">
-                <span className="text-[10px] font-mono text-slate-300">
-                    <span className="text-green-400 font-bold">{filtered.filter(t => t.status === 'EN_SERVICIO').length}</span>
-                    <span className="text-slate-600"> / {filtered.length} trenes</span>
-                </span>
-            </div>
-
-            <MapContainer
-                center={center}
-                zoom={7}
-                style={{ width: '100%', height: '100%' }}
-                zoomControl={false}
-            >
-                <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                />
+        <div className="w-full h-full occ-card rounded-xl overflow-hidden">
+            <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full" role="img" aria-label="Red ferroviaria">
+                <defs>
+                    <pattern id="tgrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M40 0L0 0 0 40" fill="none" stroke="#0d2040" strokeWidth="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width={W} height={H} fill="url(#tgrid)" opacity="0.5"/>
 
                 {/* Route lines */}
-                {visibleRoutes.map(route => (
-                    <Polyline
-                        key={route.id}
-                        positions={route.positions}
-                        pathOptions={{
-                            color: route.color,
-                            weight: 2.5,
-                            opacity: 0.7,
-                            dashArray: route.type === 'carga' ? '6 4' : null,
-                        }}
+                {paths.map(r => (
+                    <path
+                        key={r.id}
+                        d={r.d}
+                        stroke={r.stroke}
+                        strokeWidth={r.dashed ? 1.5 : 2}
+                        strokeDasharray={r.dashed ? '5 3' : undefined}
+                        fill="none"
+                        opacity={0.55}
                     />
                 ))}
 
-                {/* Station markers */}
-                {visibleRoutes.flatMap(route =>
-                    route.stations.map(s => (
-                        <Marker key={`${route.id}-${s.id}`} position={[s.lat, s.lng]} icon={stationIcon}>
-                            <Popup>
-                                <div className="text-xs">
-                                    <p className="font-bold">{s.name}</p>
-                                    <p className="text-slate-400">{route.name} · {s.km} km</p>
-                                </div>
-                            </Popup>
-                        </Marker>
-                    ))
-                )}
-
-                {/* Train markers */}
-                {filtered.map(train => (
-                    <Marker
-                        key={train.id}
-                        position={[train.lat, train.lng]}
-                        icon={createTrainIcon(train)}
-                    >
-                        <Popup maxWidth={220}>
-                            <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#e2e8f0', minWidth: '180px' }}>
-                                <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '6px', color: '#38a8e0' }}>
-                                    {train.name}
-                                </div>
-                                <div style={{ color: '#94a3b8', marginBottom: '2px' }}>{train.callsign} · {train.model}</div>
-                                <hr style={{ border: 'none', borderTop: '1px solid #163060', margin: '6px 0' }} />
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px' }}>
-                                    <span style={{ color: '#64748b' }}>Estado:</span>
-                                    <span style={{ color: STATUS_STYLES[train.status]?.fill || '#94a3b8' }}>{train.status?.replace('_', ' ')}</span>
-                                    <span style={{ color: '#64748b' }}>Ruta:</span>
-                                    <span>{train.routeName || train.route}</span>
-                                    <span style={{ color: '#64748b' }}>Velocidad:</span>
-                                    <span>{train.speed} km/h</span>
-                                    {train.type === 'pasajeros' && train.occupancy !== null && (
-                                        <><span style={{ color: '#64748b' }}>Ocupación:</span><span>{train.occupancy}%</span></>
-                                    )}
-                                    {train.type === 'carga' && train.tonsLoaded !== null && (
-                                        <><span style={{ color: '#64748b' }}>Carga:</span><span>{train.tonsLoaded?.toLocaleString()} t</span></>
-                                    )}
-                                    {train.delayMin > 0 && (
-                                        <><span style={{ color: '#64748b' }}>Retraso:</span><span style={{ color: '#f59e0b' }}>+{train.delayMin} min</span></>
-                                    )}
-                                    <span style={{ color: '#64748b' }}>Km mant.:</span>
-                                    <span style={{ color: train.maintUrgency === 'CRITICA' ? '#ef4444' : train.maintUrgency === 'PROXIMA' ? '#f59e0b' : '#4ade80' }}>
-                                        {train.kmToNextMaint?.toLocaleString()} km
-                                    </span>
-                                </div>
-                            </div>
-                        </Popup>
-                    </Marker>
+                {/* Station dots */}
+                {stations.map(s => (
+                    <g key={s.id}>
+                        <circle cx={s.x} cy={s.y} r={2.5} fill="#1d6fa5" stroke="#38a8e0" strokeWidth={0.8}/>
+                        <text x={s.x} y={s.y - 5} textAnchor="middle" fontSize="6.5" fontFamily="monospace" fill="#334155">{s.name}</text>
+                    </g>
                 ))}
 
-                <RecenterMap center={center} />
-            </MapContainer>
+                {/* Train markers */}
+                {dots.map(t => (
+                    <g key={t.id}>
+                        <circle cx={t.x} cy={t.y} r={t.active ? 5 : 4} fill={t.color} opacity={t.active ? 0.95 : 0.5}/>
+                        {t.active && (
+                            <text x={t.x + 7} y={t.y + 3} fontSize="6.5" fontFamily="monospace" fill="#94a3b8">{t.callsign}</text>
+                        )}
+                    </g>
+                ))}
+
+                {/* Header */}
+                <text x={PL} y={13} fontSize="7.5" fontFamily="monospace" fill="#1d6fa5" letterSpacing="1.5" opacity="0.7">
+                    RED FERROVIARIA · TIEMPO REAL · SIMULACIÓN
+                </text>
+
+                {/* Legend */}
+                <g transform={`translate(${PL},${H - 14})`}>
+                    {[['#22c55e','Servicio'],['#f59e0b','Mantenimiento'],['#475569','Standby']].map(([c,l],i) => (
+                        <g key={l} transform={`translate(${i * 115},0)`}>
+                            <circle cx="5" cy="5" r="3.5" fill={c}/>
+                            <text x="12" y="9" fontSize="7" fontFamily="monospace" fill="#475569">{l}</text>
+                        </g>
+                    ))}
+                    {[['#3b82f6','Pasajeros',false],['#f59e0b','Carga',true]].map(([c,l,d],i) => (
+                        <g key={l} transform={`translate(${360 + i * 90},0)`}>
+                            <line x1="0" y1="5" x2="12" y2="5" stroke={c} strokeWidth="2" strokeDasharray={d ? '4 2' : undefined}/>
+                            <text x="16" y="9" fontSize="7" fontFamily="monospace" fill="#475569">{l}</text>
+                        </g>
+                    ))}
+                </g>
+            </svg>
         </div>
     );
 }
 
-TrainMap.propTypes = {
-    trains:    PropTypes.array,
-    fleetType: PropTypes.string,
-};
+TrainMap.propTypes = { trains: PropTypes.array };
+TrainMap.defaultProps = { trains: [] };
