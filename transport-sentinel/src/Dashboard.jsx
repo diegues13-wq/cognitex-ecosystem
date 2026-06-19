@@ -35,6 +35,7 @@ export default function Dashboard({ user, onLogout }) {
   const [activeProject, setActiveProject] = useState(null);
   const [fleetType,     setFleetType]     = useState('todos');
   const [timeMode,      setTimeMode]      = useState('live');
+  const [selectedTrain, setSelectedTrain] = useState(null);
 
   // Core data (always needed)
   const [snapshot, setSnapshot] = useState([]);
@@ -102,6 +103,11 @@ export default function Dashboard({ user, onLogout }) {
     snapshot, kpis, history, workOrders, incidents,
     alerts, energyData, paxData, cargoData, ramsMetrics,
     fleetType, timeMode,
+    // Aliases for views that use different prop names
+    orders: workOrders,
+    rams:   ramsMetrics,
+    selectedTrain,
+    onSelectTrain: setSelectedTrain,
   };
 
   return (

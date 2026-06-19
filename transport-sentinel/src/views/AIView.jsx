@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Brain, Send, Train, AlertTriangle, Zap, TrendingUp, Bot, User, Lightbulb, Sparkles } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+const GEMINI_KEY  = import.meta.env.VITE_GEMINI_API_KEY || '';
+const GEMINI_MODEL = 'gemini-2.0-flash';
 const HAS_AI = !!GEMINI_KEY;
 
 const SUGGESTIONS = [
@@ -78,8 +79,8 @@ async function sendToGemini(prompt, kpis, snapshot, onChunk, onDone) {
         const { GoogleGenerativeAI } = await import('@google/generative-ai');
         const genAI = new GoogleGenerativeAI(GEMINI_KEY);
         const model = genAI.getGenerativeModel({
-            model: 'gemini-1.5-flash',
-            systemInstruction: `Eres Transport-Sentinel AI, experto en operaciones y mantenimiento ferroviario (normas UIC, RAMS/EN 50126, IEC 62290). ${buildContext(kpis, snapshot)}`,
+            model: GEMINI_MODEL,
+            systemInstruction: `Eres Transport-Sentinel AI, asistente experto en operaciones y mantenimiento ferroviario según normas UIC, RAMS/EN 50126 e IEC 62290. ${buildContext(kpis, snapshot)}`,
         });
         const result = await model.generateContentStream(prompt);
         let buffer = '';
@@ -125,7 +126,7 @@ function MessageBubble({ msg }) {
 export default function AIView({ kpis = {}, snapshot = [] }) {
     const [messages, setMessages] = useState([{
         role: 'assistant',
-        content: `¡Hola! Soy **Transport-Sentinel AI** ${HAS_AI ? '— impulsado por **Gemini 1.5 Flash**' : '(modo simulación)'}.\n\nEstoy conectado a los datos de la flota ferroviaria en tiempo real. Puedo analizar puntualidad OTP, consumo energético, mantenimiento predictivo RAMS, seguridad y operaciones de la red de las Américas.\n\n¿En qué puedo ayudarte hoy?`,
+        content: `¡Hola! Soy **Transport-Sentinel AI**${HAS_AI ? ` — impulsado por **${GEMINI_MODEL}**` : ' (modo simulación)'}.\n\nEstoy conectado a los datos de la flota ferroviaria en tiempo real. Puedo analizar puntualidad OTP, consumo energético, mantenimiento predictivo RAMS, seguridad y operaciones de la red de las Américas.\n\n¿En qué puedo ayudarte hoy?`,
     }]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -172,7 +173,7 @@ export default function AIView({ kpis = {}, snapshot = [] }) {
                         <div className="flex items-center gap-1.5">
                             <span className="status-dot-active" />
                             <span className="text-[9px] font-mono text-green-400">
-                                {HAS_AI ? 'Gemini 1.5 Flash — Conectado' : 'Modo Simulación Activo'}
+                                {HAS_AI ? `${GEMINI_MODEL} — Conectado` : 'Modo Simulación Activo'}
                             </span>
                             {HAS_AI && <Sparkles size={9} className="text-violet-400"/>}
                         </div>
