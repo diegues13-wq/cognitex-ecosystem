@@ -1,11 +1,11 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { AlertTriangle, Clock, Train, Activity, CheckCircle } from 'lucide-react';
 import PropTypes from 'prop-types';
-import TrainGraph from '../components/TrainGraph.jsx';
-
-const TrainMap = lazy(() => import('../components/TrainMap.jsx'));
-import { fetchTrainSchedule } from '../services/dataService.js';
 import { ROUTES } from '../utils/dataGenerator.js';
+
+// Both map and graph are lazy — separate chunks, compiled only when rendered
+const TrainMap   = lazy(() => import('../components/TrainMap.jsx'));
+const TrainGraph = lazy(() => import('../components/TrainGraph.jsx'));
 
 const STATUS_CONFIG = {
     EN_SERVICIO:      { label: 'En Servicio',    color: 'text-green-400',  dot: 'bg-green-400' },
@@ -20,7 +20,9 @@ export default function CCOView({ snapshot, alerts, kpis, fleetType }) {
 
     useEffect(() => {
         setLoadingSchedule(true);
-        fetchTrainSchedule(selectedRoute).then(s => {
+        import('../services/dataService.js').then(({ fetchTrainSchedule }) =>
+            fetchTrainSchedule(selectedRoute)
+        ).then(s => {
             setSchedule(s);
             setLoadingSchedule(false);
         });
@@ -96,7 +98,9 @@ export default function CCOView({ snapshot, alerts, kpis, fleetType }) {
                         </div>
                         {loadingSchedule
                             ? <div className="h-32 flex items-center justify-center text-slate-500 text-xs font-mono">Cargando horario…</div>
-                            : <TrainGraph routeId={selectedRoute} schedule={schedule} trains={snapshot} />
+                            : <Suspense fallback={<div className="h-32 flex items-center justify-center text-slate-500 text-xs font-mono">Cargando gráfico…</div>}>
+                                <TrainGraph routeId={selectedRoute} schedule={schedule} trains={snapshot} />
+                              </Suspense>
                         }
                     </div>
                 </div>

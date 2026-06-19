@@ -200,14 +200,19 @@ export const ROUTES = [
     ]},
 ];
 
-// Deterministic pseudo-random seeded by string
+// Deterministic pseudo-random — MurmurHash3 finalizer, pure integer arithmetic
+// Math.sin removed: V8 TurboFan called libm sin() which used AVX2 on Linux → SIGILL
 function seededRandom(seed) {
-    let h = 0;
+    let h = 0x811c9dc5 | 0;
     for (let i = 0; i < seed.length; i++) {
-        h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+        h = Math.imul(h ^ seed.charCodeAt(i), 0x9e3779b9);
     }
-    const x = Math.sin(h) * 10000;
-    return x - Math.floor(x);
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
 }
 
 function seededRandRange(seed, min, max) {
