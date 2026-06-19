@@ -8,7 +8,8 @@ export default defineConfig({
             output: {
                 manualChunks: {
                     'vendor-react':    ['react', 'react-dom'],
-                    'vendor-recharts': ['recharts'],
+                    'vendor-recharts':  ['recharts'],
+                    'data-projects':   ['./src/data/railProjectsData.js'],
                     'vendor-lucide':   ['lucide-react'],
                     'vendor-firebase':   ['firebase/app', 'firebase/auth'],
                 },

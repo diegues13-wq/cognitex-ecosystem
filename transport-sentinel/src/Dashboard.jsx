@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import TopBar from './components/TopBar.jsx';
 import AlertTicker from './components/AlertTicker.jsx';
+import ProjectView from './views/ProjectView.jsx';
 
 const CCOView         = lazy(() => import('./views/CCOView.jsx'));
 const FleetView       = lazy(() => import('./views/FleetView.jsx'));
@@ -11,6 +12,7 @@ const CommercialView  = lazy(() => import('./views/CommercialView.jsx'));
 const EnergyView      = lazy(() => import('./views/EnergyView.jsx'));
 const SafetyView      = lazy(() => import('./views/SafetyView.jsx'));
 const AIView          = lazy(() => import('./views/AIView.jsx'));
+
 import {
     generateFleetSnapshot,
     generateFleetKPIs,
@@ -36,10 +38,10 @@ const VIEW_COMPONENTS = {
 };
 
 export default function Dashboard({ user, onLogout }) {
-    const [activeView,   setActiveView]   = useState('cco');
-    const [fleetType,    setFleetType]    = useState('todos');
-    const [timeMode,     setTimeMode]     = useState('live');
-    const [sidebarOpen,  setSidebarOpen]  = useState(true);
+    const [activeView,    setActiveView]    = useState('cco');
+    const [activeProject, setActiveProject] = useState(null);
+    const [fleetType,     setFleetType]     = useState('todos');
+    const [timeMode,      setTimeMode]      = useState('live');
 
     // Data state
     const [snapshot,    setSnapshot]    = useState([]);
@@ -66,13 +68,11 @@ export default function Dashboard({ user, onLogout }) {
         setRamsMetrics(generateRAMSMetrics());
     }, [fleetType]);
 
-    // Defer initial load to after first paint to avoid blocking Chrome renderer
     useEffect(() => {
         const t = setTimeout(loadData, 80);
         return () => clearTimeout(t);
     }, [loadData]);
 
-    // Live refresh every 5s
     useEffect(() => {
         if (timeMode !== 'live') return;
         const id = setInterval(() => {
@@ -83,8 +83,19 @@ export default function Dashboard({ user, onLogout }) {
         return () => clearInterval(id);
     }, [timeMode, fleetType]);
 
-    const ActiveView = VIEW_COMPONENTS[activeView] || CCOView;
+    const handleProjectSelect = useCallback((project) => {
+        setActiveProject(project);
+        setActiveView('proyecto');
+    }, []);
 
+    const handleNavigate = useCallback((viewId) => {
+        setActiveView(viewId);
+        if (viewId !== 'proyecto') setActiveProject(null);
+    }, []);
+
+    const isMockAuth = !user?.uid || user?.uid?.startsWith?.('mock');
+
+    const ActiveView = VIEW_COMPONENTS[activeView];
     const viewProps = {
         snapshot, kpis, history, workOrders, incidents,
         alerts, energyData, paxData, cargoData, ramsMetrics,
@@ -93,25 +104,19 @@ export default function Dashboard({ user, onLogout }) {
 
     return (
         <div className="h-screen bg-occ-950 flex flex-col overflow-hidden">
-            {/* Alert ticker */}
             <AlertTicker alerts={alerts} />
 
-            {/* Main layout */}
             <div className="flex flex-1 overflow-hidden min-h-0">
-                {/* Sidebar */}
                 <Sidebar
                     activeView={activeView}
-                    onNavigate={setActiveView}
-                    isOpen={sidebarOpen}
-                    onToggle={() => setSidebarOpen(o => !o)}
+                    onNavigate={handleNavigate}
                     kpis={kpis}
-                    user={user}
                     onLogout={onLogout}
+                    isMockAuth={isMockAuth}
+                    onProjectSelect={handleProjectSelect}
                 />
 
-                {/* Content area */}
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                    {/* Top bar */}
                     <TopBar
                         fleetType={fleetType}
                         onFleetTypeChange={setFleetType}
@@ -119,21 +124,34 @@ export default function Dashboard({ user, onLogout }) {
                         onTimeModeChange={setTimeMode}
                         kpis={kpis}
                         alerts={alerts}
-                        onSidebarToggle={() => setSidebarOpen(o => !o)}
                     />
 
-                    {/* View content */}
                     <div className="flex-1 overflow-hidden min-h-0 p-3">
-                        <Suspense fallback={
-                            <div className="h-full flex items-center justify-center">
-                                <div className="text-center space-y-3">
-                                    <div className="w-8 h-8 border-2 border-rail/40 border-t-rail rounded-full animate-spin mx-auto" />
-                                    <p className="text-[11px] font-mono text-slate-500">Cargando módulo…</p>
+                        {activeView === 'proyecto' && activeProject ? (
+                            <ProjectView
+                                project={activeProject}
+                                onBack={() => handleNavigate('cco')}
+                            />
+                        ) : ActiveView ? (
+                            <Suspense fallback={
+                                <div className="h-full flex items-center justify-center">
+                                    <div className="text-center space-y-3">
+                                        <div className="w-8 h-8 border-2 border-rail/40 border-t-rail rounded-full animate-spin mx-auto" />
+                                        <p className="text-[11px] font-mono text-slate-500">Cargando módulo…</p>
+                                    </div>
                                 </div>
-                            </div>
-                        }>
-                            <ActiveView {...viewProps} />
-                        </Suspense>
+                            }>
+                                <ActiveView {...viewProps} />
+                            </Suspense>
+                        ) : (
+                            <Suspense fallback={
+                                <div className="h-full flex items-center justify-center">
+                                    <p className="text-[11px] font-mono text-slate-500">Cargando…</p>
+                                </div>
+                            }>
+                                <CCOView {...viewProps} />
+                            </Suspense>
+                        )}
                     </div>
                 </div>
             </div>
