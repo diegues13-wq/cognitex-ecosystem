@@ -1,5 +1,5 @@
 import { Zap, Fuel, Leaf, TrendingDown } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Line } from 'recharts';
+import { SvgAreaChart } from '../components/SvgCharts.jsx';
 import PropTypes from 'prop-types';
 
 export default function EnergyView({ energyData, kpis }) {
@@ -41,40 +41,28 @@ export default function EnergyView({ energyData, kpis }) {
                         <Zap size={12} className="text-rail-glow" />
                         <span className="mono-label">Consumo Eléctrico (kWh) — 30 días</span>
                     </div>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <AreaChart data={energyData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="gradKwh" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#1d6fa5" stopOpacity={0.4} />
-                                    <stop offset="95%" stopColor="#1d6fa5" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                            <XAxis dataKey="displayDate" tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} interval={4} />
-                            <YAxis tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} />
-                            <Tooltip contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }} itemStyle={{ color: '#38a8e0' }} labelStyle={{ color: '#94a3b8' }} />
-                            <Area type="monotone" dataKey="kwhElectrico" stroke="#1d6fa5" strokeWidth={2} fill="url(#gradKwh)" name="kWh Eléctrico" dot={false} />
-                            <Area type="monotone" dataKey="kwhRegen" stroke="#10b981" strokeWidth={1.5} fill="none" name="kWh Regen." dot={false} strokeDasharray="4 3" />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    <SvgAreaChart
+                        data={energyData}
+                        xKey="displayDate"
+                        yKey="kwhElectrico"
+                        color="#1d6fa5"
+                        height={180}
+                    />
                 </div>
 
                 {/* Diesel chart */}
                 <div className="occ-card p-3">
                     <div className="flex items-center gap-2 mb-2">
                         <Fuel size={12} className="text-amber-400" />
-                        <span className="mono-label">Consumo Diésel (L) y CO₂ (kg) — 30 días</span>
+                        <span className="mono-label">Consumo Diésel (L) — 30 días</span>
                     </div>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <ComposedChart data={energyData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                            <XAxis dataKey="displayDate" tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} interval={4} />
-                            <YAxis tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} />
-                            <Tooltip contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }} labelStyle={{ color: '#94a3b8' }} />
-                            <Bar dataKey="litrosDiesel" fill="#f59e0b" opacity={0.5} name="Litros Diesel" radius={[2, 2, 0, 0]} />
-                            <Line type="monotone" dataKey="co2Kg" stroke="#ef4444" strokeWidth={2} dot={false} name="CO₂ kg" />
-                        </ComposedChart>
-                    </ResponsiveContainer>
+                    <SvgAreaChart
+                        data={energyData}
+                        xKey="displayDate"
+                        yKey="litrosDiesel"
+                        color="#f59e0b"
+                        height={180}
+                    />
                 </div>
 
                 {/* Cost chart */}
@@ -83,21 +71,14 @@ export default function EnergyView({ energyData, kpis }) {
                         <TrendingDown size={12} className="text-green-400" />
                         <span className="mono-label">Costo Energético (USD) — 30 días</span>
                     </div>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <AreaChart data={energyData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="gradCost" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                            <XAxis dataKey="displayDate" tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} interval={4} />
-                            <YAxis tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} />
-                            <Tooltip contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }} itemStyle={{ color: '#10b981' }} labelStyle={{ color: '#94a3b8' }} />
-                            <Area type="monotone" dataKey="costEnergiaUSD" stroke="#10b981" strokeWidth={2} fill="url(#gradCost)" name="Costo USD" dot={false} />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    <SvgAreaChart
+                        data={energyData}
+                        xKey="displayDate"
+                        yKey="costEnergiaUSD"
+                        color="#10b981"
+                        height={180}
+                        formatY={v => `$${Math.round(v)}`}
+                    />
                 </div>
 
                 {/* Sustainability metrics */}

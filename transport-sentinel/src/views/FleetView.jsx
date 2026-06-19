@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Train, Filter, Zap, Fuel, MapPin, Clock, Activity } from 'lucide-react';
+import { Train, Zap, Fuel, Activity } from 'lucide-react';
 import PropTypes from 'prop-types';
 import AssetCard from '../components/AssetCard.jsx';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { SvgAreaChart } from '../components/SvgCharts.jsx';
 
 const TRACTION_ICONS = { electrico: Zap, diesel: Fuel, hibrido: Activity };
 
@@ -166,29 +166,20 @@ export default function FleetView({ snapshot, history, onSelectTrain, selectedTr
                         </div>
                     </div>
 
-                    {/* OTP/km chart from history */}
+                    {/* OTP chart from history */}
                     {history && history.length > 0 && (
                         <div className="occ-card p-3">
                             <p className="mono-label mb-2">OTP — Últimos 30 días</p>
-                            <ResponsiveContainer width="100%" height={120}>
-                                <AreaChart data={history} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorOTP" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#1d6fa5" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#1d6fa5" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                                    <XAxis dataKey="displayDate" tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} interval={4} />
-                                    <YAxis tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} domain={[60, 100]} />
-                                    <Tooltip
-                                        contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }}
-                                        labelStyle={{ color: '#94a3b8' }}
-                                        itemStyle={{ color: '#38a8e0' }}
-                                    />
-                                    <Area type="monotone" dataKey="otp" stroke="#1d6fa5" strokeWidth={1.5} fill="url(#colorOTP)" name="OTP %" dot={false} />
-                                </AreaChart>
-                            </ResponsiveContainer>
+                            <SvgAreaChart
+                                data={history}
+                                xKey="displayDate"
+                                yKey="otp"
+                                color="#1d6fa5"
+                                height={120}
+                                yMin={60}
+                                yMax={100}
+                                formatY={v => `${v}%`}
+                            />
                         </div>
                     )}
                 </div>

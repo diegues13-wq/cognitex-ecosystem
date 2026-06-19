@@ -5,7 +5,6 @@ import {
     Activity, TrendingUp, Globe, ChevronDown,
 } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { COUNTRIES, getProjectsByCountry } from '../data/railProjectsData.js';
 
 const NAV_SECTIONS = [
     {
@@ -41,11 +40,23 @@ const NAV_SECTIONS = [
 const TYPE_ICON = { metro: '🚇', intercity: '🚄', lrt: '🚊', cable: '🚡', suburbano: '🚆' };
 
 export default function Sidebar({ activeView, onNavigate, kpis, onLogout, isMockAuth, onProjectSelect }) {
-    const [collapsed,        setCollapsed]        = useState(false);
-    const [proyExpanded,     setProyExpanded]      = useState(false);
-    const [selectedCountry,  setSelectedCountry]   = useState(COUNTRIES[0]);
+    const [collapsed,       setCollapsed]       = useState(false);
+    const [proyExpanded,    setProyExpanded]     = useState(false);
+    const [selectedCountry, setSelectedCountry] = useState('Ecuador');
+    const [railData,        setRailData]         = useState(null);
 
-    const countryProjects = getProjectsByCountry(selectedCountry);
+    // Lazy-load railProjectsData only when user expands the section (avoids SIGILL)
+    async function expandProjects() {
+        if (!railData) {
+            const mod = await import('../data/railProjectsData.js');
+            setRailData({ COUNTRIES: mod.COUNTRIES, getProjectsByCountry: mod.getProjectsByCountry });
+            setSelectedCountry(mod.COUNTRIES[0]);
+        }
+        setProyExpanded(e => !e);
+    }
+
+    const countries        = railData?.COUNTRIES ?? ['Ecuador'];
+    const countryProjects  = railData ? railData.getProjectsByCountry(selectedCountry) : [];
 
     return (
         <aside
@@ -127,12 +138,8 @@ export default function Sidebar({ activeView, onNavigate, kpis, onLogout, isMock
                     {/* Toggle proyectos button */}
                     <button
                         onClick={() => {
-                            if (collapsed) {
-                                setCollapsed(false);
-                                setProyExpanded(true);
-                            } else {
-                                setProyExpanded(e => !e);
-                            }
+                            if (collapsed) { setCollapsed(false); expandProjects(); }
+                            else { expandProjects(); }
                         }}
                         title={collapsed ? 'Proyectos Ferroviarios' : undefined}
                         className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-all duration-150 ${collapsed ? 'justify-center' : ''}
@@ -159,7 +166,7 @@ export default function Sidebar({ activeView, onNavigate, kpis, onLogout, isMock
                                 onChange={e => setSelectedCountry(e.target.value)}
                                 className="w-full text-[10px] font-mono bg-occ-800/80 border border-occ-700/50 rounded px-2 py-1 text-slate-300 focus:outline-none focus:border-rail/50"
                             >
-                                {COUNTRIES.map(c => (
+                                {countries.map(c => (
                                     <option key={c} value={c}>{c}</option>
                                 ))}
                             </select>

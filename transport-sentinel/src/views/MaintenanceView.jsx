@@ -1,5 +1,5 @@
-import { Wrench, Brain, AlertTriangle, Clock, CheckCircle, TrendingDown } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Wrench, Brain, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import { SvgBarChart, ProgressBar } from '../components/SvgCharts.jsx';
 import PropTypes from 'prop-types';
 import WorkOrderCard from '../components/WorkOrderCard.jsx';
 
@@ -16,14 +16,20 @@ export default function MaintenanceView({ orders, rams, kpis }) {
     const criticalAI = orders.filter(o => o.aiPredictedFailureDate && o.remainingLifePct <= 15);
 
     const typeChart = [
-        { name: 'PREV', value: preventivos, color: '#1d6fa5' },
-        { name: 'CORR', value: correctivos, color: '#ef4444' },
-        { name: 'PRED', value: predictivos, color: '#7c3aed' },
-        { name: 'INSP', value: orders.filter(o => o.type === 'INSPECCION').length, color: '#64748b' },
+        { label: 'PREV', value: preventivos, color: '#1d6fa5' },
+        { label: 'CORR', value: correctivos, color: '#ef4444' },
+        { label: 'PRED', value: predictivos, color: '#7c3aed' },
+        { label: 'INSP', value: orders.filter(o => o.type === 'INSPECCION').length, color: '#64748b' },
     ];
 
-    // RAMS data for radar / table
+    // RAMS data for table
     const ramsData = rams || [];
+
+    // Component life progress bars — pulled from criticalAI or top orders with remainingLifePct
+    const compLifeOrders = orders
+        .filter(o => o.remainingLifePct != null)
+        .sort((a, b) => a.remainingLifePct - b.remainingLifePct)
+        .slice(0, 5);
 
     return (
         <div className="h-full overflow-y-auto space-y-3 pr-1">
@@ -113,23 +119,32 @@ export default function MaintenanceView({ orders, rams, kpis }) {
                     {/* OT type distribution */}
                     <div className="occ-card p-3">
                         <p className="mono-label mb-2">Tipo de OTs</p>
-                        <ResponsiveContainer width="100%" height={120}>
-                            <BarChart data={typeChart} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                                <XAxis dataKey="name" tick={{ fill: '#475569', fontSize: 9, fontFamily: 'monospace' }} />
-                                <YAxis tick={{ fill: '#475569', fontSize: 9, fontFamily: 'monospace' }} />
-                                <Tooltip
-                                    contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }}
-                                    itemStyle={{ color: '#94a3b8' }}
-                                />
-                                <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-                                    {typeChart.map((entry, i) => (
-                                        <Cell key={i} fill={entry.color} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
+                        <SvgBarChart
+                            data={typeChart}
+                            height={120}
+                            showValues
+                            formatValue={v => Math.round(v).toString()}
+                        />
                     </div>
+
+                    {/* Component life progress bars */}
+                    {compLifeOrders.length > 0 && (
+                        <div className="occ-card p-3">
+                            <p className="mono-label mb-3">Vida útil componentes</p>
+                            <div className="space-y-3">
+                                {compLifeOrders.map(o => (
+                                    <ProgressBar
+                                        key={o.id}
+                                        label={o.component ?? o.id}
+                                        value={o.remainingLifePct}
+                                        max={100}
+                                        color={o.remainingLifePct <= 15 ? '#ef4444' : o.remainingLifePct <= 40 ? '#f59e0b' : '#1d6fa5'}
+                                        showPct
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* RAMS table per asset */}
                     <div className="occ-card p-3 flex-1">

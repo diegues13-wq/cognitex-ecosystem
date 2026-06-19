@@ -1,5 +1,5 @@
 import { Activity, Clock, Route } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
+import { SvgAreaChart, SvgBarChart } from '../components/SvgCharts.jsx';
 import PropTypes from 'prop-types';
 import { ROUTES } from '../utils/dataGenerator.js';
 
@@ -13,10 +13,10 @@ export default function OperationsView({ history, kpis }) {
     }));
 
     const delayDist = [
-        { range: '0-3 min', count: 45, color: '#22c55e' },
-        { range: '4-10 min', count: 18, color: '#f59e0b' },
-        { range: '11-20 min', count: 8, color: '#f97316' },
-        { range: '> 20 min', count: 3, color: '#ef4444' },
+        { label: '0-3 min', value: 45, color: '#22c55e' },
+        { label: '4-10 min', value: 18, color: '#f59e0b' },
+        { label: '11-20 min', value: 8, color: '#f97316' },
+        { label: '> 20 min', value: 3, color: '#ef4444' },
     ];
 
     return (
@@ -43,22 +43,18 @@ export default function OperationsView({ history, kpis }) {
                         <Activity size={12} className="text-rail-glow" />
                         <span className="mono-label">Tendencia OTP — 30 días</span>
                     </div>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <AreaChart data={history} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="gradOTP" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#1d6fa5" stopOpacity={0.35} />
-                                    <stop offset="95%" stopColor="#1d6fa5" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                            <XAxis dataKey="displayDate" tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} interval={4} />
-                            <YAxis tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} domain={[60, 100]} />
-                            <Tooltip contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }} itemStyle={{ color: '#38a8e0' }} labelStyle={{ color: '#94a3b8' }} />
-                            <ReferenceLine y={85} stroke="#f59e0b" strokeDasharray="4 3" strokeOpacity={0.5} label={{ value: 'Objetivo 85%', fill: '#f59e0b', fontSize: 8, fontFamily: 'monospace' }} />
-                            <Area type="monotone" dataKey="otp" stroke="#1d6fa5" strokeWidth={2} fill="url(#gradOTP)" name="OTP %" dot={false} />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    <SvgAreaChart
+                        data={history}
+                        xKey="displayDate"
+                        yKey="otp"
+                        color="#1d6fa5"
+                        height={180}
+                        yMin={60}
+                        yMax={100}
+                        formatY={v => `${v}%`}
+                        refLine={85}
+                        refLabel="85%"
+                    />
                 </div>
 
                 {/* Delay distribution */}
@@ -67,19 +63,12 @@ export default function OperationsView({ history, kpis }) {
                         <Clock size={12} className="text-amber-400" />
                         <span className="mono-label">Distribución de Retrasos (hoy)</span>
                     </div>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={delayDist} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                            <XAxis dataKey="range" tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} />
-                            <YAxis tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} />
-                            <Tooltip contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }} itemStyle={{ color: '#94a3b8' }} />
-                            <Bar dataKey="count" name="Trenes" radius={[3, 3, 0, 0]}>
-                                {delayDist.map((d, i) => (
-                                    <Cell key={i} fill={d.color} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <SvgBarChart
+                        data={delayDist}
+                        height={180}
+                        showValues
+                        formatValue={v => Math.round(v).toString()}
+                    />
                 </div>
 
                 {/* Km realized trend */}
@@ -88,21 +77,13 @@ export default function OperationsView({ history, kpis }) {
                         <Route size={12} className="text-green-400" />
                         <span className="mono-label">Km Recorridos — 30 días</span>
                     </div>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <AreaChart data={history} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="gradKm" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
-                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                            <XAxis dataKey="displayDate" tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} interval={4} />
-                            <YAxis tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} />
-                            <Tooltip contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }} itemStyle={{ color: '#10b981' }} labelStyle={{ color: '#94a3b8' }} />
-                            <Area type="monotone" dataKey="kmTraveled" stroke="#10b981" strokeWidth={2} fill="url(#gradKm)" name="Km" dot={false} />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    <SvgAreaChart
+                        data={history}
+                        xKey="displayDate"
+                        yKey="kmTraveled"
+                        color="#10b981"
+                        height={180}
+                    />
                 </div>
 
                 {/* Route performance table */}

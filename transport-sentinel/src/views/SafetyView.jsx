@@ -1,5 +1,5 @@
-import { ShieldAlert, AlertTriangle, CheckCircle, Clock, Activity } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { ShieldAlert, AlertTriangle, CheckCircle } from 'lucide-react';
+import { SvgBarChart, SvgDonut } from '../components/SvgCharts.jsx';
 import PropTypes from 'prop-types';
 
 const SEVERITY_CONFIG = {
@@ -12,11 +12,18 @@ const STATUS_ICONS = { ABIERTO: AlertTriangle, CERRADO: CheckCircle };
 const STATUS_COLORS = { ABIERTO: 'text-red-400', CERRADO: 'text-green-400' };
 
 const typeChartData = [
-    { name: 'Retraso Mayor', value: 2, color: '#f59e0b' },
-    { name: 'Avería',        value: 2, color: '#ef4444' },
-    { name: 'Near-Miss',     value: 1, color: '#f97316' },
-    { name: 'Retraso Menor', value: 1, color: '#64748b' },
+    { label: 'Retraso Mayor', value: 2, color: '#f59e0b' },
+    { label: 'Avería',        value: 2, color: '#ef4444' },
+    { label: 'Near-Miss',     value: 1, color: '#f97316' },
+    { label: 'Retraso Menor', value: 1, color: '#64748b' },
 ];
+
+// Weekly incident bars (last 10 weeks, seeded)
+const weeklyIncidents = Array.from({ length: 10 }, (_, i) => ({
+    label: `S${i + 1}`,
+    value: [1, 0, 2, 1, 0, 1, 0, 2, 0, 1][i] ?? 0,
+    color: '#ef4444',
+}));
 
 export default function SafetyView({ incidents, kpis }) {
     const open   = incidents.filter(i => i.status === 'ABIERTO');
@@ -28,6 +35,15 @@ export default function SafetyView({ incidents, kpis }) {
         { name: 'Señaliz.',  mtbf: 4200, mttr: 1.5, sil: 'SIL-2' },
         { name: 'Tracción',  mtbf: 2900, mttr: 6.1, sil: 'SIL-1' },
     ];
+
+    // Donut segments from typeChartData
+    const donutSegments = typeChartData.map(d => ({
+        value: d.value,
+        color: d.color,
+        label: d.label,
+    }));
+
+    const totalIncidents = typeChartData.reduce((s, d) => s + d.value, 0);
 
     return (
         <div className="h-full overflow-y-auto space-y-3 pr-1">
@@ -91,28 +107,14 @@ export default function SafetyView({ incidents, kpis }) {
 
                 {/* Right: charts */}
                 <div className="flex flex-col gap-3">
-                    {/* Type distribution pie */}
+                    {/* Type distribution donut */}
                     <div className="occ-card p-3">
                         <p className="mono-label mb-2">Incidentes por Tipo</p>
-                        <div className="flex items-center gap-3">
-                            <ResponsiveContainer width={120} height={120}>
-                                <PieChart>
-                                    <Pie data={typeChartData} cx="50%" cy="50%" innerRadius={30} outerRadius={52} paddingAngle={2} dataKey="value">
-                                        {typeChartData.map((entry, i) => (
-                                            <Cell key={i} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="space-y-1.5">
-                                {typeChartData.map(d => (
-                                    <div key={d.name} className="flex items-center gap-2 text-[9px] font-mono">
-                                        <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: d.color }} />
-                                        <span className="text-slate-400">{d.name}: <span className="text-slate-200 font-bold">{d.value}</span></span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <SvgDonut
+                            segments={donutSegments}
+                            size={120}
+                            centerText={String(totalIncidents)}
+                        />
                     </div>
 
                     {/* RAMS by subsystem */}
@@ -146,18 +148,16 @@ export default function SafetyView({ incidents, kpis }) {
                         </div>
                     </div>
 
-                    {/* Safety trend (last 7 days) */}
+                    {/* Safety weekly bar chart */}
                     <div className="occ-card p-3">
                         <p className="mono-label mb-2">Incidentes Últimos 30 días</p>
-                        <ResponsiveContainer width="100%" height={100}>
-                            <BarChart data={Array.from({ length: 10 }, (_, i) => ({ week: `S${i + 1}`, incidents: Math.round(Math.random() * 2) }))} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#0d2040" />
-                                <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} />
-                                <YAxis tick={{ fill: '#475569', fontSize: 8, fontFamily: 'monospace' }} />
-                                <Tooltip contentStyle={{ background: '#081526', border: '1px solid #163060', borderRadius: 8, fontSize: 10, fontFamily: 'monospace' }} itemStyle={{ color: '#ef4444' }} labelStyle={{ color: '#94a3b8' }} />
-                                <Bar dataKey="incidents" fill="#ef4444" opacity={0.7} name="Incidentes" radius={[2, 2, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        <SvgBarChart
+                            data={weeklyIncidents}
+                            height={100}
+                            color="#ef4444"
+                            showValues={false}
+                            formatValue={v => Math.round(v).toString()}
+                        />
                     </div>
                 </div>
             </div>
