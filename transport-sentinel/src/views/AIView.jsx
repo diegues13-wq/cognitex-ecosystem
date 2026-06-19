@@ -92,7 +92,15 @@ async function sendToGemini(prompt, kpis, snapshot, onChunk, onDone) {
         }
         onDone();
     } catch (err) {
-        onChunk(`Error al conectar con Gemini: ${err.message}`);
+        const msg = err.message || '';
+        let friendly = `Error Gemini: ${msg}`;
+        if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('prepayment'))
+            friendly = '**Créditos de Gemini API agotados.**\n\nActiva billing en [aistudio.google.com](https://aistudio.google.com) → Billing, o crea un nuevo proyecto con API key válida y actualiza el secret `VITE_GEMINI_API_KEY`.';
+        else if (msg.includes('403') || msg.includes('API_KEY_INVALID') || msg.includes('permission'))
+            friendly = '**API key de Gemini inválida o sin permisos.**\n\nVerifica el secret `VITE_GEMINI_API_KEY` en GitHub → Settings → Secrets.';
+        else if (msg.includes('404') || msg.includes('not found'))
+            friendly = `**Modelo no disponible:** ${GEMINI_MODEL}.\n\nRevisa que tu API key tenga acceso a este modelo.`;
+        onChunk(friendly);
         onDone();
     }
 }
