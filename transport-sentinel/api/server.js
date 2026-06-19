@@ -23,6 +23,7 @@ import express from 'express';
 import cors    from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { GoogleGenAI } from '@google/genai';
 
 import { initFirestore, isAvailable, getDB } from './db/firestore.js';
 import { seedDatabase }                       from './db/seed.js';
@@ -141,6 +142,53 @@ app.get('/api/rams', async (_req, res) => {
 app.get('/api/schedule', (req, res) =>
     res.json(generateTrainSchedule(req.query.route || 'RT-001'))
 );
+
+// ─── Gemini AI chat (Vertex AI — ADC, no API key required) ──────────────────
+const AI_MODEL    = 'gemini-2.5-flash';
+const GCP_PROJECT = process.env.GOOGLE_CLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID;
+const GCP_REGION  = process.env.GEMINI_REGION || 'us-central1';
+
+let geminiClient = null;
+function getGemini() {
+    if (!geminiClient) {
+        geminiClient = new GoogleGenAI({
+            vertexai: true,
+            project:  GCP_PROJECT,
+            location: GCP_REGION,
+        });
+    }
+    return geminiClient;
+}
+
+app.post('/api/ai/chat', async (req, res) => {
+    const { prompt, systemInstruction } = req.body || {};
+    if (!prompt) return res.status(400).json({ error: 'prompt required' });
+    if (!GCP_PROJECT) return res.status(503).json({ error: 'GOOGLE_CLOUD_PROJECT not set' });
+
+    res.setHeader('Content-Type',  'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection',    'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    try {
+        const ai     = getGemini();
+        const stream = await ai.models.generateContentStream({
+            model:    AI_MODEL,
+            contents: prompt,
+            config:   systemInstruction ? { systemInstruction } : {},
+        });
+        for await (const chunk of stream) {
+            const text = chunk.text;
+            if (text) res.write(`data: ${JSON.stringify({ text })}\n\n`);
+        }
+        res.write('data: [DONE]\n\n');
+    } catch (err) {
+        console.error('[ai/chat] Gemini error:', err.message);
+        res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+    }
+    res.end();
+});
 
 // ─── Admin: force re-seed (requires X-Admin-Key header) ──────────────────────
 app.post('/api/admin/reseed', async (req, res) => {

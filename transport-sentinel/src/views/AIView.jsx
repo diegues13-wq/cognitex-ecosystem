@@ -2,9 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Brain, Send, Train, AlertTriangle, Zap, TrendingUp, Bot, User, Lightbulb, Sparkles } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-const GEMINI_KEY  = import.meta.env.VITE_GEMINI_API_KEY || '';
 const GEMINI_MODEL = 'gemini-2.5-flash';
-const HAS_AI = !!GEMINI_KEY;
+const HAS_AI = true; // always enabled — Gemini runs server-side via Vertex AI
 
 const SUGGESTIONS = [
     { label: 'Estado de la flota',    query: '¿Cómo está la eficiencia general de la flota?' },
@@ -66,40 +65,53 @@ function buildContext(kpis, snapshot) {
     ].join('\n');
 }
 
-// ── Gemini streaming send ─────────────────────────────────────────────────────
+// ── Gemini streaming via server-side Vertex AI (SSE) ─────────────────────────
 async function sendToGemini(prompt, kpis, snapshot, onChunk, onDone) {
-    if (!HAS_AI) {
-        // Fallback mock
-        const mock = `**Modo simulación activo** (sin API key de Gemini)\n\nSu consulta: *${prompt}*\n\nOTP actual: **${kpis.otp ?? 87}%**. Flota: ${snapshot.length} trenes, ${snapshot.filter(t => t.status === 'EN_SERVICIO').length} en servicio.`;
-        onChunk(mock);
-        onDone();
-        return;
-    }
     try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai     = new GoogleGenAI({ apiKey: GEMINI_KEY });
-        const stream = await ai.models.generateContentStream({
-            model:    GEMINI_MODEL,
-            contents: prompt,
-            config: {
+        const res = await fetch('/api/ai/chat', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+                prompt,
                 systemInstruction: `Eres Transport-Sentinel AI, asistente experto en operaciones y mantenimiento ferroviario según normas UIC, RAMS/EN 50126 e IEC 62290. ${buildContext(kpis, snapshot)}`,
-            },
+            }),
         });
-        let buffer = '';
-        for await (const chunk of stream) {
-            buffer += chunk.text;
-            onChunk(buffer);
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: res.statusText }));
+            throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer    = '';
+        let textAcc   = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); // keep incomplete last line
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
+                const payload = line.slice(6).trim();
+                if (payload === '[DONE]') { onDone(); return; }
+                try {
+                    const { text, error } = JSON.parse(payload);
+                    if (error) throw new Error(error);
+                    if (text) { textAcc += text; onChunk(textAcc); }
+                } catch { /* malformed chunk, skip */ }
+            }
         }
         onDone();
     } catch (err) {
         const msg = err.message || '';
-        let friendly = `Error Gemini: ${msg}`;
-        if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('prepayment'))
-            friendly = '**Créditos de Gemini API agotados.**\n\nActiva billing en [aistudio.google.com](https://aistudio.google.com) → Billing, o crea un nuevo proyecto con API key válida y actualiza el secret `VITE_GEMINI_API_KEY`.';
-        else if (msg.includes('403') || msg.includes('API_KEY_INVALID') || msg.includes('permission'))
-            friendly = '**API key de Gemini inválida o sin permisos.**\n\nVerifica el secret `VITE_GEMINI_API_KEY` en GitHub → Settings → Secrets.';
-        else if (msg.includes('404') || msg.includes('not found'))
-            friendly = `**Modelo no disponible:** ${GEMINI_MODEL}.\n\nRevisa que tu API key tenga acceso a este modelo.`;
+        let friendly = `**Error conectando con IA:** ${msg}`;
+        if (msg.includes('403') || msg.includes('permission') || msg.includes('PERMISSION_DENIED'))
+            friendly = '**Permiso denegado en Vertex AI.**\n\nEl service account de Cloud Run necesita el rol `roles/aiplatform.user`. Ejecuta en Cloud Shell:\n\n```\ngcloud projects add-iam-policy-binding cognitex-485919 \\\n  --member="serviceAccount:530498544659-compute@developer.gserviceaccount.com" \\\n  --role="roles/aiplatform.user"\n```';
+        else if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED'))
+            friendly = '**Cuota de Vertex AI agotada.** Revisa los límites en Google Cloud Console → Vertex AI → Quotas.';
         onChunk(friendly);
         onDone();
     }
@@ -136,7 +148,7 @@ function MessageBubble({ msg }) {
 export default function AIView({ kpis = {}, snapshot = [] }) {
     const [messages, setMessages] = useState([{
         role: 'assistant',
-        content: `¡Hola! Soy **Transport-Sentinel AI**${HAS_AI ? ` — impulsado por **${GEMINI_MODEL}**` : ' (modo simulación)'}.\n\nEstoy conectado a los datos de la flota ferroviaria en tiempo real. Puedo analizar puntualidad OTP, consumo energético, mantenimiento predictivo RAMS, seguridad y operaciones de la red de las Américas.\n\n¿En qué puedo ayudarte hoy?`,
+        content: `¡Hola! Soy **Transport-Sentinel AI** — impulsado por **${GEMINI_MODEL}** vía Google Cloud Vertex AI.\n\nEstoy conectado a los datos de la flota ferroviaria en tiempo real. Puedo analizar puntualidad OTP, consumo energético, mantenimiento predictivo RAMS, seguridad y operaciones de la red de las Américas.\n\n¿En qué puedo ayudarte hoy?`,
     }]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -183,7 +195,7 @@ export default function AIView({ kpis = {}, snapshot = [] }) {
                         <div className="flex items-center gap-1.5">
                             <span className="status-dot-active" />
                             <span className="text-[9px] font-mono text-green-400">
-                                {HAS_AI ? `${GEMINI_MODEL} — Conectado` : 'Modo Simulación Activo'}
+                                {GEMINI_MODEL} · Vertex AI
                             </span>
                             {HAS_AI && <Sparkles size={9} className="text-violet-400"/>}
                         </div>

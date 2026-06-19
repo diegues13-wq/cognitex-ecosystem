@@ -8,6 +8,7 @@
     "dev": "PORT=3001 node --watch server.js"
   },
   "dependencies": {
+    "@google/genai": "^2.9.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "firebase-admin": "^12.7.0"
