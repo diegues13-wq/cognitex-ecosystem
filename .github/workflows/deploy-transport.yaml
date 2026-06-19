@@ -50,18 +50,6 @@ jobs:
           docker push $IMAGE_NAME
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
-      # Grant the Cloud Run default service account Firestore access
-      # (idempotent — safe to run every deploy)
-      - name: Grant Firestore IAM to Cloud Run SA
-        run: |
-          PROJECT_NUM=$(gcloud projects describe ${{ env.PROJECT_ID }} --format='value(projectNumber)')
-          CR_SA="${PROJECT_NUM}-compute@developer.gserviceaccount.com"
-          gcloud projects add-iam-policy-binding ${{ env.PROJECT_ID }} \
-            --member="serviceAccount:${CR_SA}" \
-            --role="roles/datastore.user" \
-            --condition=None \
-            --quiet || true
-
       - uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ env.SERVICE }}
