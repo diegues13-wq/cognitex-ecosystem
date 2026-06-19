@@ -200,24 +200,10 @@ export const ROUTES = [
     ]},
 ];
 
-// Deterministic pseudo-random — MurmurHash3 finalizer, pure integer arithmetic
-// Math.sin removed: V8 TurboFan called libm sin() which used AVX2 on Linux → SIGILL
-function seededRandom(seed) {
-    let h = 0x811c9dc5 | 0;
-    for (let i = 0; i < seed.length; i++) {
-        h = Math.imul(h ^ seed.charCodeAt(i), 0x9e3779b9);
-    }
-    h ^= h >>> 16;
-    h = Math.imul(h, 0x85ebca6b);
-    h ^= h >>> 13;
-    h = Math.imul(h, 0xc2b2ae35);
-    h ^= h >>> 16;
-    return (h >>> 0) / 4294967296;
-}
-
-function seededRandRange(seed, min, max) {
-    return min + seededRandom(seed) * (max - min);
-}
+// Math.random() is implemented internally in V8 using xorshift128+ with SSE2
+// (no libm, no AVX2). All previous seededRandom approaches delegated to libm
+// or used Math.imul loops that TurboFan vectorized → SIGILL on pre-Haswell CPUs.
+function rnd(min, max) { return min + Math.random() * (max - min); }
 
 // ─── FLEET SNAPSHOT (real-time state) ────────────────────────────────────────
 
@@ -226,26 +212,19 @@ export function generateFleetSnapshot(fleetType = 'todos') {
     const filtered = fleetType === 'todos' ? TRAINS : TRAINS.filter(t => t.type === fleetType);
 
     return filtered.map(train => {
-        const seed = `${train.id}-${now.toDateString()}`;
-        const statusRoll = seededRandom(seed + 'status');
-        const status = statusRoll < 0.75 ? 'EN_SERVICIO'
-            : statusRoll < 0.90 ? 'EN_MANTENIMIENTO'
-            : 'STANDBY';
+        const r = Math.random();
+        const status = r < 0.78 ? 'EN_SERVICIO' : r < 0.92 ? 'EN_MANTENIMIENTO' : 'STANDBY';
 
         const isRunning = status === 'EN_SERVICIO';
-        const delayMin = isRunning ? Math.round(seededRandRange(seed + 'delay', -2, 18)) : 0;
-        const speed = isRunning ? Math.round(seededRandRange(seed + 'speed', 60, train.maxSpeedKmh * 0.9)) : 0;
-        const occupancy = train.type === 'pasajeros'
-            ? Math.round(seededRandRange(seed + 'occ', 45, 92))
-            : null;
-        const tonsLoaded = train.type === 'carga'
-            ? Math.round(seededRandRange(seed + 'tons', train.capacity * 0.5, train.capacity * 0.95))
-            : null;
+        // 80% of trains on time (OTP-realistic)
+        const delayMin = isRunning ? (Math.random() < 0.8 ? Math.round(rnd(-1, 3)) : Math.round(rnd(4, 18))) : 0;
+        const speed = isRunning ? Math.round(rnd(60, train.maxSpeedKmh * 0.9)) : 0;
+        const occupancy = train.type === 'pasajeros' ? Math.round(rnd(45, 92)) : null;
+        const tonsLoaded = train.type === 'carga' ? Math.round(rnd(train.capacity * 0.5, train.capacity * 0.95)) : null;
 
-        // Fuel/energy for current trip
-        const tripKm = Math.round(seededRandRange(seed + 'km', 20, 150));
-        const fuelL = train.traction === 'diesel' ? parseFloat((tripKm * 2.5 + seededRandRange(seed + 'fl', -5, 15)).toFixed(1)) : 0;
-        const kwhConsumed = train.traction === 'electrico' ? parseFloat((tripKm * (6.5 + seededRandRange(seed + 'kwh', -1, 2))).toFixed(1)) : 0;
+        const tripKm = Math.round(rnd(20, 150));
+        const fuelL = train.traction === 'diesel' ? Math.round(tripKm * 2.5 + rnd(-5, 15)) : 0;
+        const kwhConsumed = train.traction === 'electrico' ? Math.round(tripKm * rnd(5.5, 8.5)) : 0;
 
         // Jitter position slightly for live movement feel
         const jitter = 0.02;
@@ -344,20 +323,20 @@ export function generateHistoricalData(days = 30, trainId = 'USA-001') {
         const seed = `${trainId}-${format(date, 'yyyy-MM-dd')}`;
         const dayOfWeek = date.getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        const isRunningDay = seededRandom(seed + 'run') > 0.07;
+        const isRunningDay = Math.random() > 0.07;
 
         const tripsToday = isRunningDay ? (isWeekend ? 3 : 5) : 0;
         const route = ROUTES.find(r => r.id === train.route) || ROUTES[0];
-        const kmDay = tripsToday * route.distanceKm * (0.9 + seededRandom(seed + 'km') * 0.2);
+        const kmDay = tripsToday * route.distanceKm * (0.9 + Math.random() * 0.2);
 
-        const otpDay = isRunningDay ? Math.round(seededRandRange(seed + 'otp', 72, 98)) : 100;
-        const delayAvg = isRunningDay ? parseFloat(seededRandRange(seed + 'delay', 0.5, 8.5).toFixed(1)) : 0;
+        const otpDay = isRunningDay ? Math.round(rnd(72, 98)) : 100;
+        const delayAvg = isRunningDay ? parseFloat(rnd(0.5, 8.5).toFixed(1)) : 0;
 
         const occupancyDay = train.type === 'pasajeros'
-            ? Math.round(seededRandRange(seed + 'occ', isWeekend ? 55 : 65, 95))
+            ? Math.round(rnd(isWeekend ? 55 : 65, 95))
             : null;
         const tonsDay = train.type === 'carga'
-            ? Math.round(seededRandRange(seed + 'tons', 1800, train.capacity * 0.95))
+            ? Math.round(rnd(1800, train.capacity * 0.95))
             : null;
 
         const fuelDay = train.traction === 'diesel' ? parseFloat((kmDay * 2.5).toFixed(1)) : 0;
@@ -365,7 +344,7 @@ export function generateHistoricalData(days = 30, trainId = 'USA-001') {
         const co2Day = parseFloat((fuelDay * 2.68).toFixed(1));
         const regenDay = train.traction === 'electrico' ? parseFloat((kwhDay * 0.12).toFixed(1)) : 0;
 
-        const incidentDay = seededRandom(seed + 'inc') < 0.08 ? 1 : 0;
+        const incidentDay = Math.random() < 0.08 ? 1 : 0;
 
         data.push({
             date: format(date, 'yyyy-MM-dd'),
@@ -381,8 +360,8 @@ export function generateHistoricalData(days = 30, trainId = 'USA-001') {
             kwhConsumed: kwhDay,
             co2Kg: co2Day,
             regenKwh: regenDay,
-            incidentCount: incidentDay,
-            maintenanceFlag: seededRandom(seed + 'maint') < 0.05,
+            incidentCount: Math.random() < 0.08 ? 1 : 0,
+            maintenanceFlag: Math.random() < 0.05,
         });
     }
     return data;
@@ -499,8 +478,8 @@ export function generateEnergyData(days = 30) {
         const date = subDays(now, days - 1 - i);
         const seed = `energy-${format(date, 'yyyy-MM-dd')}`;
         const isWeekend = [0, 6].includes(date.getDay());
-        const kwhElec = Math.round(seededRandRange(seed + 'kwh', isWeekend ? 8000 : 11000, isWeekend ? 13000 : 17000));
-        const fuelDiesel = Math.round(seededRandRange(seed + 'fuel', isWeekend ? 1200 : 1800, isWeekend ? 2000 : 2800));
+        const kwhElec = Math.round(rnd(isWeekend ? 8000 : 11000, isWeekend ? 13000 : 17000));
+        const fuelDiesel = Math.round(rnd(isWeekend ? 1200 : 1800, isWeekend ? 2000 : 2800));
         return {
             date: format(date, 'yyyy-MM-dd'),
             displayDate: format(date, 'dd/MM'),
@@ -524,8 +503,8 @@ export function generateCommercialData(type = 'pasajeros', days = 30) {
         const isWeekend = [0, 6].includes(date.getDay());
 
         if (type === 'pasajeros') {
-            const pax = Math.round(seededRandRange(seed, isWeekend ? 3200 : 4800, isWeekend ? 5500 : 7200));
-            const factorCarga = Math.round(seededRandRange(seed + 'fc', 60, 92));
+            const pax = Math.round(rnd(isWeekend ? 3200 : 4800, isWeekend ? 5500 : 7200));
+            const factorCarga = Math.round(rnd(60, 92));
             const ingresoPax = Math.round(pax * 1.5);
             return {
                 date: format(date, 'yyyy-MM-dd'),
@@ -533,12 +512,12 @@ export function generateCommercialData(type = 'pasajeros', days = 30) {
                 pasajeros: pax,
                 factorCarga,
                 ingresoUSD: ingresoPax,
-                costoOperUSD: Math.round(ingresoPax * seededRandRange(seed + 'cost', 0.7, 0.9)),
+                costoOperUSD: Math.round(ingresoPax * rnd(0.7, 0.9)),
                 paxKm: Math.round(pax * 85),
             };
         } else {
-            const tons = Math.round(seededRandRange(seed, 2800, 5200));
-            const tonKm = Math.round(tons * seededRandRange(seed + 'tkm', 80, 150));
+            const tons = Math.round(rnd(2800, 5200));
+            const tonKm = Math.round(tons * rnd(80, 150));
             const ingreso = Math.round(tonKm * 0.04);
             return {
                 date: format(date, 'yyyy-MM-dd'),
@@ -546,9 +525,9 @@ export function generateCommercialData(type = 'pasajeros', days = 30) {
                 toneladas: tons,
                 tonKm,
                 ingresoUSD: ingreso,
-                costoOperUSD: Math.round(ingreso * seededRandRange(seed + 'cost', 0.65, 0.82)),
-                entregasATiempo: Math.round(seededRandRange(seed + 'eta', 82, 97)),
-                vagonVacioPct: Math.round(seededRandRange(seed + 'vv', 8, 22)),
+                costoOperUSD: Math.round(ingreso * rnd(0.65, 0.82)),
+                entregasATiempo: Math.round(rnd(82, 97)),
+                vagonVacioPct: Math.round(rnd(8, 22)),
             };
         }
     });
@@ -601,8 +580,8 @@ export function generateTrainSchedule(routeId = 'RT-001') {
 
 export function generateRAMSMetrics() {
     return TRAINS.map(train => {
-        const mtbf = Math.round(1800 + seededRandom(train.id + 'mtbf') * 2000);
-        const mttr = parseFloat((2 + seededRandom(train.id + 'mttr') * 4).toFixed(1));
+        const mtbf = Math.round(rnd(1800, 3800));
+        const mttr = parseFloat(rnd(2, 6).toFixed(1));
         const availability = parseFloat(((mtbf / (mtbf + mttr)) * 100).toFixed(1));
         const failureRate = parseFloat((1 / mtbf * 1000).toFixed(3));
         const healthScore = Math.round(availability * 0.5 + (train.odometer < train.nextMaintKm * 0.9 ? 40 : 20) + Math.random() * 10);
@@ -615,7 +594,7 @@ export function generateRAMSMetrics() {
             availability,
             failureRate,
             healthScore: Math.min(100, healthScore),
-            lastFailureDate: format(subDays(new Date(), Math.round(seededRandom(train.id + 'lf') * 60 + 5)), 'yyyy-MM-dd'),
+            lastFailureDate: format(subDays(new Date(), Math.round(rnd(5, 65))), 'yyyy-MM-dd'),
             sil: train.type === 'pasajeros' ? 'SIL-2' : 'SIL-1',
         };
     });
