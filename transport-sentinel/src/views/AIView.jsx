@@ -76,21 +76,23 @@ async function sendToGemini(prompt, kpis, snapshot, onChunk, onDone) {
         return;
     }
     try {
-        const { GoogleGenerativeAI } = await import('@google/generative-ai');
-        const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-        const model = genAI.getGenerativeModel({
-            model: GEMINI_MODEL,
-            systemInstruction: `Eres Transport-Sentinel AI, asistente experto en operaciones y mantenimiento ferroviario según normas UIC, RAMS/EN 50126 e IEC 62290. ${buildContext(kpis, snapshot)}`,
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai     = new GoogleGenAI({ apiKey: GEMINI_KEY });
+        const stream = await ai.models.generateContentStream({
+            model:    GEMINI_MODEL,
+            contents: prompt,
+            config: {
+                systemInstruction: `Eres Transport-Sentinel AI, asistente experto en operaciones y mantenimiento ferroviario según normas UIC, RAMS/EN 50126 e IEC 62290. ${buildContext(kpis, snapshot)}`,
+            },
         });
-        const result = await model.generateContentStream(prompt);
         let buffer = '';
-        for await (const chunk of result.stream) {
-            buffer += chunk.text();
+        for await (const chunk of stream) {
+            buffer += chunk.text;
             onChunk(buffer);
         }
         onDone();
     } catch (err) {
-        onChunk(`Error al conectar con Gemini: ${err.message}. Verifica que VITE_GEMINI_API_KEY sea válida y tenga acceso a Gemini API.`);
+        onChunk(`Error al conectar con Gemini: ${err.message}`);
         onDone();
     }
 }
