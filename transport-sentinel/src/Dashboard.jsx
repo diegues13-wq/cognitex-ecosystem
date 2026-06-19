@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import TopBar from './components/TopBar.jsx';
 import AlertTicker from './components/AlertTicker.jsx';
-import CCOView from './views/CCOView.jsx';
-import FleetView from './views/FleetView.jsx';
-import MaintenanceView from './views/MaintenanceView.jsx';
-import OperationsView from './views/OperationsView.jsx';
-import CommercialView from './views/CommercialView.jsx';
-import EnergyView from './views/EnergyView.jsx';
-import SafetyView from './views/SafetyView.jsx';
-import AIView from './views/AIView.jsx';
+
+const CCOView         = lazy(() => import('./views/CCOView.jsx'));
+const FleetView       = lazy(() => import('./views/FleetView.jsx'));
+const MaintenanceView = lazy(() => import('./views/MaintenanceView.jsx'));
+const OperationsView  = lazy(() => import('./views/OperationsView.jsx'));
+const CommercialView  = lazy(() => import('./views/CommercialView.jsx'));
+const EnergyView      = lazy(() => import('./views/EnergyView.jsx'));
+const SafetyView      = lazy(() => import('./views/SafetyView.jsx'));
+const AIView          = lazy(() => import('./views/AIView.jsx'));
 import {
     generateFleetSnapshot,
     generateFleetKPIs,
@@ -65,8 +66,11 @@ export default function Dashboard({ user, onLogout }) {
         setRamsMetrics(generateRAMSMetrics());
     }, [fleetType]);
 
-    // Initial load
-    useEffect(() => { loadData(); }, [loadData]);
+    // Defer initial load to after first paint to avoid blocking Chrome renderer
+    useEffect(() => {
+        const t = setTimeout(loadData, 80);
+        return () => clearTimeout(t);
+    }, [loadData]);
 
     // Live refresh every 5s
     useEffect(() => {
@@ -120,7 +124,16 @@ export default function Dashboard({ user, onLogout }) {
 
                     {/* View content */}
                     <div className="flex-1 overflow-hidden min-h-0 p-3">
-                        <ActiveView {...viewProps} />
+                        <Suspense fallback={
+                            <div className="h-full flex items-center justify-center">
+                                <div className="text-center space-y-3">
+                                    <div className="w-8 h-8 border-2 border-rail/40 border-t-rail rounded-full animate-spin mx-auto" />
+                                    <p className="text-[11px] font-mono text-slate-500">Cargando módulo…</p>
+                                </div>
+                            </div>
+                        }>
+                            <ActiveView {...viewProps} />
+                        </Suspense>
                     </div>
                 </div>
             </div>
