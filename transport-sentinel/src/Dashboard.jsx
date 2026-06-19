@@ -1,10 +1,35 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense, Component } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import TopBar from './components/TopBar.jsx';
 import AlertTicker from './components/AlertTicker.jsx';
 import ProjectView from './views/ProjectView.jsx';
 import * as API from './services/api.js';
 import PropTypes from 'prop-types';
+
+class ErrorBoundary extends Component {
+    constructor(props) { super(props); this.state = { error: null }; }
+    static getDerivedStateFromError(error) { return { error }; }
+    componentDidCatch(err) { console.error('[Dashboard] View error:', err); }
+    render() {
+        if (this.state.error) {
+            return (
+                <div className="h-full flex flex-col items-center justify-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+                        <span className="text-red-400 text-sm font-bold">!</span>
+                    </div>
+                    <p className="text-[11px] font-mono text-red-400">Error al cargar la vista</p>
+                    <p className="text-[9px] font-mono text-slate-600 max-w-xs text-center">{this.state.error.message}</p>
+                    <button
+                        onClick={() => this.setState({ error: null })}
+                        className="text-[9px] font-mono px-3 py-1.5 rounded-lg bg-occ-800 border border-occ-700 text-slate-400 hover:text-[#38a8e0] hover:border-[#1d4a6a] transition-colors">
+                        Reintentar
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
 
 const CCOView         = lazy(() => import('./views/CCOView.jsx'));
 const FleetView       = lazy(() => import('./views/FleetView.jsx'));
@@ -130,13 +155,17 @@ export default function Dashboard({ user, onLogout }) {
             onTimeModeChange={setTimeMode}
           />
           <div className="flex-1 overflow-hidden min-h-0 p-2.5">
-            {activeView === 'proyecto' && activeProject ? (
-              <ProjectView project={activeProject} onBack={() => handleNavigate('cco')} />
-            ) : ActiveView ? (
-              <Suspense fallback={LOADING}><ActiveView {...viewProps} /></Suspense>
-            ) : (
-              <Suspense fallback={LOADING}><CCOView {...viewProps} /></Suspense>
-            )}
+            <ErrorBoundary key={activeView}>
+              <div className="h-full view-enter">
+                {activeView === 'proyecto' && activeProject ? (
+                  <ProjectView project={activeProject} onBack={() => handleNavigate('cco')} />
+                ) : ActiveView ? (
+                  <Suspense fallback={LOADING}><ActiveView {...viewProps} /></Suspense>
+                ) : (
+                  <Suspense fallback={LOADING}><CCOView {...viewProps} /></Suspense>
+                )}
+              </div>
+            </ErrorBoundary>
           </div>
         </div>
       </div>

@@ -117,6 +117,23 @@ async function sendToGemini(prompt, kpis, snapshot, onChunk, onDone) {
     }
 }
 
+// ── Safe inline markdown renderer (no dangerouslySetInnerHTML) ───────────────
+function InlineMd({ text }) {
+    const parts = [];
+    const re = /\*\*(.*?)\*\*|\*(.*?)\*/g;
+    let last = 0, match, key = 0;
+    while ((match = re.exec(text)) !== null) {
+        if (match.index > last) parts.push(<span key={key++}>{text.slice(last, match.index)}</span>);
+        if (match[1] !== undefined)
+            parts.push(<strong key={key++} className="text-slate-100 font-bold">{match[1]}</strong>);
+        else
+            parts.push(<em key={key++} className="text-slate-300 not-italic opacity-90">{match[2]}</em>);
+        last = match.index + match[0].length;
+    }
+    if (last < text.length) parts.push(<span key={key++}>{text.slice(last)}</span>);
+    return <>{parts}</>;
+}
+
 // ── Message bubble ────────────────────────────────────────────────────────────
 function MessageBubble({ msg }) {
     const isUser = msg.role === 'user';
@@ -130,12 +147,9 @@ function MessageBubble({ msg }) {
                     ? 'bg-rail/10 border border-rail/20 text-slate-200 rounded-tr-none'
                     : 'bg-occ-800/60 border border-occ-700/40 text-slate-300 rounded-tl-none'
             }`}>
-                {msg.content.split('\n').map((line, i) => {
-                    const html = line
-                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-100">$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em class="text-slate-300">$1</em>');
-                    return <p key={i} className="mb-0.5 last:mb-0" dangerouslySetInnerHTML={{ __html: html }} />;
-                })}
+                {msg.content.split('\n').map((line, i) => (
+                    <p key={i} className="mb-0.5 last:mb-0"><InlineMd text={line} /></p>
+                ))}
                 {msg.streaming && (
                     <span className="inline-block w-1.5 h-3 bg-violet-400/70 animate-pulse ml-0.5 align-text-bottom rounded-sm"/>
                 )}

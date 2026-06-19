@@ -143,6 +143,17 @@ app.get('/api/schedule', (req, res) =>
     res.json(generateTrainSchedule(req.query.route || 'RT-001'))
 );
 
+// ─── Simple in-memory rate limiter for AI endpoint ───────────────────────────
+const _aiRateMap = new Map();
+function aiRateOk(ip) {
+    const now = Date.now();
+    const entry = _aiRateMap.get(ip) || { n: 0, reset: now + 60_000 };
+    if (now > entry.reset) { entry.n = 0; entry.reset = now + 60_000; }
+    entry.n++;
+    _aiRateMap.set(ip, entry);
+    return entry.n <= 30; // 30 requests/min per IP
+}
+
 // ─── Gemini AI chat (Vertex AI — ADC, no API key required) ──────────────────
 const AI_MODEL    = 'gemini-2.5-flash';
 const GCP_PROJECT = process.env.GOOGLE_CLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID;
@@ -161,8 +172,16 @@ function getGemini() {
 }
 
 app.post('/api/ai/chat', async (req, res) => {
-    const { prompt, systemInstruction } = req.body || {};
-    if (!prompt) return res.status(400).json({ error: 'prompt required' });
+    const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+    if (!aiRateOk(ip)) return res.status(429).json({ error: 'Demasiadas solicitudes. Espera un momento.' });
+
+    const rawPrompt = req.body?.prompt;
+    const rawSys    = req.body?.systemInstruction;
+    if (!rawPrompt || typeof rawPrompt !== 'string') return res.status(400).json({ error: 'prompt required' });
+
+    const prompt            = rawPrompt.slice(0, 8000);
+    const systemInstruction = rawSys ? String(rawSys).slice(0, 4000) : undefined;
+
     if (!GCP_PROJECT) return res.status(503).json({ error: 'GOOGLE_CLOUD_PROJECT not set' });
 
     res.setHeader('Content-Type',  'text/event-stream');

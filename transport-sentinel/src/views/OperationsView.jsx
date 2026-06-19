@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Activity, Clock, Route } from 'lucide-react';
 import { SvgAreaChart, SvgBarChart } from '../components/SvgCharts.jsx';
 import PropTypes from 'prop-types';
@@ -10,13 +10,18 @@ export default function OperationsView({ history, kpis }) {
         import('../services/api.js').then(({ fetchRoutes }) => fetchRoutes()).then(setRoutes);
     }, []);
 
-    const routePerf = routes.map(route => ({
-        name: route.name,
-        otp: Math.round(75 + Math.random() * 22),
-        retrasoMedio: parseFloat((1 + Math.random() * 10).toFixed(1)),
-        viajes: route.type === 'carga' ? Math.round(2 + Math.random() * 4) : Math.round(10 + Math.random() * 20),
-        tipo: route.type,
-    }));
+    const routePerf = useMemo(() => routes.map(route => {
+        const seed = route.id?.charCodeAt(route.id.length - 1) ?? 0;
+        return {
+            name:         route.name,
+            otp:          75 + (seed * 13 + 7) % 23,
+            retrasoMedio: parseFloat((1 + (seed * 7 + 3) % 10).toFixed(1)),
+            viajes:       route.type === 'carga'
+                ? 2 + (seed * 3) % 5
+                : 10 + (seed * 11) % 21,
+            tipo: route.type,
+        };
+    }), [routes]);
 
     const delayDist = [
         { label: '0-3 min', value: 45, color: '#22c55e' },

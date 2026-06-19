@@ -42,20 +42,26 @@ function loadMapsAPI(apiKey) {
     return _mapsPromise;
 }
 
+function esc(v) {
+    return String(v ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function trainInfoHTML(t) {
     const color    = STATUS_COLOR[t.status] || '#475569';
-    const label    = STATUS_LABEL[t.status] || t.status;
+    const label    = STATUS_LABEL[t.status] || esc(t.status);
     const hasDelay = (t.delayMin ?? 0) > 3;
     return `<div style="font-family:monospace;background:#081526;color:#e2e8f0;padding:10px 12px;border-radius:8px;border:1px solid #1d3a5c;min-width:175px;font-size:11px;">
-        <div style="color:#38a8e0;font-weight:bold;margin-bottom:2px;">${t.id} · ${t.callsign}</div>
-        <div style="margin-bottom:1px;">${t.name}</div>
-        <div style="color:#475569;font-size:10px;margin-bottom:6px;">${t.routeName || '—'}</div>
+        <div style="color:#38a8e0;font-weight:bold;margin-bottom:2px;">${esc(t.id)} · ${esc(t.callsign)}</div>
+        <div style="margin-bottom:1px;">${esc(t.name)}</div>
+        <div style="color:#475569;font-size:10px;margin-bottom:6px;">${esc(t.routeName) || '—'}</div>
         <hr style="border:none;border-top:1px solid #0d2040;margin:0 0 5px"/>
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#64748b;">Estado</span><span style="color:${color};font-weight:bold;">${label}</span></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#64748b;">Velocidad</span><span>${t.speed ?? 0} km/h</span></div>
-        ${t.occupancy  != null ? `<div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#64748b;">Ocupaci\xf3n</span><span>${t.occupancy}%</span></div>` : ''}
-        ${t.tonsLoaded != null ? `<div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#64748b;">Toneladas</span><span>${t.tonsLoaded} t</span></div>` : ''}
-        ${hasDelay ? `<div style="display:flex;justify-content:space-between;"><span style="color:#64748b;">Retraso</span><span style="color:#f59e0b;font-weight:bold;">+${t.delayMin} min</span></div>` : ''}
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#64748b;">Estado</span><span style="color:${esc(color)};font-weight:bold;">${label}</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#64748b;">Velocidad</span><span>${esc(t.speed ?? 0)} km/h</span></div>
+        ${t.occupancy  != null ? `<div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#64748b;">Ocupaci\xf3n</span><span>${esc(t.occupancy)}%</span></div>` : ''}
+        ${t.tonsLoaded != null ? `<div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#64748b;">Toneladas</span><span>${esc(t.tonsLoaded)} t</span></div>` : ''}
+        ${hasDelay ? `<div style="display:flex;justify-content:space-between;"><span style="color:#64748b;">Retraso</span><span style="color:#f59e0b;font-weight:bold;">+${esc(t.delayMin)} min</span></div>` : ''}
     </div>`;
 }
 
