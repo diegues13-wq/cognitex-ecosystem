@@ -3,7 +3,7 @@ import { Brain, Send, Train, AlertTriangle, Zap, TrendingUp, Bot, User, Lightbul
 import PropTypes from 'prop-types';
 
 const GEMINI_KEY  = import.meta.env.VITE_GEMINI_API_KEY || '';
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const HAS_AI = !!GEMINI_KEY;
 
 const SUGGESTIONS = [
