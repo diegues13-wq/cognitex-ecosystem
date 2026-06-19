@@ -1,4 +1,18 @@
-import { subDays, format, addMinutes } from 'date-fns';
+// Native date helpers — no external dependency
+const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+function pad(n) { return String(n).padStart(2, '0'); }
+function subDays(date, n) { return new Date(date.getTime() - n * 86400000); }
+function addMinutes(date, n) { return new Date(date.getTime() + n * 60000); }
+function format(date, pattern) {
+    const d = date.getDate(), mo = date.getMonth(), y = date.getFullYear();
+    const h = date.getHours(), mi = date.getMinutes();
+    if (pattern === 'yyyy-MM-dd')      return `${y}-${pad(mo+1)}-${pad(d)}`;
+    if (pattern === 'dd/MM')           return `${pad(d)}/${pad(mo+1)}`;
+    if (pattern === 'dd MMM')          return `${pad(d)} ${MONTHS_SHORT[mo]}`;
+    if (pattern === 'HH:mm')           return `${pad(h)}:${pad(mi)}`;
+    if (pattern === 'yyyy-MM-dd HH:mm') return `${y}-${pad(mo+1)}-${pad(d)} ${pad(h)}:${pad(mi)}`;
+    return date.toISOString();
+}
 
 // ─── MASTER FLEET DATA ────────────────────────────────────────────────────────
 
