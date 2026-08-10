@@ -57,13 +57,62 @@ export const ENGINES = [
 
 export type EngineId = (typeof ENGINES)[number]['id'];
 
-/** Live Sentinel platforms, linked from the footer. */
+/**
+ * The Sentinel consoles, in the order they appear on the site.
+ *
+ * `url` is null when the platform has nowhere to send a visitor yet. The UI
+ * renders those as "coming soon" rather than a dead link — the brand voice
+ * does not allow advertising something that does not answer.
+ *
+ * Verified against DNS and HTTP on 2026-08-10:
+ *  · agro / industry / personal → subdomain, 200
+ *  · transport                  → subdomain (Cloud Run mapping), 200
+ *  · productivity               → deployed to Cloud Run, NO subdomain yet
+ *  · cash                       → not deployed at all (no workflow exists)
+ */
 export const PLATFORMS = [
-    { name: 'Industry Sentinel', url: 'https://industry.cognitexindustrial.com' },
-    { name: 'Personal Sentinel', url: 'https://personal.cognitexindustrial.com' },
-    { name: 'Agro Sentinel', url: 'https://agro.cognitexindustrial.com' },
-    { name: 'Transport Sentinel', url: 'https://transport.cognitexindustrial.com' },
+    {
+        id: 'industry',
+        name: 'Industry Sentinel',
+        url: 'https://industry.cognitexindustrial.com',
+        accent: 'var(--color-cyan-electric)',
+    },
+    {
+        id: 'personal',
+        name: 'Personal Sentinel',
+        url: 'https://personal.cognitexindustrial.com',
+        accent: 'var(--color-amber-warn)',
+    },
+    {
+        id: 'agro',
+        name: 'Agro Sentinel',
+        url: 'https://agro.cognitexindustrial.com',
+        accent: 'var(--color-green-ok)',
+    },
+    {
+        id: 'transport',
+        name: 'Transport Sentinel',
+        url: 'https://transport.cognitexindustrial.com',
+        accent: 'var(--color-cyan-600)',
+    },
+    {
+        id: 'productivity',
+        name: 'Productivity Sentinel',
+        // Live on Cloud Run but with no subdomain. Point this at
+        // productivity.cognitexindustrial.com once the DNS record exists.
+        url: 'https://productivity-sentinel-myvq6twbpa-uk.a.run.app',
+        accent: 'var(--color-steel)',
+    },
+    {
+        id: 'cash',
+        name: 'Cash Sentinel',
+        // No deployment pipeline exists for this project yet.
+        url: null,
+        accent: 'var(--color-steel)',
+    },
 ] as const;
+
+export type PlatformId = (typeof PLATFORMS)[number]['id'];
 
 /**
  * Published pricing. The chat guardrails (spec §4.5) forbid quoting any

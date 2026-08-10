@@ -84,10 +84,14 @@ export const es = {
             kicker: 'Transparencia',
             title: 'La demo viva',
             description:
-                'Datos reales de nuestra operación, ahora mismo — así de transparente será la suya.',
+                'Nuestra oficina y nuestro vehículo, medidos y publicados aquí. Cuando un sensor deja de reportar lo decimos en pantalla, en vez de rellenar el hueco — eso es exactamente lo que haremos con su operación.',
             power: { title: 'Potencia de la oficina', subtitle: 'Últimas 24 horas' },
             vehicle: { title: 'Vehículo', subtitle: 'Recorrido de hoy' },
             cta: 'Ver la demo completa',
+            statusLive: 'Medición en vivo',
+            statusSimulated: 'Sin señal · curva simulada',
+            statusHelp:
+                'El sensor no ha reportado en la última hora. Lo que ve es una curva de referencia, no una medición.',
         },
 
         process: {
@@ -144,6 +148,43 @@ export const es = {
             answerYes: 'Atendemos su zona',
             answerRemote: 'Su zona se atiende en modo remoto y con visitas programadas',
             cta: 'Coordinar una visita',
+        },
+
+        platforms: {
+            kicker: 'Plataformas',
+            title: 'Las consolas que ya están operando',
+            description:
+                'Cada motor entrega su tablero. Son las mismas plataformas que corremos nosotros, no maquetas de venta.',
+            statusLive: 'En línea',
+            statusSoon: 'En preparación',
+            open: 'Abrir consola',
+            soonNote: 'Todavía sin acceso público',
+            items: {
+                industry: {
+                    name: 'Industry Sentinel',
+                    body: 'Planta y línea de producción: OEE, disponibilidad, paradas y mantenimiento predictivo.',
+                },
+                personal: {
+                    name: 'Personal Sentinel',
+                    body: 'Seguridad laboral: presencia por zona, cumplimiento de EPP y reporte de incidentes.',
+                },
+                agro: {
+                    name: 'Agro Sentinel',
+                    body: 'Invernadero: sensores de clima, análisis térmico por imagen y consultas en lenguaje natural.',
+                },
+                transport: {
+                    name: 'Transport Sentinel',
+                    body: 'Operación ferroviaria: flota en vivo, puntualidad, órdenes de mantenimiento y métricas RAMS.',
+                },
+                productivity: {
+                    name: 'Productivity Sentinel',
+                    body: 'Productividad de obra: tablero de restricciones, cumplimiento semanal y Pareto de causas.',
+                },
+                cash: {
+                    name: 'Cash Sentinel',
+                    body: 'Divisas y remesas: cálculo de transferencias con tipo de cambio, en tres idiomas.',
+                },
+            },
         },
 
         cases: {

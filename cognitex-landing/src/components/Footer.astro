@@ -80,18 +80,29 @@ const columns = [
                 </h2>
                 <ul class="mt-5 space-y-3">
                     {
-                        PLATFORMS.map((platform) => (
-                            <li>
-                                <a
-                                    href={platform.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="text-sm text-steel transition-colors duration-150 hover:text-ice"
-                                >
+                        PLATFORMS.map((platform) =>
+                            platform.url ? (
+                                <li>
+                                    <a
+                                        href={platform.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="text-sm text-steel transition-colors duration-150 hover:text-ice"
+                                    >
+                                        {platform.name}
+                                    </a>
+                                </li>
+                            ) : (
+                                // Not deployed yet — listed, but never as a link
+                                // that goes nowhere.
+                                <li class="flex items-baseline gap-2 text-sm text-steel/60">
                                     {platform.name}
-                                </a>
-                            </li>
-                        ))
+                                    <span class="text-[10px] tracking-wide uppercase">
+                                        {t.home.platforms.statusSoon}
+                                    </span>
+                                </li>
+                            )
+                        )
                     }
                 </ul>
             </nav>

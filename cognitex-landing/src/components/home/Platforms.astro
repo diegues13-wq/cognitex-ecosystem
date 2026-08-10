@@ -1,0 +1,96 @@
+---
+import Section from '~/components/ui/Section.astro';
+import Card from '~/components/ui/Card.astro';
+import { PLATFORMS } from '~/config';
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const section = t.home.platforms;
+
+/*
+ * A platform without a URL renders as a plain card with an honest "no public
+ * access yet" note instead of a link that goes nowhere. Cash Sentinel has no
+ * deployment pipeline at all; Productivity is live on Cloud Run but still
+ * points at its run.app URL until a subdomain exists.
+ */
+const platforms = PLATFORMS.map((platform) => ({
+    ...platform,
+    copy: section.items[platform.id],
+    live: platform.url !== null,
+}));
+---
+
+<Section
+    kicker={section.kicker}
+    title={section.title}
+    description={section.description}
+    tone="deep"
+    id="plataformas"
+>
+    <ul class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {
+            platforms.map((platform, i) => (
+                <li>
+                    <Card
+                        href={platform.url ?? undefined}
+                        variant={platform.live ? 'solid' : 'outline'}
+                        class={`group flex h-full flex-col gap-4 p-6 ${platform.live ? '' : 'opacity-70'}`}
+                        data-reveal
+                        data-reveal-delay={i * 70}
+                        {...platform.live
+                            ? { target: '_blank', rel: 'noopener noreferrer' }
+                            : {}}
+                    >
+                        <div class="flex items-center justify-between gap-3">
+                            <span
+                                class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase"
+                                style={`color:${platform.live ? platform.accent : 'var(--color-steel)'}`}
+                            >
+                                <span
+                                    class={`inline-block size-2 rounded-full ${platform.live ? 'bg-green-ok' : 'bg-steel'}`}
+                                    aria-hidden="true"
+                                />
+                                {platform.live ? section.statusLive : section.statusSoon}
+                            </span>
+                        </div>
+
+                        <h3 class="font-display text-[length:var(--text-h3)]">
+                            {platform.copy.name}
+                        </h3>
+
+                        <p class="text-sm leading-relaxed text-steel">{platform.copy.body}</p>
+
+                        <p class="mt-auto pt-3 text-sm font-semibold">
+                            {
+                                platform.live ? (
+                                    <span class="flex items-center gap-2 text-ice">
+                                        {section.open}
+                                        <svg
+                                            class="size-4 transition-transform duration-300 ease-[cubic-bezier(.16,1,.3,1)] group-hover:translate-x-1"
+                                            viewBox="0 0 16 16"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.75"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M3 8h10M9 4l4 4-4 4" />
+                                        </svg>
+                                    </span>
+                                ) : (
+                                    <span class="text-steel/70">{section.soonNote}</span>
+                                )
+                            }
+                        </p>
+                    </Card>
+                </li>
+            ))
+        }
+    </ul>
+</Section>

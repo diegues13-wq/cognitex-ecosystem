@@ -2,6 +2,8 @@
 import Section from '~/components/ui/Section.astro';
 import Card from '~/components/ui/Card.astro';
 import Button from '~/components/ui/Button.astro';
+import { simulateOfficeSeries, simulateVehicleDay } from '~/lib/demo-fallback';
+import { seriesToPaths } from '~/lib/demo-chart';
 import { route, useTranslations, type Locale } from '~/i18n/utils';
 
 interface Props {
@@ -13,32 +15,24 @@ const t = useTranslations(locale);
 const demo = t.home.demo;
 
 /*
- * Placeholder telemetry. The shape below is exactly what `/api/public/demo`
- * will return (spec §4.3.3), so wiring the real feed is a fetch call — the
- * markup and the axis maths do not change.
+ * Server-rendered fallback so the widget is never empty on first paint and
+ * degrades to something meaningful with JS disabled. It is marked
+ * `simulated` until the client fetch says otherwise — the page must never
+ * present a reference curve as a measurement.
+ *
+ * The client then hits /api/public/demo (same origin via the Firebase Hosting
+ * rewrite to the demo-api Cloud Run service) and swaps in real values.
  */
-const series = [
-    3.1, 2.9, 2.8, 2.7, 2.8, 3.0, 3.6, 4.4, 5.2, 5.8, 6.1, 6.4, 6.2, 5.9, 6.3, 6.6, 6.1, 5.4, 4.8,
-    4.3, 3.9, 3.6, 3.4, 3.2,
-];
-const vehicle = { km: 38, consumption: 9.4, stops: 6 };
+const series = simulateOfficeSeries(24);
+const vehicle = simulateVehicleDay();
 
-const max = Math.max(...series);
-const min = Math.min(...series);
 const W = 600;
 const H = 180;
 
-// Map the series onto the viewBox. Padded 8px top and bottom so the stroke
-// never clips.
-const points = series.map((value, i) => {
-    const x = (i / (series.length - 1)) * W;
-    const y = H - 8 - ((value - min) / (max - min || 1)) * (H - 16);
-    return [x, y] as const;
-});
-
-const line = points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
-const area = `${line} L${W} ${H} L0 ${H} Z`;
-const current = series.at(-1) ?? 0;
+// Drawn server-side with the same function the client uses, so the curve is
+// present on first paint and with JS disabled, and does not jump when the
+// fetch lands.
+const paths = seriesToPaths(series, W, H);
 ---
 
 <Section
@@ -48,7 +42,7 @@ const current = series.at(-1) ?? 0;
     tone="deep"
     id="demo"
 >
-    <div class="mt-14 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+    <div class="mt-14 grid gap-6 lg:grid-cols-[1.6fr_1fr]" data-demo-root>
         <Card variant="glass" class="p-7" data-reveal>
             <div class="flex flex-wrap items-baseline justify-between gap-3">
                 <div>
@@ -56,9 +50,10 @@ const current = series.at(-1) ?? 0;
                     <p class="mt-1 text-sm text-steel">{demo.power.subtitle}</p>
                 </div>
                 <p class="flex items-baseline gap-1.5">
-                    <span class="text-3xl font-semibold text-cyan-electric tabular">
-                        {current.toFixed(1)}
-                    </span>
+                    <span
+                        class="text-3xl font-semibold text-cyan-electric tabular"
+                        data-demo="office-current">{series.at(-1)?.kw.toFixed(1)}</span
+                    >
                     <span class="text-sm text-steel">kW</span>
                 </p>
             </div>
@@ -69,6 +64,9 @@ const current = series.at(-1) ?? 0;
                 role="img"
                 aria-label={`${demo.power.title} — ${demo.power.subtitle}`}
                 preserveAspectRatio="none"
+                data-demo="office-chart"
+                data-width={W}
+                data-height={H}
             >
                 <defs>
                     <linearGradient id="powerFill" x1="0" y1="0" x2="0" y2="1">
@@ -76,9 +74,10 @@ const current = series.at(-1) ?? 0;
                         <stop offset="100%" stop-color="#00E5FF" stop-opacity="0"></stop>
                     </linearGradient>
                 </defs>
-                <path d={area} fill="url(#powerFill)"></path>
+                <path data-demo="office-area" d={paths.area} fill="url(#powerFill)"></path>
                 <path
-                    d={line}
+                    data-demo="office-line"
+                    d={paths.line}
                     fill="none"
                     stroke="#00E5FF"
                     stroke-width="2"
@@ -87,10 +86,17 @@ const current = series.at(-1) ?? 0;
                     vector-effect="non-scaling-stroke"></path>
             </svg>
 
-            <p class="mt-4 flex items-center gap-2 text-xs text-steel">
-                <span class="inline-block size-1.5 rounded-full bg-green-ok" aria-hidden="true"
+            {/* Provenance badge — the whole point of the widget. */}
+            <p
+                class="mt-4 flex items-center gap-2 text-xs text-steel"
+                data-demo="office-status"
+                data-live-label={demo.statusLive}
+                data-simulated-label={demo.statusSimulated}
+                title={demo.statusHelp}
+            >
+                <span class="inline-block size-1.5 rounded-full bg-amber-warn" data-demo="office-dot"
                 ></span>
-                {t.demoPage.note}
+                <span data-demo="office-status-text">{demo.statusSimulated}</span>
             </p>
         </Card>
 
@@ -100,17 +106,28 @@ const current = series.at(-1) ?? 0;
 
             <dl class="mt-8 space-y-6">
                 <div>
-                    <dd class="text-3xl font-semibold text-cyan-electric tabular">{vehicle.km}</dd>
+                    <dd
+                        class="text-3xl font-semibold text-cyan-electric tabular"
+                        data-demo="vehicle-km"
+                    >
+                        {vehicle.kmToday}
+                    </dd>
                     <dt class="mt-1 text-sm text-steel">km</dt>
                 </div>
                 <div>
-                    <dd class="text-3xl font-semibold text-cyan-electric tabular">
-                        {vehicle.consumption.toFixed(1)}
+                    <dd
+                        class="text-3xl font-semibold text-cyan-electric tabular"
+                        data-demo="vehicle-consumption"
+                    >
+                        {vehicle.litersPer100km.toFixed(1)}
                     </dd>
                     <dt class="mt-1 text-sm text-steel">L/100 km</dt>
                 </div>
                 <div>
-                    <dd class="text-3xl font-semibold text-cyan-electric tabular">
+                    <dd
+                        class="text-3xl font-semibold text-cyan-electric tabular"
+                        data-demo="vehicle-stops"
+                    >
                         {vehicle.stops}
                     </dd>
                     <dt class="mt-1 text-sm text-steel">
@@ -119,9 +136,96 @@ const current = series.at(-1) ?? 0;
                 </div>
             </dl>
 
+            <p
+                class="mt-6 flex items-center gap-2 text-xs text-steel"
+                data-demo="vehicle-status"
+                data-live-label={demo.statusLive}
+                data-simulated-label={demo.statusSimulated}
+                title={demo.statusHelp}
+            >
+                <span
+                    class="inline-block size-1.5 rounded-full bg-amber-warn"
+                    data-demo="vehicle-dot"></span>
+                <span data-demo="vehicle-status-text">{demo.statusSimulated}</span>
+            </p>
+
             <div class="mt-auto pt-8">
                 <Button href={route('demo', locale)} variant="ghost">{demo.cta}</Button>
             </div>
         </Card>
     </div>
 </Section>
+
+<script>
+    import { seriesToPaths } from '~/lib/demo-chart';
+
+    const root = document.querySelector('[data-demo-root]');
+
+    if (root) {
+        const pick = <T extends Element = HTMLElement>(name: string) =>
+            root.querySelector<T>(`[data-demo="${name}"]`);
+
+        const chart = pick<SVGSVGElement>('office-chart');
+        const line = pick<SVGPathElement>('office-line');
+        const area = pick<SVGPathElement>('office-area');
+
+        const setStatus = (which: 'office' | 'vehicle', live: boolean) => {
+            const wrapper = pick(`${which}-status`);
+            const dot = pick(`${which}-dot`);
+            const text = pick(`${which}-status-text`);
+            if (!wrapper || !dot || !text) return;
+
+            text.textContent = live
+                ? (wrapper.dataset.liveLabel ?? '')
+                : (wrapper.dataset.simulatedLabel ?? '');
+
+            // Green for a real measurement, amber for a reference curve.
+            dot.classList.toggle('bg-green-ok', live);
+            dot.classList.toggle('bg-amber-warn', !live);
+        };
+
+        const render = (payload: any) => {
+            const width = Number(chart?.dataset.width ?? 600);
+            const height = Number(chart?.dataset.height ?? 180);
+
+            const series: { at: number; kw: number }[] = payload.office?.series ?? [];
+            if (series.length > 1 && line && area) {
+                const paths = seriesToPaths(series, width, height);
+                line.setAttribute('d', paths.line);
+                area.setAttribute('d', paths.area);
+            }
+
+            const current = pick('office-current');
+            if (current) current.textContent = Number(payload.office.currentKw).toFixed(1);
+
+            const km = pick('vehicle-km');
+            if (km) km.textContent = String(payload.vehicle.kmToday);
+
+            const consumption = pick('vehicle-consumption');
+            if (consumption)
+                consumption.textContent = Number(payload.vehicle.litersPer100km).toFixed(1);
+
+            const stops = pick('vehicle-stops');
+            if (stops) stops.textContent = String(payload.vehicle.stops);
+
+            setStatus('office', payload.office?.source === 'live');
+            setStatus('vehicle', payload.vehicle?.source === 'live');
+        };
+
+        const load = async () => {
+            try {
+                const response = await fetch('/api/public/demo', { cache: 'no-store' });
+                if (!response.ok) return;
+                render(await response.json());
+            } catch {
+                // Offline or the service is down: keep the server-rendered
+                // fallback, which is already labelled as simulated. Spec §8.7
+                // requires the widgets to be offline-tolerant.
+            }
+        };
+
+        load();
+        // Matches the API's 30s cache; no point polling faster.
+        setInterval(load, 30_000);
+    }
+</script>
