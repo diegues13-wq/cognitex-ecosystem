@@ -8,7 +8,16 @@ interface Props {
     contained?: boolean;
 }
 
-const { variant = 'solid', href, class: className = '', contained = true } = Astro.props;
+// `...rest` matters: Astro does not forward unknown attributes to a component,
+// so without this every `<Card data-reveal>` silently loses the attribute and
+// the card never animates in.
+const {
+    variant = 'solid',
+    href,
+    class: className = '',
+    contained = true,
+    ...rest
+} = Astro.props;
 
 const variants = {
     glass: 'glass',
@@ -29,6 +38,7 @@ const Tag = href ? 'a' : 'div';
 <Tag
     class={contained ? classes : classes.replace('@container ', '')}
     {...href ? { href } : {}}
+    {...rest}
 >
     <slot />
 </Tag>
