@@ -30,12 +30,19 @@ import { buildPayload, dayKey } from './feed.js';
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-/** Comma-separated list; defaults to the production site. */
+/**
+ * Allowed origins, separated by semicolons, commas or whitespace.
+ *
+ * Accepts all three because the Cloud Run deploy action joins env_vars with
+ * commas, so a comma inside this value silently becomes a second variable.
+ * The workflow passes semicolons; parsing all of them means a future edit
+ * cannot reintroduce that failure.
+ */
 const ALLOWED_ORIGINS = (
     process.env.ALLOWED_ORIGINS ??
-    'https://www.cognitexindustrial.com,https://cognitexindustrial.com'
+    'https://www.cognitexindustrial.com;https://cognitexindustrial.com'
 )
-    .split(',')
+    .split(/[;,\s]+/)
     .map((o) => o.trim())
     .filter(Boolean);
 

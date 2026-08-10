@@ -73,8 +73,12 @@ jobs:
           # Manager reference: if the GitHub secret is unset the value is
           # empty, and the service then refuses every write with 503 instead
           # of failing the deploy. Reads keep working either way.
+          # Semicolons, not commas: deploy-cloudrun joins these lines with
+          # `^,^`, so a comma inside a value splits it into a second, bogus
+          # variable. The first deploy of this service literally set an env
+          # var named `https://cognitexindustrial.com`.
           env_vars: |
             GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
             FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
-            ALLOWED_ORIGINS=https://www.cognitexindustrial.com,https://cognitexindustrial.com
+            ALLOWED_ORIGINS=https://www.cognitexindustrial.com;https://cognitexindustrial.com
             INGEST_TOKEN=${{ secrets.DEMO_INGEST_TOKEN }}
