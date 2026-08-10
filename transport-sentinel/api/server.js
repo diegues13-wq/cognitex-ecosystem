@@ -212,7 +212,17 @@ app.post('/api/ai/chat', async (req, res) => {
 // ─── Admin: force re-seed (requires X-Admin-Key header) ──────────────────────
 app.post('/api/admin/reseed', async (req, res) => {
     const key = process.env.ADMIN_KEY;
-    if (key && req.headers['x-admin-key'] !== key) return res.sendStatus(403);
+
+    // Fail closed. This used to be `if (key && ...)`, so an unset ADMIN_KEY
+    // skipped the check entirely — and the deploy workflow never set one. On
+    // an --allow-unauthenticated service that left a destructive endpoint
+    // (deletes _meta/seed, rewrites every collection) open to the internet.
+    if (!key) {
+        console.error('[admin] reseed refused: ADMIN_KEY is not configured');
+        return res.status(503).json({ error: 'admin endpoint not configured' });
+    }
+    if (req.headers['x-admin-key'] !== key) return res.sendStatus(403);
+
     if (!isAvailable()) return res.status(503).json({ error: 'Firestore not available' });
     try {
         await getDB().doc('_meta/seed').delete();

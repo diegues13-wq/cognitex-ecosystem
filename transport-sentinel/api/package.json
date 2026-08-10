@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "PORT=3001 node --watch server.js"
+    "dev": "PORT=3001 node --watch server.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@google/genai": "^2.9.0",
