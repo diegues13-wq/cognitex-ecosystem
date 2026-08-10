@@ -4,7 +4,19 @@ import { auth, isMockAuth } from './firebase.js';
 import Dashboard from './Dashboard.jsx';
 import { Train, Shield, Cpu, Activity } from 'lucide-react';
 
-const MOCK_CREDENTIALS = { email: 'demo@cognitex.com', password: 'cognitex2024' };
+/*
+ * Mock mode no longer checks a credential pair.
+ *
+ * It used to compare against a hardcoded email/password pair that was both
+ * shipped inside the JS bundle and printed on the login card — a password
+ * anyone could read, guarding a service that is deployed
+ * --allow-unauthenticated anyway. That is not a security control, it is the
+ * appearance of one, which is worse.
+ *
+ * This now matches the other five platforms: with no Firebase key configured
+ * the app is an open demo and says so plainly. Real protection comes from
+ * configuring VITE_FIREBASE_API_KEY, not from a constant in the bundle.
+ */
 
 export default function App() {
     const [user, setUser]         = useState(null);
@@ -21,11 +33,11 @@ export default function App() {
         setLoading(true);
         try {
             if (isMockAuth) {
-                if (email === MOCK_CREDENTIALS.email && password === MOCK_CREDENTIALS.password) {
-                    setUser({ email, displayName: 'Operador CCO', uid: 'mock-uid' });
-                } else {
-                    throw new Error('Credenciales incorrectas. Use demo@cognitex.com / cognitex2024');
-                }
+                setUser({
+                    email: email || 'demo@local',
+                    displayName: 'Operador CCO',
+                    uid: 'mock-uid',
+                });
             } else {
                 const cred = await signInWithEmailAndPassword(auth, email, password);
                 setUser(cred.user);
@@ -113,7 +125,7 @@ export default function App() {
 
                     {isMockAuth && (
                         <div className="bg-[#08111c] border border-[#122e50] rounded-lg p-2.5 text-[9px] font-mono text-[#38a8e0] text-center">
-                            SIMULACIÓN · demo@cognitex.com / cognitex2024
+                            MODO DEMO · DATOS SIMULADOS · SIN AUTENTICACIÓN
                         </div>
                     )}
 

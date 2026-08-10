@@ -541,9 +541,20 @@ export function generateTrainSchedule(routeId = 'RT-001') {
     let serviceId = 1;
     const totalMins = route.distanceKm * 60 / route.maxSpeedKmh + route.stops.length * 2;
 
-    for (let h = sh; h <= eh; h += 0) {
-        const depMin = h * 60 + (serviceId === 1 ? sm : 0);
-        if (depMin + totalMins > eh * 60) break;
+    // Walk the service window in minutes, not hours.
+    //
+    // This loop used to advance with `h = Math.floor(nextMin / 60)` while
+    // stepping `h += 0`. For any route with freqMin < 60 the hour never
+    // changed — RT-001 (freq 30) recomputed depMin = 300 forever and pushed
+    // into `services` until the process ran out of memory. RT-001 is both the
+    // default for /api/schedule and CCOView's initial route, so the first load
+    // of the default view wedged the whole single-threaded API.
+    const startMin = sh * 60 + sm;
+    const endMin = eh * 60;
+    const stepMin = Math.max(1, freqMin);
+
+    for (let depMin = startMin; depMin <= endMin; depMin += stepMin) {
+        if (depMin + totalMins > endMin) break;
 
         // Outbound
         const delayMin = Math.random() < 0.25 ? Math.round(Math.random() * 15) : 0;
@@ -563,9 +574,6 @@ export function generateTrainSchedule(routeId = 'RT-001') {
         });
 
         serviceId++;
-        const nextMin = depMin + freqMin;
-        h = Math.floor(nextMin / 60);
-        if (nextMin >= eh * 60 + sm) break;
     }
 
     return { route, services, totalDistanceKm: route.distanceKm };
