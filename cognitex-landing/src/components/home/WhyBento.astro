@@ -1,0 +1,76 @@
+---
+import Section from '~/components/ui/Section.astro';
+import Card from '~/components/ui/Card.astro';
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const why = t.home.why;
+
+// Unequal cells (bento, spec §2) on a 6-column grid. Rows size to content —
+// no row-span, which previously left a tall void under the shortest card.
+const cells = [
+    { ...why.cards.metro, span: 'lg:col-span-4', figure: 'metro' },
+    { ...why.cards.cross, span: 'lg:col-span-2', figure: 'cross' },
+    { ...why.cards.agents, span: 'lg:col-span-2', figure: 'agents' },
+    { ...why.cards.guarantee, span: 'lg:col-span-4', figure: 'seal' },
+];
+---
+
+<Section kicker={why.kicker} title={why.title}>
+    <div class="mt-14 grid gap-5 lg:grid-cols-6">
+        {
+            cells.map((cell, i) => (
+                <Card
+                    class={`group flex flex-col gap-4 p-7 ${cell.span}`}
+                    data-reveal
+                    data-reveal-delay={i * 80}
+                >
+                    <div class="text-cyan-electric" aria-hidden="true">
+                        {cell.figure === 'metro' && (
+                            <svg viewBox="0 0 120 40" class="h-12 w-auto" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="2" y="10" width="34" height="20" rx="4" />
+                                <rect x="42" y="10" width="34" height="20" rx="4" opacity="0.6" />
+                                <rect x="82" y="10" width="34" height="20" rx="4" opacity="0.3" />
+                                <path d="M0 34h120" stroke-dasharray="3 5" opacity="0.5" />
+                            </svg>
+                        )}
+                        {cell.figure === 'cross' && (
+                            <svg viewBox="0 0 120 44" class="h-12 w-auto" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="26" cy="22" r="16" opacity="0.65" />
+                                <circle cx="60" cy="22" r="16" opacity="0.65" />
+                                <circle cx="94" cy="22" r="16" opacity="0.65" />
+                                <circle cx="60" cy="22" r="5" fill="currentColor" stroke="none">
+                                    <animate attributeName="r" values="4;6;4" dur="2.6s" repeatCount="indefinite" />
+                                </circle>
+                            </svg>
+                        )}
+                        {cell.figure === 'agents' && (
+                            <div class="flex flex-wrap gap-1.5">
+                                {Array.from({ length: 12 }).map((_, n) => (
+                                    <span
+                                        class="size-2.5 rounded-sm bg-cyan-electric/70"
+                                        style={`animation: pulse 2.4s ${n * 0.12}s cubic-bezier(.4,0,.6,1) infinite`}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                        {cell.figure === 'seal' && (
+                            <svg viewBox="0 0 44 44" class="h-12 w-auto" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M22 3l16 7v11c0 9-7 16-16 20C13 37 6 30 6 21V10z" />
+                                <path d="M15 22l5 5 9-10" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        )}
+                    </div>
+
+                    <h3 class="font-display text-[length:var(--text-h3)]">{cell.title}</h3>
+                    <p class="text-sm leading-relaxed text-steel">{cell.body}</p>
+                </Card>
+            ))
+        }
+    </div>
+</Section>

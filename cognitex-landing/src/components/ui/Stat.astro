@@ -1,0 +1,74 @@
+---
+interface Props {
+    value: number;
+    label: string;
+    unit?: string;
+    /** Decimal places to display. */
+    decimals?: number;
+    class?: string;
+}
+
+const { value, label, unit = '', decimals = 0, class: className = '' } = Astro.props;
+
+// The final value is rendered server-side, so the figure is in the HTML for
+// crawlers and for anyone with JS disabled. The script only animates towards it.
+const formatted = value.toLocaleString('es-EC', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+});
+---
+
+<div class={`flex flex-col gap-1 ${className}`}>
+    <p class="flex items-baseline gap-1.5">
+        <span
+            class="text-[length:var(--text-figure)] leading-none font-semibold text-cyan-electric tabular"
+            data-countup={value}
+            data-decimals={decimals}>{formatted}</span
+        >
+        {unit && <span class="text-lg font-medium text-steel">{unit}</span>}
+    </p>
+    <p class="text-sm leading-snug text-steel">{label}</p>
+</div>
+
+<script>
+    // Count-up on first view. Skipped entirely under prefers-reduced-motion,
+    // where the server-rendered final value simply stays put (spec §4.8).
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const figures = document.querySelectorAll<HTMLElement>('[data-countup]');
+
+    if (!reduced && figures.length && 'IntersectionObserver' in window) {
+        const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+
+        const run = (el: HTMLElement) => {
+            const target = Number(el.dataset.countup ?? 0);
+            const decimals = Number(el.dataset.decimals ?? 0);
+            const duration = 1100;
+            const start = performance.now();
+
+            const tick = (now: number) => {
+                const progress = Math.min((now - start) / duration, 1);
+                const current = target * easeOut(progress);
+                el.textContent = current.toLocaleString('es-EC', {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals,
+                });
+                if (progress < 1) requestAnimationFrame(tick);
+            };
+
+            requestAnimationFrame(tick);
+        };
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                for (const entry of entries) {
+                    if (!entry.isIntersecting) continue;
+                    run(entry.target as HTMLElement);
+                    observer.unobserve(entry.target);
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        figures.forEach((el) => observer.observe(el));
+    }
+</script>

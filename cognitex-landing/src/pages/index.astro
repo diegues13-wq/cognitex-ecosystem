@@ -1,0 +1,35 @@
+---
+import Base from '~/layouts/Base.astro';
+import Hero from '~/components/home/Hero.astro';
+import PainSelector from '~/components/home/PainSelector.astro';
+import LiveDemo from '~/components/home/LiveDemo.astro';
+import Process from '~/components/home/Process.astro';
+import WhyBento from '~/components/home/WhyBento.astro';
+import Coverage from '~/components/home/Coverage.astro';
+import Cases from '~/components/home/Cases.astro';
+import Faq from '~/components/home/Faq.astro';
+import FinalCta from '~/components/home/FinalCta.astro';
+import { faqSchema } from '~/lib/schema';
+import { useTranslations } from '~/i18n/utils';
+
+const locale = 'es' as const;
+const t = useTranslations(locale);
+---
+
+<Base
+    {locale}
+    routeId="home"
+    title={t.home.seo.title}
+    description={t.home.seo.description}
+    schema={[faqSchema(t.home.faq.items)]}
+>
+    <Hero {locale} />
+    <PainSelector {locale} />
+    <LiveDemo {locale} />
+    <Process {locale} />
+    <WhyBento {locale} />
+    <Coverage {locale} />
+    <Cases {locale} />
+    <Faq {locale} />
+    <FinalCta {locale} />
+</Base>

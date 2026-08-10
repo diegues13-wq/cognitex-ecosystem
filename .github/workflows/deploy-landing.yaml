@@ -1,57 +1,75 @@
 name: Deploy Landing Page
 
+# cognitex-landing v2 is a static Astro site on Firebase Hosting (spec §3),
+# replacing the GitHub Pages deploy of v1. Pull requests get a preview channel;
+# main goes live.
+
 on:
   push:
     branches: ["main"]
     paths:
       - "cognitex-landing/**"
       - ".github/workflows/deploy-landing.yaml"
+  pull_request:
+    paths:
+      - "cognitex-landing/**"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+defaults:
+  run:
+    working-directory: ./cognitex-landing
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      
-      - name: Install dependencies
-        working-directory: ./cognitex-landing
-        run: npm install
-        
-      - name: Build
-        working-directory: ./cognitex-landing
-        run: npm run build
-        
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-        
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './cognitex-landing/dist'
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+      id-token: write
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cognitex-landing/package-lock.json
+
+      # npm ci, not npm install: v1 had package-lock disabled in .npmrc, so
+      # every CI run resolved fresh semver ranges.
+      - name: Install
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          PUBLIC_GA4_MEASUREMENT_ID: ${{ secrets.PUBLIC_GA4_MEASUREMENT_ID }}
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Deploy preview (pull request)
+        if: github.event_name == 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.GCP_CREDENTIALS }}
+          projectId: ${{ secrets.GCP_PROJECT_ID }}
+          entryPoint: ./cognitex-landing
+          expires: 7d
+
+      - name: Deploy live (main)
+        if: github.event_name != 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.GCP_CREDENTIALS }}
+          projectId: ${{ secrets.GCP_PROJECT_ID }}
+          entryPoint: ./cognitex-landing
+          channelId: live

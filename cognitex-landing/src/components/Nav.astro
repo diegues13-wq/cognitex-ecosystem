@@ -1,0 +1,184 @@
+---
+import { Image } from 'astro:assets';
+import logo from '~/assets/cognitex_icon.png';
+import { whatsappLink } from '~/config';
+import { route, alternateRoute, useTranslations, type Locale, type RouteId } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+    routeId: RouteId;
+}
+
+const { locale, routeId } = Astro.props;
+const t = useTranslations(locale);
+
+const links: { href: string; label: string; id: RouteId }[] = [
+    { id: 'energia', href: route('energia', locale), label: t.nav.energia },
+    { id: 'agentes', href: route('agentes', locale), label: t.nav.agentes },
+    { id: 'flotas', href: route('flotas', locale), label: t.nav.flotas },
+    { id: 'demo', href: route('demo', locale), label: t.nav.demo },
+    { id: 'nosotros', href: route('nosotros', locale), label: t.nav.nosotros },
+];
+
+const altHref = alternateRoute(routeId, locale);
+const otherLang = locale === 'es' ? 'EN' : 'ES';
+---
+
+<header
+    class="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-navy-900/80 backdrop-blur-lg"
+>
+    <nav class="container-page flex h-20 items-center justify-between gap-4" aria-label="Principal">
+        <a
+            href={route('home', locale)}
+            class="flex shrink-0 items-center gap-3"
+            aria-label="Cognitex Industrial"
+        >
+            <Image src={logo} alt="" width={36} height={41} loading="eager" densities={[1, 2]} />
+            <span class="font-display text-base leading-none font-semibold tracking-tight">
+                COGNITEX <span class="text-cyan-electric">INDUSTRIAL</span>
+            </span>
+        </a>
+
+        <ul class="hidden items-center gap-7 lg:flex">
+            {
+                links.map((link) => (
+                    <li>
+                        <a
+                            href={link.href}
+                            aria-current={routeId === link.id ? 'page' : undefined}
+                            class="text-sm font-medium text-steel transition-colors duration-150 hover:text-ice aria-[current=page]:text-cyan-electric"
+                        >
+                            {link.label}
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+
+        <div class="hidden items-center gap-3 lg:flex">
+            <a
+                href={altHref}
+                hreflang={locale === 'es' ? 'en' : 'es'}
+                aria-label={t.nav.switchLang}
+                class="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/12 px-3 text-xs font-semibold text-steel transition-colors duration-150 hover:border-cyan-electric/50 hover:text-ice"
+            >
+                {otherLang}
+            </a>
+            <a
+                href={whatsappLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-analytics="click_whatsapp"
+                data-source="nav"
+                class="inline-flex min-h-11 items-center rounded-xl bg-cyan-electric px-5 text-sm font-semibold text-navy-900 transition-[background-color,box-shadow] duration-150 hover:bg-cyan-600 hover:shadow-[0_8px_28px_-6px_rgba(0,229,255,0.5)]"
+            >
+                {t.nav.cta}
+            </a>
+        </div>
+
+        <button
+            type="button"
+            id="nav-toggle"
+            class="flex size-11 items-center justify-center rounded-lg border border-white/12 lg:hidden"
+            aria-label={t.nav.openMenu}
+            data-label-close={t.nav.closeMenu}
+            aria-expanded="false"
+            aria-controls="nav-panel"
+        >
+            <svg
+                class="size-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                aria-hidden="true"
+            >
+                <path d="M4 7h16M4 12h16M4 17h16" data-icon="open" />
+                <path d="M6 6l12 12M18 6L6 18" data-icon="close" class="hidden" />
+            </svg>
+        </button>
+    </nav>
+
+    {/* Hidden with `hidden` rather than opacity, so it is out of the a11y tree
+        and untabbable when closed — v1 left it permanently in the DOM. */}
+    <div id="nav-panel" class="hidden border-t border-white/8 bg-navy-900 lg:hidden">
+        <ul class="container-page flex flex-col py-4">
+            {
+                links.map((link) => (
+                    <li>
+                        <a
+                            href={link.href}
+                            aria-current={routeId === link.id ? 'page' : undefined}
+                            class="flex min-h-12 items-center border-b border-white/5 text-base font-medium text-ice aria-[current=page]:text-cyan-electric"
+                        >
+                            {link.label}
+                        </a>
+                    </li>
+                ))
+            }
+            <li class="mt-4 flex items-center gap-3">
+                <a
+                    href={whatsappLink()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-analytics="click_whatsapp"
+                    data-source="nav_mobile"
+                    class="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-cyan-electric px-5 font-semibold text-navy-900"
+                >
+                    {t.nav.cta}
+                </a>
+                <a
+                    href={altHref}
+                    hreflang={locale === 'es' ? 'en' : 'es'}
+                    aria-label={t.nav.switchLang}
+                    class="flex min-h-12 min-w-12 items-center justify-center rounded-xl border border-white/12 px-4 text-sm font-semibold text-steel"
+                >
+                    {otherLang}
+                </a>
+            </li>
+        </ul>
+    </div>
+</header>
+
+{/* Spacer for the fixed header. */}
+<div class="h-20" aria-hidden="true"></div>
+
+<script>
+    const toggle = document.getElementById('nav-toggle');
+    const panel = document.getElementById('nav-panel');
+
+    if (toggle && panel) {
+        const openIcon = toggle.querySelector<SVGPathElement>('[data-icon="open"]');
+        const closeIcon = toggle.querySelector<SVGPathElement>('[data-icon="close"]');
+        const labelOpen = toggle.getAttribute('aria-label') ?? '';
+        const labelClose = toggle.dataset.labelClose ?? labelOpen;
+
+        const setOpen = (open: boolean) => {
+            panel.classList.toggle('hidden', !open);
+            toggle.setAttribute('aria-expanded', String(open));
+            toggle.setAttribute('aria-label', open ? labelClose : labelOpen);
+            openIcon?.classList.toggle('hidden', open);
+            closeIcon?.classList.toggle('hidden', !open);
+            // Stop the page scrolling behind the open panel.
+            document.body.style.overflow = open ? 'hidden' : '';
+        };
+
+        toggle.addEventListener('click', () => {
+            setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+                setOpen(false);
+                toggle.focus();
+            }
+        });
+
+        // Reset when crossing into the desktop breakpoint.
+        const desktop = window.matchMedia('(min-width: 1024px)');
+        desktop.addEventListener('change', (event) => {
+            if (event.matches) setOpen(false);
+        });
+    }
+</script>

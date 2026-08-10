@@ -1,0 +1,33 @@
+---
+import Section from '~/components/ui/Section.astro';
+import Card from '~/components/ui/Card.astro';
+import Button from '~/components/ui/Button.astro';
+import { route, useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const cases = t.home.cases;
+---
+
+{/*
+  No case studies exist yet, and inventing logos would contradict the brand
+  voice. Spec §4.3.7 calls for exactly this honest placeholder until real
+  twelve-month figures are in.
+*/}
+<Section kicker={cases.kicker}>
+    <Card variant="outline" class="p-9 sm:p-12" data-reveal>
+        <div class="max-w-2xl">
+            <h2 class="font-display text-[length:var(--text-h2)]">{cases.title}</h2>
+            <p class="mt-5 text-[length:var(--text-lead)] leading-relaxed text-steel">
+                {cases.body}
+            </p>
+            <div class="mt-8">
+                <Button href={route('demo', locale)} variant="ghost">{cases.cta}</Button>
+            </div>
+        </div>
+    </Card>
+</Section>

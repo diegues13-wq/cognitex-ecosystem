@@ -1,0 +1,53 @@
+---
+interface Props {
+    href: string;
+    variant?: 'primary' | 'ghost' | 'quiet';
+    size?: 'md' | 'lg';
+    /** Opens in a new tab with the right rel — used for WhatsApp and platforms. */
+    external?: boolean;
+    class?: string;
+    id?: string;
+    'data-analytics'?: string;
+}
+
+const {
+    href,
+    variant = 'primary',
+    size = 'md',
+    external = false,
+    class: className = '',
+    ...rest
+} = Astro.props;
+
+// min-h-11 keeps every target at or above the 44px WCAG 2.2 minimum.
+const base =
+    'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl font-semibold ' +
+    'transition-[transform,box-shadow,background-color,border-color] duration-150 ' +
+    'ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-0.5 active:translate-y-0';
+
+const variants = {
+    primary:
+        'bg-cyan-electric text-navy-900 shadow-[0_0_0_0_rgba(0,229,255,0)] ' +
+        'hover:bg-cyan-600 hover:shadow-[0_8px_32px_-4px_rgba(0,229,255,0.45)]',
+    ghost:
+        'border border-cyan-electric/35 text-ice hover:border-cyan-electric ' +
+        'hover:bg-cyan-electric/10 hover:shadow-[0_8px_28px_-8px_rgba(0,229,255,0.3)]',
+    quiet: 'text-steel hover:text-ice underline-offset-4 hover:underline',
+};
+
+const sizes = {
+    md: 'px-5 py-2.5 text-sm',
+    lg: 'px-7 py-3.5 text-base',
+};
+
+const classes = `${base} ${variants[variant]} ${sizes[size]} ${className}`;
+---
+
+<a
+    href={href}
+    class={classes}
+    {...external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+    {...rest}
+>
+    <slot />
+</a>

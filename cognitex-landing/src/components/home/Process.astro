@@ -1,0 +1,40 @@
+---
+import Section from '~/components/ui/Section.astro';
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const process = t.home.process;
+---
+
+<Section kicker={process.kicker} title={process.title} tone="deep">
+    <ol class="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+        {
+            process.steps.map((step, i) => (
+                <li class="relative" data-reveal data-reveal-delay={i * 120}>
+                    {/* Connector rule between steps on desktop. */}
+                    {i < process.steps.length - 1 && (
+                        <span
+                            class="absolute top-6 left-16 hidden h-px w-[calc(100%-3rem)] bg-gradient-to-r from-cyan-electric/40 to-transparent md:block"
+                            aria-hidden="true"
+                        />
+                    )}
+
+                    <p
+                        class="flex size-12 items-center justify-center rounded-full border border-cyan-electric/30 bg-navy-900 font-display text-sm font-semibold text-cyan-electric tabular"
+                        aria-hidden="true"
+                    >
+                        {step.n}
+                    </p>
+
+                    <h3 class="mt-6 font-display text-[length:var(--text-h3)]">{step.title}</h3>
+                    <p class="mt-3 leading-relaxed text-steel">{step.body}</p>
+                </li>
+            ))
+        }
+    </ol>
+</Section>

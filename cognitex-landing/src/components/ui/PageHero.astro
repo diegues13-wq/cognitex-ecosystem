@@ -1,0 +1,48 @@
+---
+interface Props {
+    title: string;
+    lead?: string;
+    /** Pill above the heading — the section label, where the page has one. */
+    eyebrow?: string;
+    class?: string;
+}
+
+const { title, lead, eyebrow, class: className = '' } = Astro.props;
+---
+
+{/*
+  The leading band of every secondary page. Same shape as the engine hero in
+  EnginePage.astro, minus the per-engine accent glow, so /nosotros, /casos and
+  /contacto all open at the same rhythm.
+  The slot takes anything that belongs directly under the lead — the legal
+  pages hang their <time> there.
+*/}
+<section class={`relative overflow-hidden bg-navy-900 pt-16 pb-16 sm:pt-24 sm:pb-20 ${className}`}>
+    <div
+        class="pointer-events-none absolute -top-40 left-1/2 size-[36rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.09),transparent_65%)] blur-2xl"
+        aria-hidden="true"
+    >
+    </div>
+
+    <div class="container-page relative" data-reveal>
+        {
+            eyebrow && (
+                <p class="mb-6 inline-flex rounded-full border border-cyan-electric/30 px-4 py-1.5 text-xs font-semibold tracking-[0.16em] text-cyan-electric uppercase">
+                    {eyebrow}
+                </p>
+            )
+        }
+
+        <h1 class="max-w-4xl text-[length:var(--text-hero)]">{title}</h1>
+
+        {
+            lead && (
+                <p class="mt-7 max-w-[65ch] text-[length:var(--text-lead)] leading-relaxed text-steel">
+                    {lead}
+                </p>
+            )
+        }
+
+        <slot />
+    </div>
+</section>

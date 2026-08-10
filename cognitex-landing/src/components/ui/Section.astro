@@ -1,0 +1,64 @@
+---
+interface Props {
+    id?: string;
+    kicker?: string;
+    title?: string;
+    description?: string;
+    /** `ice` is the light band used to rest the eye on long reading. */
+    tone?: 'navy' | 'deep' | 'ice';
+    align?: 'left' | 'center';
+    class?: string;
+    /** Renders the heading as h1 — only on a page's leading section. */
+    as?: 'h1' | 'h2';
+}
+
+// Explicit cast: renaming `as` to `Heading` in the destructure defeats
+// Astro's automatic Props inference, leaving every prop implicitly `any`.
+const {
+    id,
+    kicker,
+    title,
+    description,
+    tone = 'navy',
+    align = 'left',
+    class: className = '',
+    as: Heading = 'h2',
+}: Props = Astro.props;
+
+const tones = {
+    navy: 'bg-navy-900 text-ice',
+    deep: 'bg-navy-deep text-ice',
+    ice: 'bg-ice text-ink',
+};
+
+const kickerTone = tone === 'ice' ? 'text-cyan-600' : 'text-cyan-electric';
+const descTone = tone === 'ice' ? 'text-ink/75' : 'text-steel';
+const alignment = align === 'center' ? 'text-center mx-auto' : '';
+---
+
+<section id={id} class={`py-20 sm:py-28 ${tones[tone]} ${className}`}>
+    <div class="container-page">
+        {
+            (kicker || title || description) && (
+                <div class={`max-w-3xl ${alignment}`} data-reveal>
+                    {kicker && (
+                        <p
+                            class={`mb-3 text-xs font-semibold tracking-[0.18em] uppercase ${kickerTone}`}
+                        >
+                            {kicker}
+                        </p>
+                    )}
+                    {title && (
+                        <Heading class="text-[length:var(--text-h2)]">{title}</Heading>
+                    )}
+                    {description && (
+                        <p class={`mt-5 text-[length:var(--text-lead)] leading-relaxed ${descTone}`}>
+                            {description}
+                        </p>
+                    )}
+                </div>
+            )
+        }
+        <slot />
+    </div>
+</section>

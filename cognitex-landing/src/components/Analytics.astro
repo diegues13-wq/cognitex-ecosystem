@@ -1,0 +1,158 @@
+---
+import { route, useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+/*
+ * GA4 measurement id. Absent in dev and in any build without the secret, in
+ * which case nothing loads and the banner never appears — the site simply has
+ * no analytics rather than a broken tag.
+ */
+const measurementId = import.meta.env.PUBLIC_GA4_MEASUREMENT_ID ?? '';
+---
+
+{
+    measurementId && (
+        <>
+            <div
+                id="consent-banner"
+                class="fixed inset-x-0 bottom-0 z-50 hidden border-t border-cyan-electric/20 bg-navy-deep/97 backdrop-blur-lg"
+                role="dialog"
+                aria-labelledby="consent-title"
+                aria-describedby="consent-body"
+            >
+                <div class="container-page flex flex-col gap-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="max-w-2xl">
+                        <p id="consent-title" class="font-display font-semibold">
+                            {t.cookies.title}
+                        </p>
+                        <p id="consent-body" class="mt-1 text-sm leading-relaxed text-steel">
+                            {t.cookies.body}{' '}
+                            <a
+                                href={route('privacidad', locale)}
+                                class="text-cyan-electric underline underline-offset-2"
+                            >
+                                {t.cookies.more}
+                            </a>
+                        </p>
+                    </div>
+
+                    <div class="flex shrink-0 gap-3">
+                        <button
+                            type="button"
+                            data-consent="denied"
+                            class="min-h-11 rounded-xl border border-white/15 px-5 text-sm font-semibold text-steel transition-colors duration-150 hover:text-ice"
+                        >
+                            {t.cookies.reject}
+                        </button>
+                        <button
+                            type="button"
+                            data-consent="granted"
+                            class="min-h-11 rounded-xl bg-cyan-electric px-5 text-sm font-semibold text-navy-900 transition-colors duration-150 hover:bg-cyan-600"
+                        >
+                            {t.cookies.accept}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <script is:inline define:vars={{ measurementId }}>
+                // Consent Mode v2 — everything starts denied, which is what the
+                // LOPDP expects: analytics runs only after an explicit choice.
+                window.dataLayer = window.dataLayer || [];
+                function gtag() {
+                    window.dataLayer.push(arguments);
+                }
+                window.gtag = gtag;
+
+                gtag('consent', 'default', {
+                    ad_storage: 'denied',
+                    ad_user_data: 'denied',
+                    ad_personalization: 'denied',
+                    analytics_storage: 'denied',
+                    wait_for_update: 500,
+                });
+
+                const STORAGE_KEY = 'cgx-consent';
+                const stored = localStorage.getItem(STORAGE_KEY);
+                const banner = document.getElementById('consent-banner');
+
+                function loadGa() {
+                    if (document.getElementById('ga4-script')) return;
+                    const script = document.createElement('script');
+                    script.id = 'ga4-script';
+                    script.async = true;
+                    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+                    document.head.appendChild(script);
+
+                    gtag('js', new Date());
+                    gtag('config', measurementId, { anonymize_ip: true });
+                }
+
+                function apply(choice) {
+                    gtag('consent', 'update', {
+                        analytics_storage: choice === 'granted' ? 'granted' : 'denied',
+                    });
+                    if (choice === 'granted') loadGa();
+                }
+
+                if (stored) {
+                    apply(stored);
+                } else if (banner) {
+                    banner.classList.remove('hidden');
+                }
+
+                banner?.addEventListener('click', (event) => {
+                    const button = event.target.closest('[data-consent]');
+                    if (!button) return;
+                    const choice = button.dataset.consent;
+                    localStorage.setItem(STORAGE_KEY, choice);
+                    apply(choice);
+                    banner.classList.add('hidden');
+                });
+            </script>
+        </>
+    )
+}
+
+<script>
+    /*
+     * One delegated listener for every tracked interaction, so components only
+     * declare `data-analytics="event_name"` and never touch gtag directly.
+     * Events per spec §4.8: click_whatsapp, calc_submit, chat_open,
+     * chat_handoff, map_search, booking.
+     */
+    type Gtag = (command: string, ...args: unknown[]) => void;
+
+    const send = (name: string, params: Record<string, unknown> = {}) => {
+        const gtag = (window as unknown as { gtag?: Gtag }).gtag;
+        // No-op unless consent was granted and the tag actually loaded.
+        gtag?.('event', name, params);
+    };
+
+    document.addEventListener('click', (event) => {
+        const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+            '[data-analytics]'
+        );
+        if (!target) return;
+
+        send(target.dataset.analytics!, {
+            source: target.dataset.source ?? undefined,
+            page: location.pathname,
+        });
+    });
+
+    // Components that decide in JS (the coverage check, the calculator) raise a
+    // CustomEvent instead of carrying an attribute.
+    document.addEventListener('analytics', (event) => {
+        const detail = (event as CustomEvent<{ event: string } & Record<string, unknown>>).detail;
+        if (!detail?.event) return;
+        const { event: name, ...params } = detail;
+        send(name, { ...params, page: location.pathname });
+    });
+</script>

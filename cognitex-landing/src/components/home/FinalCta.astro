@@ -1,0 +1,48 @@
+---
+import Button from '~/components/ui/Button.astro';
+import { SITE, whatsappLink } from '~/config';
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const cta = t.home.finalCta;
+---
+
+<section class="relative overflow-hidden bg-navy-900 py-24 sm:py-32">
+    <div
+        class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-electric/50 to-transparent"
+        aria-hidden="true"
+    >
+    </div>
+    <div
+        class="pointer-events-none absolute -top-32 left-1/2 size-[40rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.1),transparent_65%)] blur-2xl"
+        aria-hidden="true"
+    >
+    </div>
+
+    <div class="container-page text-center" data-reveal>
+        <h2 class="mx-auto max-w-3xl text-[length:var(--text-h2)]">{cta.title}</h2>
+        <p class="mx-auto mt-6 max-w-2xl text-[length:var(--text-lead)] leading-relaxed text-steel">
+            {cta.body}
+        </p>
+
+        <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button
+                href={whatsappLink()}
+                size="lg"
+                external
+                data-analytics="click_whatsapp"
+                data-source="final_cta"
+            >
+                {cta.cta}
+            </Button>
+            <Button href={`mailto:${SITE.email}`} variant="ghost" size="lg">
+                {cta.secondary}
+            </Button>
+        </div>
+    </div>
+</section>

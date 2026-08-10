@@ -1,0 +1,37 @@
+---
+import Base from '~/layouts/Base.astro';
+import Button from '~/components/ui/Button.astro';
+import { SITE } from '~/config';
+import { route, useTranslations } from '~/i18n/utils';
+
+const locale = 'es' as const;
+const t = useTranslations(locale);
+
+/*
+ * 404 is not a page in ROUTES — it has no English twin and nothing should
+ * canonicalise to it — so it borrows the home routeId for the Seo pair and
+ * carries no copy beyond the numeral and the way back.
+ */
+---
+
+<Base
+    {locale}
+    routeId="home"
+    title={`404 · ${SITE.name}`}
+    description={t.home.seo.description}
+>
+    <section class="relative overflow-hidden bg-navy-900 py-32 sm:py-40">
+        <div
+            class="pointer-events-none absolute -top-32 left-1/2 size-[36rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.1),transparent_65%)] blur-2xl"
+            aria-hidden="true"
+        >
+        </div>
+
+        <div class="container-page relative text-center" data-reveal>
+            <h1 class="text-[length:var(--text-hero)] text-cyan-electric text-glow">404</h1>
+            <div class="mt-10">
+                <Button href={route('home', locale)} size="lg">{t.common.backHome}</Button>
+            </div>
+        </div>
+    </section>
+</Base>
