@@ -1,0 +1,7 @@
+{
+  "extends": "@cognitex/config/tsconfig.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "types": ["vite/client"]
+  }
+}

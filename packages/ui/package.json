@@ -1,0 +1,26 @@
+{
+  "name": "@cognitex/ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The shared console shell, metric cards and charts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cognitex/data": "*",
+    "@cognitex/theme": "*"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
+  }
+}

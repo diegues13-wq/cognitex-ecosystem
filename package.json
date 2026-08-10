@@ -1,0 +1,30 @@
+{
+  "name": "cognitex-ecosystem",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Cognitex Industrial — monorepo of Sentinel platforms and shared packages",
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "agro-sentinel/web",
+    "cash-sentinel",
+    "industry-sentinel",
+    "personal-sentinel",
+    "productivity-sentinel",
+    "transport-sentinel"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  }
+}

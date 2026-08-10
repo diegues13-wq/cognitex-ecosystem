@@ -1,0 +1,25 @@
+{
+  "name": "@cognitex/auth",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Firebase auth, the session hook and the shared login screen",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cognitex/data": "*",
+    "@cognitex/theme": "*",
+    "firebase": "^11.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.5",
+    "typescript": "^5.9.3"
+  }
+}

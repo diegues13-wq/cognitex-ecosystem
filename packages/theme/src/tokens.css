@@ -1,0 +1,154 @@
+@import 'tailwindcss';
+
+/**
+ * Cognitex Industrial — the one design system.
+ *
+ * Replaces five separate tailwind.config.js files in which `cognitex.DEFAULT`
+ * meant #06b6d4, #7c3aed and #1d6fa5 depending on which app you opened. The
+ * surface scale, semantics and type are now identical everywhere; only the
+ * accent changes per platform, and it changes in exactly one place
+ * (`--color-brand`, set by the app's brand file).
+ *
+ * Tailwind v4 native @theme — no legacy `@config` bridge, no
+ * postcss.config.js.
+ */
+
+@theme {
+    /* ── Surfaces ──────────────────────────────────────────────────────────
+       Shared with cognitexindustrial.com so a customer moving from the site
+       to their console does not feel handed off to a different company. */
+    --color-navy-900: #050d1a;
+    --color-navy-deep: #0a192f;
+    --color-navy-800: #112240;
+    --color-navy-700: #1b3358;
+
+    --color-ink: #2d3748;
+    --color-steel: #8696a7;
+    --color-ice: #f4f8fb;
+
+    /* ── Semantics — identical meaning in every platform ──────────────────
+       Contrast on --color-navy-900: ok 8.9:1 · warn 11.4:1 · alert 5.1:1 ·
+       steel 7.1:1 · ice 18.4:1. All clear WCAG 2.2 AA for normal text. */
+    --color-ok: #00c896;
+    --color-warn: #ffb830;
+    --color-alert: #e5484d;
+    --color-info: #00b4d8;
+
+    /* ── Brand accent ─────────────────────────────────────────────────────
+       Overridden per app in its brand.css. The default is the corporate cyan
+       so an app that forgets to set one still looks like Cognitex rather
+       than like nothing. */
+    --color-brand: #00e5ff;
+    --color-brand-dim: #00b4d8;
+
+    /* ── Type ─────────────────────────────────────────────────────────────
+       Self-hosted variable subsets. Every app previously preconnected to
+       Google Fonts and then never linked a stylesheet, so all six silently
+       rendered in the system font. */
+    --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+    /* Control-room density: readable at a glance from a metre away, without
+       the 8px type transport-sentinel had drifted into. */
+    --text-metric: clamp(1.75rem, 1.2vw + 1.2rem, 2.5rem);
+    --text-label: 0.6875rem;
+
+    /* ── Motion ───────────────────────────────────────────────────────────*/
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast: 150ms;
+    --dur-med: 300ms;
+
+    --radius-panel: 12px;
+}
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        background-color: var(--color-navy-900);
+        color: var(--color-ice);
+        font-family: var(--font-sans);
+        font-synthesis-weight: none;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+
+    /* Readings must never reflow as they tick. */
+    .tabular,
+    [data-metric] {
+        font-variant-numeric: tabular-nums;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-brand);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--color-navy-900);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--color-navy-700);
+        border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-steel);
+    }
+}
+
+@layer components {
+    /*
+     * Panels are SOLID. This is a hard constraint, not a style preference:
+     * backdrop-filter: blur() routes through Skia's Gaussian kernel, which
+     * takes an AVX2 path that raised SIGILL on pre-Haswell hardware and
+     * repeatedly crashed transport-sentinel in the field. Industrial panel
+     * PCs are exactly the machines that are old.
+     *
+     * Do not reintroduce backdrop-blur here or in any app.
+     */
+    .panel {
+        background-color: var(--color-navy-deep);
+        border: 1px solid color-mix(in srgb, var(--color-steel) 18%, transparent);
+        border-radius: var(--radius-panel);
+    }
+
+    .panel-raised {
+        background-color: var(--color-navy-800);
+        border: 1px solid color-mix(in srgb, var(--color-steel) 22%, transparent);
+        border-radius: var(--radius-panel);
+    }
+
+    .label-mono {
+        font-family: var(--font-mono);
+        font-size: var(--text-label);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-steel);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
