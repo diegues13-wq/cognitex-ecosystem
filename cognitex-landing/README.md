@@ -1,16 +1,52 @@
-# React + Vite
+# Cognitex Landing
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Cognitex Landing** is the central marketing and entry hub for the Cognitex Industrial Ecosystem. It serves as the primary gateway for users to discover and access the various Sentinel platforms.
 
-Currently, two official plugins are available:
+## 🌟 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   **Central Hub**: Unified entry point showcasing all Sentinel applications.
+*   **Interactive Ecosystem**: Visual navigator for exploring platform capabilities.
+*   **Contact Modal**: Integrated lead capture for B2B inquiries.
+*   **Theme**: Neural network aesthetics — the "Brain" of the ecosystem.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Category | Technology | Version |
+| :--- | :--- | :--- |
+| **UI Framework** | React | 19 |
+| **Build Tool** | Vite | 7 |
+| **Styling** | Tailwind CSS (PostCSS) | 4 |
+| **Animations** | Framer Motion | 12 |
+| **Icons** | Lucide React | 0.563 |
+| **Maps** | React Leaflet | 5 |
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+*   Node.js v20+
+*   npm v10+
+
+### Installation
+```bash
+cd cognitex-landing
+npm install
+npm run dev
+```
+
+The application will be available at [http://localhost:5173](http://localhost:5173).
+
+### Production Build
+```bash
+npm run build    # Output in dist/
+npm run preview  # Preview the production build
+```
+
+### 🐳 Docker
+```bash
+docker build -t cognitex-landing .
+docker run -p 5173:80 cognitex-landing
+```
+
+## 📄 License
+
+Private property of Cognitex Industrial.

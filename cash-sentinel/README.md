@@ -1,16 +1,51 @@
-# React + Vite
+# Cash Sentinel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Cash Sentinel** is the unified financial platform within the Cognitex Industrial Ecosystem. It consolidates all currency exchange, remittance, and financial transfer services into a single application with multi-language support (ES, EN, RU).
 
-Currently, two official plugins are available:
+> [!NOTE]
+> This project is the result of unifying three previously separate projects: **Cash Sentinel**, **AuraFi Landing**, and **Rusec Transfer** into a single consolidated financial platform.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌟 Features
 
-## React Compiler
+*   **Currency Calculator**: Quick and reliable financial conversions and remittance calculations.
+*   **Multi-language**: Spanish, English, and Russian support (built-in translations).
+*   **Social Links**: Integrated contact and social media section.
+*   **Theme**: Blue / Financial aesthetic.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+| Category | Technology | Version |
+| :--- | :--- | :--- |
+| **UI Framework** | React | 19 |
+| **Build Tool** | Vite | 7 |
+| **Styling** | Tailwind CSS (PostCSS) | **3** |
+| **Animations** | Framer Motion | 12 |
+| **Icons** | Lucide React | 0.575 |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+> [!NOTE]
+> This project uses **Tailwind CSS v3** (with PostCSS + Autoprefixer), unlike the rest of the ecosystem which uses Tailwind v4.
+
+## 🚀 Getting Started
+
+### Prerequisites
+*   Node.js v20+
+*   npm v10+
+
+### Installation
+```bash
+cd cash-sentinel
+npm install
+npm run dev
+```
+
+The application will be available at [http://localhost:5173](http://localhost:5173) (default Vite port).
+
+### Production Build
+```bash
+npm run build    # Output in dist/
+npm run preview  # Preview the production build
+```
+
+## 📄 License
+
+Private property of Cognitex Industrial.

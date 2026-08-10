@@ -4,23 +4,38 @@
 
 ## 🏗 Architecture
 
-The project is divided into three main components:
+The project is divided into four main components:
 
 1.  **`/edge`**: Python code running on the Greenhouse Gateway (Raspberry Pi/Industrial PC). Handles sensor polling (Modbus/Simulated), thermal image capture, and reliable MQTT transmission to the cloud.
 2.  **`/cloud`**: Serverless backend on GCP.
     *   **Pub/Sub**: Data ingestion.
     *   **Cloud Functions**: ETL processing, alarm checks, and writing to BigQuery/Firestore.
     *   **BigQuery**: Historical data warehouse.
-    *   **vertex AI**: Thermal image analysis and Chat-with-your-data.
+    *   **Vertex AI**: Thermal image analysis and Chat-with-your-data.
 3.  **`/web`**: React-based dashboard for real-time monitoring, historical charts, and AI interaction.
+4.  **`/terraform`**: Infrastructure-as-Code for GCP resource provisioning.
+
+### Web Dashboard Tech Stack
+
+| Category | Technology | Version |
+| :--- | :--- | :--- |
+| **UI Framework** | React | 19 |
+| **Build Tool** | Vite | 7 |
+| **Styling** | Tailwind CSS (PostCSS) | 4 |
+| **Charts** | Recharts | 2 |
+| **Maps** | Leaflet + React-Leaflet | 5 |
+| **Backend** | Firebase | 11 |
+| **Icons** | Lucide React | 0.563 |
+| **Date Utilities** | date-fns | 4 |
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 *   Python 3.10+
-*   uv (gestor de paquetes)
-*   Node.js 18+
-*   Google Cloud SDK (gcloud)
+*   uv (Python package manager)
+*   Node.js v20+
+*   npm v10+
+*   Google Cloud SDK (gcloud) — for cloud deployment
 
 ### Setup
 1.  **Edge**:
@@ -43,6 +58,14 @@ The project is divided into three main components:
     npm install
     npm run dev
     ```
+
+The web dashboard will be available at [http://localhost:5174](http://localhost:5174).
+
+### 🔐 Access & Credentials
+
+Runs in **mock auth mode** when `VITE_FIREBASE_API_KEY` is unset — it auto-logs in
+as `dev@local` / "Dev User" with no password. There is no default `admin` account.
+See `docs/ARCHITECTURE.md` § Authentication.
 
 ## 🛠 Development & Testing
 
@@ -76,7 +99,16 @@ Run ESLint:
 cd web
 npm run lint
 ```
-(Note: Ensure `eslint.config.js` is present).
+
+### 🐳 Docker (Web only)
+```bash
+cd web
+docker build -t agro-sentinel-web .
+docker run -p 5174:8080 agro-sentinel-web
+```
+
+## 📚 Additional Documentation
+*   [Production Deployment Guide](./PRODUCTION.md) — Full instructions for deploying Edge, Cloud, and Web components.
 
 ## 📄 License
 Private property of Cognitex Industrial.

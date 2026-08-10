@@ -1,3 +1,12 @@
+# Local production-mode stack.
+#
+# Port mapping note: the sentinel containers listen on 8080 (Cloud Run
+# requirement), cognitex-landing listens on 80. The host ports below match
+# each app's documented dev port.
+#
+# transport-sentinel is intentionally absent — it needs Firestore credentials
+# and Vertex AI access, so it is not runnable as a plain container.
+
 services:
   cognitex-landing:
     build: ./cognitex-landing
@@ -5,26 +14,26 @@ services:
       - "5173:80"
     restart: always
 
+  agro-sentinel-web:
+    build: ./agro-sentinel/web
+    ports:
+      - "5174:8080"
+    restart: always
+
   industry-sentinel:
     build: ./industry-sentinel
     ports:
-      - "5175:80"
+      - "5175:8080"
     restart: always
 
   personal-sentinel:
     build: ./personal-sentinel
     ports:
-      - "5176:80"
+      - "5176:8080"
     restart: always
 
-  agro-sentinel-web:
-    build: ./agro-sentinel/web
+  productivity-sentinel:
+    build: ./productivity-sentinel
     ports:
-      - "5174:80"
-    restart: always
-
-  terra-landing:
-    build: ./terra-landing
-    ports:
-      - "5177:80"
+      - "5177:8080"
     restart: always

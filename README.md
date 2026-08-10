@@ -36,10 +36,16 @@ This monorepo hosts the following integrated applications:
 *   **Theme**: **Blue/Financial**.
 *   **Tech**: React 19, Vite 7, Tailwind CSS 3, Framer Motion.
 
-### 6. [Terra Landing](./terra-landing) (Port 5177 via Docker)
-*   **Role**: B2B Landing Page for Terra Latitude.
-*   **Domain**: Heritage, global logistics, EUDR traceability.
-*   **Note**: Also exists as an independent repository at `../terra-landing`.
+### 6. [Productivity Sentinel](./productivity-sentinel)
+*   **Role**: Workforce Productivity Analytics.
+*   **Domain**: Output tracking, efficiency dashboards.
+*   **Tech**: React 19, Vite 7, Tailwind CSS 4, Firebase, Recharts.
+
+### 7. [Transport Sentinel](./transport-sentinel)
+*   **Role**: Railway Operations Control Center.
+*   **Domain**: Fleet telemetry, maintenance orders, incidents, RAMS metrics.
+*   **Tech**: React 19, Vite 7, Tailwind CSS 4, **Express API**, Firestore, Vertex AI Gemini, Google Maps.
+*   **Note**: The only app with a server-side backend (`api/`) — it serves the SPA and the REST API from a single Cloud Run service.
 
 ---
 
@@ -67,7 +73,7 @@ All sentinel apps run in **mock auth mode** when `VITE_FIREBASE_API_KEY` is not 
 | **Industry Sentinel** | `https://industry-sentinel-myvq6twbpa-uk.a.run.app` | Mock (Firebase pending) |
 | **Personal Sentinel** | `https://personal-sentinel-myvq6twbpa-uk.a.run.app` | Mock (Firebase pending) |
 
-> Real Firebase Email/Password auth is wired but not yet activated — the next step is adding Firebase credentials as GitHub Secrets. See `docs/AI_HANDOVER.md` § "Next Development Session".
+> Real Firebase Email/Password auth is wired but not yet activated — the next step is adding Firebase credentials as GitHub Secrets. See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) § Authentication.
 
 ## 🏁 Getting Started
 
@@ -140,7 +146,6 @@ The applications will be available at:
 *   **Agro**: http://localhost:5174
 *   **Industry**: http://localhost:5175
 *   **Personal**: http://localhost:5176
-*   **Terra**: http://localhost:5177
 
 ### ☁️ CI/CD & Production Deployment
 
@@ -151,10 +156,15 @@ Sentinel apps deploy to **Google Cloud Run** (`cognitex-485919`, `us-east4`) via
 | `deploy-agro.yaml` | Cloud Run `agro-sentinel` |
 | `deploy-industry.yaml` | Cloud Run `industry-sentinel` |
 | `deploy-personal.yaml` | Cloud Run `personal-sentinel` |
-| `deploy-landing.yaml` | Cloudflare Pages |
-| `deploy-terra-landing.yaml` | Cloud Run |
+| `deploy-productivity.yaml` | Cloud Run `productivity-sentinel` |
+| `deploy-transport.yaml` | Cloud Run `transport-sentinel` |
+| `deploy-landing.yaml` | GitHub Pages |
 
-**Required GitHub Secrets**: `GCP_PROJECT_ID`, `GCP_CREDENTIALS`, and 6× `VITE_FIREBASE_*` secrets (for real auth builds).
+> `cash-sentinel` has no deployment workflow.
+
+**Required GitHub Secrets**: `GCP_PROJECT_ID`, `GCP_CREDENTIALS`, 6× `VITE_FIREBASE_*` (for real auth builds), plus `VITE_GOOGLE_MAPS_API_KEY` and `VITE_GEMINI_API_KEY` for Transport Sentinel.
+
+For deployment details, pinned versions and known constraints, see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
 
 ## 🗺️ Roadmap: Ecosystem Integration
 

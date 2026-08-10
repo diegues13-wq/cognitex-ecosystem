@@ -82,7 +82,7 @@ docker build \
 **URL**: `https://personal-sentinel-myvq6twbpa-uk.a.run.app`  
 **Platform**: Google Cloud Run (`cognitex-485919`, `us-east4`)  
 **Deploy**: Automatic via GitHub Actions on push to `personal-sentinel/**` on `main`  
-**Auth state**: Mock mode (real Firebase auth pending — see `docs/AI_HANDOVER.md`)
+**Auth state**: Mock mode (real Firebase auth pending — see `docs/ARCHITECTURE.md`)
 
 ## License
 
