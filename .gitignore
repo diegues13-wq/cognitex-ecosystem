@@ -31,6 +31,9 @@ yarn-error.log*
 *.swp
 *.swo
 
+# Agent tooling (local settings and worktrees)
+.claude
+
 # Python
 __pycache__/
 *.py[cod]
