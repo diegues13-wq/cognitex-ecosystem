@@ -37,8 +37,14 @@ export function createViteConfig({ port = 5173, proxyTarget, extend = {} } = {})
                 output: {
                     // Split the heavy, rarely-changing vendors so an app
                     // deploy does not invalidate them.
+                    //
+                    // `react-dom/client` must be listed explicitly: it is a
+                    // separate entry point, and without it the renderer —
+                    // almost all of React's weight — lands in the app chunk
+                    // instead. The first migrated app produced a 3.7KB
+                    // "vendor-react", which is the tell.
                     manualChunks: {
-                        'vendor-react': ['react', 'react-dom'],
+                        'vendor-react': ['react', 'react-dom', 'react-dom/client'],
                         'vendor-icons': ['lucide-react'],
                     },
                 },

@@ -1,0 +1,15 @@
+# Applies to root-context image builds. Apps still built with their own
+# directory as the context keep using their local .dockerignore.
+node_modules
+**/node_modules
+dist
+**/dist
+coverage
+**/coverage
+.git
+.github
+docs
+.env
+.env.*
+!.env.example
+npm-debug.log*

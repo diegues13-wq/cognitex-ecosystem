@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
 
 /**
  * Shared flat ESLint config.
@@ -18,6 +19,12 @@ export function createEslintConfig({ extend = [] } = {}) {
         { ignores: ['dist/**', 'build/**', 'coverage/**', 'node_modules/**'] },
 
         js.configs.recommended,
+
+        // TypeScript parsing. Without this, espree cannot read a .tsx file at
+        // all — every type annotation is a parse error. The apps are being
+        // rewritten in TypeScript, so this belongs here rather than being
+        // re-added through `extend` in each of the six.
+        ...tseslint.configs.recommended,
 
         {
             files: ['**/*.{js,jsx,ts,tsx}'],
@@ -40,11 +47,16 @@ export function createEslintConfig({ extend = [] } = {}) {
                     'warn',
                     { allowConstantExport: true },
                 ],
-                'no-unused-vars': [
+                // The base rule flags every type-only import, so the
+                // TypeScript-aware twin owns this check.
+                'no-unused-vars': 'off',
+                '@typescript-eslint/no-unused-vars': [
                     'error',
                     {
                         // Underscore prefix is the escape hatch, not "starts
-                        // with a capital letter".
+                        // with a capital letter" — which is what the apps used
+                        // to do, and why unused imports and whole unreachable
+                        // components passed lint for months.
                         varsIgnorePattern: '^_',
                         argsIgnorePattern: '^_',
                         caughtErrorsIgnorePattern: '^_',

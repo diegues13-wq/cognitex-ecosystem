@@ -1,29 +1,30 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import { createEslintConfig } from '@cognitex/config/eslint';
+import tseslint from 'typescript-eslint';
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+/**
+ * The shared flat config plus a TypeScript parser.
+ *
+ * The base rules stay as they are; the only additions are the ones that need
+ * to know about types. `no-unused-vars` is handed over to its TS-aware twin
+ * because the base rule cannot see type-only imports and reports every one of
+ * them as dead.
+ */
+export default createEslintConfig({
+    extend: [
+        ...tseslint.configs.recommended,
+        {
+            files: ['**/*.{ts,tsx}'],
+            rules: {
+                'no-unused-vars': 'off',
+                '@typescript-eslint/no-unused-vars': [
+                    'error',
+                    {
+                        varsIgnorePattern: '^_',
+                        argsIgnorePattern: '^_',
+                        caughtErrorsIgnorePattern: '^_',
+                    },
+                ],
+            },
+        },
     ],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
-      },
-    },
-    rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
-    },
-  },
-])
+});

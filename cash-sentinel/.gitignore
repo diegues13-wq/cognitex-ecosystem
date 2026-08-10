@@ -1,24 +1,29 @@
+# Build output
+dist
+dist-ssr
+
+# Vite's dependency pre-bundle cache. This was committed to the repository —
+# `.vite/deps/_metadata.json` and a stray package.json — so a machine-local
+# cache travelled with every checkout.
+.vite
+node_modules
+
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Local overrides
 *.local
+.env
+.env.*
+!.env.example
 
-# Editor directories and files
+# Editor
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
 *.sw?

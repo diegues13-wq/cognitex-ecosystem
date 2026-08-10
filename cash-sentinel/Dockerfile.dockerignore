@@ -1,0 +1,24 @@
+# The exclusion list BuildKit actually reads for
+#
+#     docker build -f cash-sentinel/Dockerfile .
+#
+# A .dockerignore is resolved against the build *context*, and this image is
+# built from the repository root (see the header of Dockerfile). BuildKit looks
+# for `<dockerfile>.dockerignore` first, which is this file; cash-sentinel's own
+# .dockerignore only applies if someone builds with that directory as context.
+# Keep the two in step.
+node_modules
+**/node_modules
+dist
+**/dist
+**/.vite
+
+.env
+.env.*
+!.env.example
+
+.git
+.github
+docs
+*.log
+.DS_Store

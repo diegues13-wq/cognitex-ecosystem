@@ -1,13 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/**
+ * Cash Sentinel styles.
+ *
+ * This file used to be the three `@tailwind` directives plus a hand-rolled
+ * shadow utility and a body rule that @applied an off-white hex literal —
+ * cash-sentinel was the last app in the ecosystem on Tailwind v3, with its own
+ * tailwind.config.js, postcss.config.js and autoprefixer. All of that is gone:
+ * the design system is imported as tokens, and the accent is set from
+ * `BRANDS.cash` in App.tsx rather than written as a hex literal anywhere.
+ */
+@import '@cognitex/theme/tokens.css';
 
 @layer utilities {
-  .shadow-soft {
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 3px rgba(0, 0, 0, 0.02);
-  }
+    /*
+     * Entrance motion, in CSS.
+     *
+     * Replaces framer-motion, which shipped ~40KB of gzipped runtime to fade
+     * two elements in once on load. `prefers-reduced-motion` is already
+     * honoured globally by tokens.css.
+     */
+    .animate-rise {
+        animation: cash-rise var(--dur-med) var(--ease-out-expo) both;
+    }
 }
 
-body {
-  @apply bg-[#F4F4F9] text-slate-900 antialiased min-h-screen selection:bg-yellow-400/50;
+@keyframes cash-rise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/*
+ * The number field is text, not `type="number"`, so that a comma decimal
+ * separator survives being typed. Nothing to suppress in Firefox or WebKit as
+ * a result — but keep the caret from jumping around on iOS zoom.
+ */
+input[inputmode='decimal'] {
+    font-variant-numeric: tabular-nums;
 }

@@ -1,0 +1,16 @@
+# Nothing here belongs in a build context. Dependencies are installed inside
+# the image from package-lock.json, and dist/ is produced there.
+node_modules
+**/node_modules
+dist
+**/dist
+.vite
+
+.env
+.env.*
+!.env.example
+
+.git
+.github
+*.log
+.DS_Store

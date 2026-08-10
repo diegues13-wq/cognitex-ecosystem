@@ -1,5 +1,17 @@
 @import 'tailwindcss';
 
+/*
+ * Tailwind scans the importing app's own tree and skips node_modules — which
+ * is where npm symlinks the workspace packages. Without these two lines every
+ * class used only by @cognitex/ui or @cognitex/auth is absent from the
+ * generated stylesheet, so the shared shell, sidebar and login screen render
+ * unstyled in every app that adopts the theme. Verified by the utilities
+ * missing from productivity-sentinel's first build: bg-navy-deep, min-h-dvh,
+ * w-64, min-h-16.
+ */
+@source '../../ui/src';
+@source '../../auth/src';
+
 /**
  * Cognitex Industrial — the one design system.
  *

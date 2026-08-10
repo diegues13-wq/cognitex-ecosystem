@@ -33,7 +33,9 @@ services:
     restart: always
 
   productivity-sentinel:
-    build: ./productivity-sentinel
+    build:
+      context: .
+      dockerfile: productivity-sentinel/Dockerfile
     ports:
       - "5177:8080"
     restart: always

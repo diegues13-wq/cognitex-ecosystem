@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]
     paths:
       - "productivity-sentinel/**"
+      - "packages/**"
+      - "package.json"
+      - "package-lock.json"
       - ".github/workflows/deploy-productivity.yaml"
 
 env:
@@ -13,7 +16,8 @@ env:
   GAR_LOCATION: us-east4
   REPOSITORY: cognitex-repo
   SERVICE: productivity-sentinel
-  CONTEXT: ./productivity-sentinel
+  CONTEXT: .
+  DOCKERFILE: productivity-sentinel/Dockerfile
 
 jobs:
   deploy:
@@ -44,6 +48,7 @@ jobs:
             --build-arg VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }} \
             --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }} \
             --build-arg VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }} \
+            -f ${{ env.DOCKERFILE }} \
             -t $IMAGE_NAME ${{ env.CONTEXT }}
           docker push $IMAGE_NAME
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV

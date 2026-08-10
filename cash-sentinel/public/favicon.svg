@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Replaces Vite's default logo, which the tab has shown since the app was
+  scaffolded.
+
+  The two literals below are BRANDS.cash.accent and --color-navy-900 from
+  @cognitex/theme. A favicon is fetched as a standalone document with no access
+  to the page's stylesheet, so it cannot read a custom property; these are the
+  one place in the app where a colour is written out. Keep them in step with
+  packages/theme/src/brands.ts.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Cash Sentinel">
+  <rect width="32" height="32" rx="7" fill="#3b82f6" />
+  <g fill="none" stroke="#050d1a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 13.5 16 8l10 5.5" />
+    <path d="M9 14v8M15 14v8M23 14v8" />
+    <path d="M6.5 25h19" />
+  </g>
+</svg>
