@@ -16,6 +16,32 @@ calculator would remove the reason the page exists.
   came from the market or from us**.
 - Opens WhatsApp with the calculated figures already written into the message.
 
+## Sections
+
+One page, four blocks: hero, calculator, how-it-works, support. The language
+switcher covers Spanish, English and Russian (`src/i18n/`).
+
+## Where the numbers come from
+
+There is no Firestore here and no tenant. The one external input is the
+exchange rate, fetched from `api.exchangerate-api.com` every 60 seconds, and
+`src/data/rates.ts` returns *what it knows and how it knows it*:
+
+| `source` | `reason` | Meaning |
+| :--- | :--- | :--- |
+| `live` | — | Read from the market, with `fetchedAt` |
+| `fallback` | `initial` | Nothing fetched yet — first paint |
+| `fallback` | `network` | Request failed, was blocked, or errored |
+| `fallback` | `malformed` | Response had no numeric RUB rate |
+| `fallback` | `out-of-range` | A number arrived, but not a plausible USD→RUB rate |
+
+The interface is obliged to render the difference. The version this replaces
+caught the error into the console, kept its `useState(100)` default, and drew
+it next to a green glowing dot — the universal convention for "live". Someone
+behind a captive portal was shown an invented rate and then handed a WhatsApp
+message quoting it. That is the same honesty rule the consoles apply with
+`DataSourceBadge`, on the number that decides how much money someone sends.
+
 ## The arithmetic
 
 `src/domain/exchange.ts` is the product; everything else is packaging. It is
@@ -39,7 +65,10 @@ The rules worth knowing:
 React 19 · TypeScript · Vite 7 · Tailwind v4 through `@cognitex/theme` ·
 `@cognitex/ui` · `@cognitex/config` · lucide-react. No framer-motion (the two
 entrance transitions are CSS), no charting library, and nothing that blurs what
-is behind it — see `packages/README.md`.
+is behind it — see [`../packages/README.md`](../packages/README.md).
+
+It does not depend on `@cognitex/auth` or `@cognitex/data`. There is nothing to
+sign into and nothing tenant-scoped to read.
 
 Tailwind v4 scans this README as plain text along with the source, so the
 banned utility is described here rather than named; naming it would emit the
@@ -50,16 +79,28 @@ rule into the stylesheet.
 From the repository root:
 
 ```bash
-npm install --workspaces --include-workspace-root
-npm run dev  --workspace cash-sentinel   # http://localhost:5175
-npm run test --workspace cash-sentinel
-npm run build --workspace cash-sentinel  # tsc --noEmit && vite build
+npm install                                    # once
+npm run dev       --workspace cash-sentinel    # http://localhost:5175
+npm run test      --workspace cash-sentinel    # 47 tests, 2 files
+npm run typecheck --workspace cash-sentinel
+npm run lint      --workspace cash-sentinel
+npm run build     --workspace cash-sentinel    # tsc --noEmit && vite build
 ```
+
+`industry-sentinel` is configured for 5175 as well, so the two cannot run at
+the same time without an override:
+`npm run dev --workspace cash-sentinel -- --port 5179`.
 
 ## Deploying
 
 Cloud Run, `us-east4`, via `.github/workflows/deploy-cash.yaml` on a push to
-`main`. It needs no Firebase secrets — there is no auth to configure.
+`main`. It needs no Firebase secrets — there is no auth to configure. The
+workflow also watches `packages/**` and the root manifests, because the app is
+built from the shared packages.
+
+`BRANDS.cash.url` in `packages/theme/src/brands.ts` is still `null` with a
+comment saying no pipeline exists. That comment predates this workflow and is
+stale; the platform links will stay missing until it is set.
 
 Build the image from the **repository root**, because the app imports the
 shared packages and Docker cannot reach outside its context:

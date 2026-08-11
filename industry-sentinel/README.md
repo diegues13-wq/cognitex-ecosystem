@@ -10,6 +10,36 @@ field names — vibration in `vpd`, power in `co2`, OEE in `battery`. It now
 reads `IndustryReading` from `@cognitex/data`, where every measurement carries
 its own name and unit.
 
+The shared stack and the reasoning behind it are in
+[`../packages/README.md`](../packages/README.md); this file only covers what is
+specific to this console.
+
+## Sections
+
+| Section | What it shows |
+| :--- | :--- |
+| Resumen de planta | Plant-wide OEE and its three factors, over a 30-day window |
+| Máquinas | Per-machine state, with the machine picker |
+| Disponibilidad | Downtime episodes and availability against scheduled time |
+| Mantenimiento | MTBF/MTTR and the vibration-trend horizon |
+
+## Where the data comes from
+
+`src/data/repository.ts` is the only entry point, and it follows the two rules
+from `@cognitex/data`: Firestore when configured (`readings` and `alerts`, both
+filtered by `orgId`), the deterministic generator otherwise — and the snapshot
+always carries which one it was. Every view renders `DataSourceBadge`:
+`Datos medidos` with the store's timestamp, or `Datos simulados`.
+
+This platform never writes. Readings come from the plant-floor gateway and
+alerts from the ingestion pipeline; a console that also wrote them would be
+inventing measurements, and every operator's browser would write its own copy
+of the same alarm.
+
+The sample interval is **measured, not assumed** — the median gap between a
+machine's readings. MTBF is a duration, so a hardcoded interval would silently
+scale every reliability figure by whatever rate the gateway actually runs at.
+
 ## Layout
 
 | Path | What lives there |
@@ -39,9 +69,12 @@ and lint config — comes from `packages/`.
 ## Running it
 
 ```bash
-npm install --workspaces --include-workspace-root   # from the repo root
-npm run dev --workspace industry-sentinel           # http://localhost:5175
+npm install                                  # once, from the repo root
+npm run dev --workspace industry-sentinel    # http://localhost:5175
 ```
+
+`cash-sentinel` is configured for 5175 as well, so the two cannot run at the
+same time without an override.
 
 Leave `VITE_FIREBASE_API_KEY` empty (see `.env.example`) and the console runs
 unconfigured: open demo login, generated data, and a `Datos simulados` badge on
@@ -49,9 +82,9 @@ every view. It never presents generated numbers as measurement.
 
 ```bash
 npm run typecheck --workspace industry-sentinel
-npm run test --workspace industry-sentinel
-npm run lint --workspace industry-sentinel
-npm run build --workspace industry-sentinel    # tsc --noEmit && vite build
+npm run test      --workspace industry-sentinel   # 73 tests, 7 files
+npm run lint      --workspace industry-sentinel
+npm run build     --workspace industry-sentinel   # tsc --noEmit && vite build
 ```
 
 ## Docker

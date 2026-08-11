@@ -9,6 +9,27 @@ version was a single 440-line `Dashboard.jsx` that "navigated" by swapping a
 field names — heart rate in `vpd`, fatigue in `humidity`, body temperature in
 `temp`.
 
+The shared stack and the reasoning behind it are in
+[`../packages/README.md`](../packages/README.md); this file only covers what is
+specific to this console.
+
+## Sections
+
+| Section | What it shows |
+| :--- | :--- |
+| Resumen de cuadrilla | Crew-wide fatigue, exposure and man-down over a 14-day window |
+| Trabajadores | Per-worker detail, with the worker picker |
+| Exposición | Heat and cardiac exposure windows |
+| EPP y wearables | PPE verification and wearable battery |
+
+## Where the data comes from
+
+`src/data/repository.ts` is the only entry point: Firestore when configured
+(`readings` and `alerts`, both filtered by `orgId`), the deterministic
+generator otherwise — and the snapshot always carries which one it was. Every
+view renders `DataSourceBadge`: `Datos medidos` with the store's timestamp, or
+`Datos simulados`.
+
 ## The defect this fixes
 
 The generator wrote:
@@ -60,8 +81,8 @@ and lint config — comes from `packages/`.
 ## Running it
 
 ```bash
-npm install --workspaces --include-workspace-root   # from the repo root
-npm run dev --workspace personal-sentinel           # http://localhost:5176
+npm install                                  # once, from the repo root
+npm run dev --workspace personal-sentinel    # http://localhost:5176
 ```
 
 Leave `VITE_FIREBASE_API_KEY` empty (see `.env.example`) and the console runs
@@ -70,9 +91,9 @@ every view. It never presents generated numbers as measurement.
 
 ```bash
 npm run typecheck --workspace personal-sentinel
-npm run test --workspace personal-sentinel
-npm run lint --workspace personal-sentinel
-npm run build --workspace personal-sentinel    # tsc --noEmit && vite build
+npm run test      --workspace personal-sentinel   # 77 tests, 7 files
+npm run lint      --workspace personal-sentinel
+npm run build     --workspace personal-sentinel   # tsc --noEmit && vite build
 ```
 
 ## Docker

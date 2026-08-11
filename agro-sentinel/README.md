@@ -23,6 +23,11 @@ sobre las lecturas de cinco fincas.
 
 ### Consola web
 
+Construida sobre los paquetes `@cognitex/*`. La pila compartida y las
+decisiones que la sostienen están en
+[`../packages/README.md`](../packages/README.md); aquí sólo lo propio de esta
+consola.
+
 | Categoría | Tecnología |
 | :--- | :--- |
 | UI | React 19 · TypeScript |
@@ -39,6 +44,45 @@ candidate*), sin `date-fns` y sin `prop-types`. El mapa de cinco puntos fijos es
 ahora una tabla en la sección **Fincas**; las fechas se formatean con
 `Intl.DateTimeFormat` en hora de Ecuador.
 
+### Secciones
+
+| Sección | Qué muestra |
+| :--- | :--- |
+| Clima | Temperatura, HR, VPD, CO₂, humedad de sustrato y PAR del invernadero seleccionado |
+| Historial | Series de la ventana elegida (24 h por defecto) |
+| Alarmas | Evaluación ISA 18.2 con banda muerta; el operador puede reconocer |
+| Análisis térmico | Capturas de `thermal_scans`, marcadas **sin verificar** cuando no consta qué modelo las produjo |
+| Consultas | Preguntas en lenguaje natural resueltas en el navegador contra las lecturas cargadas |
+| Fincas | Las cinco fincas y su estado |
+
+La consola se refresca sola cada 60 s: un centro de control la deja abierta
+todo el turno, y refrescar por temporizador es la diferencia entre una consola
+y una captura de pantalla.
+
+### De dónde salen los datos
+
+`src/data/repository.ts` es el único punto de entrada, y aplica las dos reglas
+de `@cognitex/data`:
+
+| | Firebase configurado | Sin configurar |
+| :--- | :--- | :--- |
+| Lecturas y alertas | `readings` y `alerts`, filtradas por `orgId` | Generador determinista |
+| Estado e imágenes | `greenhouses/{id}` y su subcolección `thermal_scans`, vía `src/data/store.ts` | Generador |
+| Insignia | `Datos medidos`, con la hora de respuesta | `Datos simulados` |
+
+Los documentos de `greenhouses` los escribe `cloud/main.py` con nombres de
+campo de Python (`temperature`, `vpd_kpa`, `max_temp_detected`), así que se
+**validan**, no se castean: `doc.data() as GreenhouseSample` sería una mentira
+que el compilador no puede comprobar sobre un esquema que ya ha divergido una
+vez.
+
+Si `readings` está vacía, el histórico se muestra vacío. No se rellena con
+datos generados — ver §9 de PIPELINE_STATUS.md.
+
+El VPD, el punto de rocío, los grados-día, la integral diaria de luz y las
+alarmas ISA 18.2 se calculan en el navegador a partir de las lecturas cargadas,
+con los mismos umbrales que `cloud/main.py` aplicaría del lado del servidor.
+
 ## 🚀 Puesta en marcha
 
 ### Requisitos
@@ -48,11 +92,12 @@ ahora una tabla en la sección **Fincas**; las fechas se formatean con
 
 ### Consola web
 
-Es un *workspace* del monorepo, así que se instala desde la raíz del
-repositorio:
+Es un *workspace* del monorepo, así que se instala una sola vez desde la raíz
+del repositorio. El nombre del workspace es `agro-sentinel-web`, no
+`agro-sentinel`:
 
 ```bash
-npm install --workspaces --include-workspace-root
+npm install                                  # una vez, en la raíz
 npm run dev --workspace agro-sentinel-web
 ```
 
@@ -74,12 +119,13 @@ contuviera el proyecto de Firebase. Ambos ficheros están corregidos.
 
 ### Consola web (`/web`)
 
+Desde la raíz del repositorio:
+
 ```bash
-cd web
-npx tsc --noEmit     # tipos
-npx eslint .         # lint
-npx vitest run       # 107 pruebas del dominio
-npx vite build       # build de producción
+npm run typecheck --workspace agro-sentinel-web
+npm run lint      --workspace agro-sentinel-web
+npm run test      --workspace agro-sentinel-web   # 107 pruebas, 6 ficheros
+npm run build     --workspace agro-sentinel-web   # tsc --noEmit && vite build
 ```
 
 Las pruebas cubren `src/domain`: psicrometría (contra la tabla 2.3 del FAO-56),
@@ -105,8 +151,23 @@ los paquetes `@cognitex/*` y del *lockfile* raíz, que un contexto limitado a
 docker build -f agro-sentinel/web/Dockerfile \
   --build-arg VITE_FIREBASE_API_KEY=... \
   -t agro-sentinel-web .
-docker run -p 5174:8080 agro-sentinel-web
+docker run -p 8080:8080 agro-sentinel-web
 ```
+
+El contenedor escucha en 8080, que es lo que Cloud Run enruta.
+
+> La entrada `agro-sentinel-web` de [`../docker-compose.yml`](../docker-compose.yml)
+> sigue usando `build: ./agro-sentinel/web` como contexto, que este Dockerfile
+> ya no admite. Usa `docker build -f` hasta que se corrija.
+
+## ☁️ Despliegue
+
+Cloud Run (`cognitex-485919`, `us-east4`) mediante
+`.github/workflows/deploy-agro.yaml`, en cada *push* a `main` que toque
+`agro-sentinel/web/**`, `packages/**` o los manifiestos de la raíz.
+
+**Nada despliega `/edge`, `/cloud` ni `/terraform`.** El filtro de rutas del
+workflow no los incluye y Terraform nunca se ha aplicado.
 
 ## 📚 Documentación
 
