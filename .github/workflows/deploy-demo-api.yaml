@@ -74,10 +74,16 @@ jobs:
           # Manager reference: if the GitHub secret is unset the value is
           # empty, and the service then refuses every write with 503 instead
           # of failing the deploy. Reads keep working either way.
+          # Replace the environment, never merge into it. The default `merge`
+          # only adds and updates, so a variable set once by mistake survives
+          # every later deploy — this service carried a variable literally
+          # named `https://cognitexindustrial.com` across five revisions,
+          # invisible unless you read the resource.
+          env_vars_update_strategy: overwrite
+
           # Semicolons, not commas: deploy-cloudrun joins these lines with
           # `^,^`, so a comma inside a value splits it into a second, bogus
-          # variable. The first deploy of this service literally set an env
-          # var named `https://cognitexindustrial.com`.
+          # variable — which is how that stray variable was created.
           env_vars: |
             GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
             FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
@@ -92,17 +98,32 @@ jobs:
       # worse than a red one, so the URL is printed and probed here.
       - name: Smoke test
         run: |
-          URL='${{ steps.deploy.outputs.url }}'
-          echo "Service URL: $URL"
-          if [ -z "$URL" ]; then
-            echo "::error::deploy-cloudrun returned no URL — the service was not created"
+          # Probe every URL the service might answer on.
+          #
+          # Neither the action output nor `describe --format='value(status.url)'`
+          # is reliable here: both reported the legacy
+          # SERVICE-PROJECTHASH-REGIONCODE.a.run.app form, which does not route
+          # for services created after Google changed the URL format. The
+          # authoritative URL is the one `gcloud run deploy` prints — the
+          # SERVICE-PROJECTNUMBER.REGION.run.app form. This service answered on
+          # the new URL while the old one 404'd for hours of debugging.
+          PROJECT_NUMBER=$(gcloud projects describe "${{ env.PROJECT_ID }}" --format='value(projectNumber)')
+          CANDIDATES="https://${{ env.SERVICE }}-${PROJECT_NUMBER}.${{ env.REGION }}.run.app ${{ steps.deploy.outputs.url }}"
+
+          OK=0
+          for URL in $CANDIDATES; do
+            [ -z "$URL" ] && continue
+            CODE=$(curl -s -o /tmp/health.json -w '%{http_code}' --max-time 30 "$URL/api/health" || echo 000)
+            echo "GET $URL/api/health -> $CODE"
+            if [ "$CODE" = "200" ]; then
+              cat /tmp/health.json; echo
+              echo "SERVICE_URL=$URL" >> "$GITHUB_ENV"
+              OK=1
+              break
+            fi
+          done
+
+          if [ "$OK" != "1" ]; then
+            echo "::error::No candidate URL answered 200. A 403/404 on all of them means either the revision is not serving or --allow-unauthenticated did not apply (the deployer needs run.services.setIamPolicy)."
             exit 1
           fi
-          CODE=$(curl -s -o /tmp/healthz.json -w '%{http_code}' --max-time 30 "$URL/healthz" || echo 000)
-          echo "GET /healthz -> $CODE"
-          cat /tmp/healthz.json || true
-          if [ "$CODE" = "403" ] || [ "$CODE" = "404" ]; then
-            echo "::error::$CODE from a public endpoint usually means --allow-unauthenticated did not apply. The deployer service account needs run.services.setIamPolicy (roles/run.admin alone is not enough when the org enforces domain-restricted sharing)."
-            exit 1
-          fi
-          [ "$CODE" = "200" ] || { echo "::error::unexpected status $CODE"; exit 1; }

@@ -191,7 +191,16 @@ app.post('/api/maintenance/prune', requireIngestToken, async (_req, res) => {
     }
 });
 
-app.get('/healthz', (_req, res) =>
+/*
+ * Under /api, not /healthz.
+ *
+ * A bare /healthz on the *.run.app hostname is answered by the Google
+ * frontend with its own 404 and never reaches this process — verified in
+ * production, where /api/public/demo returned JSON from here while /healthz
+ * on the same host returned Google's error page. transport-sentinel already
+ * uses /api/health for the same reason.
+ */
+app.get('/api/health', (_req, res) =>
     res.json({ ok: true, firestore: isAvailable(), ingestConfigured: Boolean(INGEST_TOKEN) })
 );
 
