@@ -14,6 +14,16 @@ export interface MetricCardProps {
     metric: Metric;
     /** Shown when the figure came from a generator rather than the database. */
     generated?: boolean;
+    /**
+     * Which direction counts as improvement.
+     *
+     * Without this the card coloured every rise green, so a temperature or a
+     * vibration climbing toward its alarm limit read as good news — the
+     * opposite of what the operator needed to see. Defaults to `up` because
+     * that is right for OEE, availability and compliance; pass `down` for
+     * anything you want to fall, and `none` when a change has no valence.
+     */
+    trendDirection?: 'up' | 'down' | 'none';
 }
 
 function formatTrend(trend: number): string {
@@ -21,8 +31,18 @@ function formatTrend(trend: number): string {
     return `${sign}${(trend * 100).toFixed(1)}%`;
 }
 
-export function MetricCard({ metric, generated = false }: MetricCardProps) {
+export function MetricCard({
+    metric,
+    generated = false,
+    trendDirection = 'up',
+}: MetricCardProps) {
     const { label, value, unit, precision, status, trend } = metric;
+
+    const trendColor = (change: number): string => {
+        if (trendDirection === 'none' || change === 0) return 'var(--color-steel)';
+        const improving = trendDirection === 'up' ? change > 0 : change < 0;
+        return improving ? 'var(--color-ok)' : 'var(--color-alert)';
+    };
 
     return (
         <article className="panel p-4">
@@ -44,12 +64,7 @@ export function MetricCard({ metric, generated = false }: MetricCardProps) {
 
             <div className="mt-2 flex items-center gap-2 text-xs">
                 {trend !== null && Number.isFinite(trend) && (
-                    <span
-                        className="tabular"
-                        style={{
-                            color: trend >= 0 ? 'var(--color-ok)' : 'var(--color-alert)',
-                        }}
-                    >
+                    <span className="tabular" style={{ color: trendColor(trend) }}>
                         {formatTrend(trend)}
                     </span>
                 )}

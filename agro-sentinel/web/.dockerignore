@@ -1,0 +1,24 @@
+# Nothing installed, built or secret is ever copied into an image.
+#
+# The image this app used to build had no ignore file and a `COPY . .` after
+# `npm ci`, so the 352 MB node_modules directory sitting in the working copy
+# was copied over the freshly installed one — the build shipped whatever
+# happened to be on the machine.
+#
+# Note on precedence: the Dockerfile now builds from the repository root, so
+# the file Docker consults is the root /.dockerignore, which excludes the same
+# paths for every app. This one still matters for a directory-scoped build
+# (`docker build agro-sentinel/web`, which is what a developer types first)
+# and it documents the intent where the Dockerfile is.
+node_modules
+**/node_modules
+dist
+**/dist
+coverage
+**/coverage
+.git
+.env
+.env.*
+!.env.example
+npm-debug.log*
+*.local

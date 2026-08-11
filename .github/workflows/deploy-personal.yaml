@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]
     paths:
       - "personal-sentinel/**"
+      - "packages/**"
+      - "package.json"
+      - "package-lock.json"
       - ".github/workflows/deploy-personal.yaml"
 
 env:
@@ -13,7 +16,11 @@ env:
   GAR_LOCATION: us-east4
   REPOSITORY: cognitex-repo
   SERVICE: personal-sentinel
-  CONTEXT: ./personal-sentinel
+  # Root context: the app depends on the @cognitex/* workspace packages, which
+  # live outside its directory, and `npm ci` needs the root lockfile to resolve
+  # them. A ./personal-sentinel context cannot see either.
+  CONTEXT: .
+  DOCKERFILE: personal-sentinel/Dockerfile
 
 jobs:
   deploy:
@@ -24,7 +31,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
@@ -44,6 +51,7 @@ jobs:
             --build-arg VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }} \
             --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }} \
             --build-arg VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }} \
+            -f ${{ env.DOCKERFILE }} \
             -t $IMAGE_NAME ${{ env.CONTEXT }}
           docker push $IMAGE_NAME
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV

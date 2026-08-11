@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Agro Sentinel">
+  <rect width="32" height="32" rx="7" fill="#050d1a" />
+  <g fill="none" stroke="#00c896" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 25V13" />
+    <path d="M16 16c0-3.3 2.7-6 6-6 0 3.3-2.7 6-6 6z" />
+    <path d="M16 20c0-3.3-2.7-6-6-6 0 3.3 2.7 6 6 6z" />
+  </g>
+</svg>

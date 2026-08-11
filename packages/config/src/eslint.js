@@ -67,6 +67,17 @@ export function createEslintConfig({ extend = [] } = {}) {
             },
         },
 
+        // TypeScript proves these itself; the base rules only produce false
+        // positives on type-level code — a type-only import reads as an
+        // undefined variable, an overload signature as a redeclaration.
+        {
+            files: ['**/*.{ts,tsx}'],
+            rules: {
+                'no-undef': 'off',
+                'no-redeclare': 'off',
+            },
+        },
+
         // Tests and config files run in Node and may log freely.
         {
             files: ['**/*.test.{js,jsx,ts,tsx}', '**/*.config.{js,ts}'],

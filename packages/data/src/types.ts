@@ -46,6 +46,14 @@ export interface AgroReading extends BaseReading {
     soilMoisture: number;
     /** µmol/m²/s */
     par: number;
+
+    /*
+     * Gateway health — battery, radio, soil EC and substrate temperature —
+     * deliberately lives in agro's own `DeviceHealth`, not here. They are
+     * properties of the hardware and the substrate rather than of a
+     * measurement, and no other platform records them; putting them in a type
+     * all six import would make every console carry a greenhouse's concerns.
+     */
 }
 
 export interface IndustryReading extends BaseReading {

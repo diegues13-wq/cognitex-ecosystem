@@ -6,6 +6,7 @@ import {
     getDocs,
     orderBy,
     query,
+    serverTimestamp,
     where,
 } from 'firebase/firestore';
 
@@ -50,10 +51,19 @@ export async function fetchReadings(options: {
 }): Promise<Page<Reading> | null> {
     if (!isConfigured()) return null;
 
+    /*
+     * Order descending, then reverse.
+     *
+     * `orderBy('at','asc')` with a limit returns the OLDEST slice of the
+     * window — so any asset producing more readings than `max` would render
+     * its stale beginning while a panel labelled "current" sat on top of it.
+     * Taking the newest N and flipping them gives the caller the chronological
+     * series it expects, of the readings that actually matter.
+     */
     const constraints = [
         where('orgId', '==', options.orgId),
         where('at', '>=', Timestamp.fromMillis(options.since)),
-        orderBy('at', 'asc'),
+        orderBy('at', 'desc'),
         fbLimit(options.max ?? 500),
     ];
 
@@ -63,13 +73,15 @@ export async function fetchReadings(options: {
 
     const snapshot = await getDocs(query(collection(getDb(), READINGS), ...constraints));
 
-    return {
-        fromStore: true,
-        items: snapshot.docs.map((doc) => {
-            const data = doc.data();
-            return { ...data, at: toMillis(data.at) } as Reading;
-        }),
-    };
+    const items = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return { ...data, at: toMillis(data.at) } as Reading;
+    });
+
+    // Back to oldest-first for charting.
+    items.reverse();
+
+    return { fromStore: true, items };
 }
 
 export async function appendReading(reading: Reading): Promise<void> {
@@ -77,9 +89,16 @@ export async function appendReading(reading: Reading): Promise<void> {
 
     await addDoc(collection(getDb(), READINGS), {
         ...reading,
-        // Server-assigned so a client with a wrong clock cannot reorder the
-        // series for everyone else.
-        at: Timestamp.fromMillis(reading.at),
+        /*
+         * Server-assigned. A device with a wrong clock would otherwise
+         * reorder the series for everyone reading it, and the ordering is
+         * what every chart and every downtime scan depends on.
+         *
+         * `reading.at` is kept alongside as `deviceAt` so a clock skew stays
+         * diagnosable instead of being silently discarded.
+         */
+        at: serverTimestamp(),
+        deviceAt: Timestamp.fromMillis(reading.at),
     });
 }
 

@@ -1,5 +1,13 @@
 # Guía de Despliegue a Producción - Agro-Sentinel
 
+> **Esta guía describe el objetivo, no el estado actual.** Ninguno de los pasos
+> de las secciones 1 a 3 se ha ejecutado nunca: no existe estado de Terraform,
+> el agente edge no publica y la función de análisis térmico devuelve un valor
+> fijo. Antes de seguirla, lee
+> **[PIPELINE_STATUS.md](./PIPELINE_STATUS.md)**, que enumera qué está roto con
+> referencias a fichero y línea, y qué haría falta para que estos pasos tengan
+> sentido. La sección de la consola web (`/web`) sí está vigente.
+
 Esta guía detalla los pasos para desplegar la arquitectura completa de Agro-Sentinel en un entorno productivo.
 
 ## Prerrequisitos

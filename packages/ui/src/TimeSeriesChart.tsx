@@ -42,17 +42,35 @@ export function TimeSeriesChart({
     const geometry = useMemo(() => {
         if (points.length === 0) return null;
 
-        const values = points.map((p) => p.value);
-        const lo = Math.min(...values, band?.low ?? Infinity);
-        const hi = Math.max(...values, band?.high ?? -Infinity);
+        /*
+         * Two different extents, deliberately.
+         *
+         * The SCALE has to include the band, or an acceptable range drawn
+         * outside the data would fall off the top of the chart. The DATA
+         * extent is what the caption and the screen-reader label report.
+         * Folding them together made a chart with band 0–100 always announce
+         * "0.0 – 100.0" regardless of what the readings did.
+         *
+         * Reduce rather than Math.min(...values): a spread of a large
+         * Firestore page overflows the argument limit and throws.
+         */
+        let dataLo = Infinity;
+        let dataHi = -Infinity;
+        for (const point of points) {
+            if (point.value < dataLo) dataLo = point.value;
+            if (point.value > dataHi) dataHi = point.value;
+        }
+
+        const scaleLo = Math.min(dataLo, band?.low ?? Infinity);
+        const scaleHi = Math.max(dataHi, band?.high ?? -Infinity);
         // A flat series must render as a line, not divide by zero.
-        const span = hi - lo || 1;
+        const span = scaleHi - scaleLo || 1;
         const usable = height - PAD_Y * 2;
 
-        const toY = (value: number) => height - PAD_Y - ((value - lo) / span) * usable;
+        const toY = (value: number) => height - PAD_Y - ((value - scaleLo) / span) * usable;
 
         const coords = points.map((point, i) => {
-            const x = points.length === 1 ? 0 : (i / (points.length - 1)) * VIEW_W;
+            const x = points.length === 1 ? VIEW_W / 2 : (i / (points.length - 1)) * VIEW_W;
             return [x, toY(point.value)] as const;
         });
 
@@ -66,8 +84,11 @@ export function TimeSeriesChart({
             bandRect: band
                 ? { y: toY(band.high), height: Math.abs(toY(band.low) - toY(band.high)) }
                 : null,
-            lo,
-            hi,
+            // A one-point series draws no stroke, so it gets a dot instead of
+            // an empty chart.
+            single: coords.length === 1 ? coords[0]! : null,
+            lo: dataLo,
+            hi: dataHi,
         };
     }, [points, height, band]);
 
@@ -120,6 +141,16 @@ export function TimeSeriesChart({
                     strokeLinejoin="round"
                     vectorEffect="non-scaling-stroke"
                 />
+
+                {geometry.single && (
+                    <circle
+                        cx={geometry.single[0]}
+                        cy={geometry.single[1]}
+                        r="3"
+                        fill="var(--color-brand)"
+                        vectorEffect="non-scaling-stroke"
+                    />
+                )}
             </svg>
 
             <figcaption className="mt-2 flex justify-between text-xs text-steel">

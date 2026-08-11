@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// Agro Sentinel — Firestore security rules.
+//
+// The console reads Firestore directly through the Web SDK; these rules are
+// the access-control boundary a REST API would otherwise be. Two changes over
+// the previous version, both required by the shared packages' tenancy model:
+//
+//  · Reads are scoped to the caller's `orgId` custom claim, not merely to
+//    "any signed-in user". `@cognitex/data` filters every query by orgId and
+//    the rules have to agree, or a missing filter silently widens a query to
+//    every tenant in the project.
+//  · The shared `alerts` collection is readable per tenant, and one field —
+//    `acknowledgedAt` — is writable by an operator. Acknowledging an alarm is
+//    an operator action, not a pipeline one; nothing else about an alert may
+//    be changed from a browser.
+//
+// Writes to `greenhouses` and `readings` remain closed: those come from Cloud
+// Functions using the Admin SDK, which bypasses rules entirely.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function org() {
+      return request.auth != null ? request.auth.token.orgId : null;
+    }
+
+    function inOrg(resource) {
+      return org() != null && resource.data.orgId == org();
+    }
+
+    // Default deny.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Live greenhouse state, written by cloud/main.py.
+    //
+    // Documents published before the pipeline carried an orgId have none;
+    // they are readable by any authenticated user of the project, which is
+    // the pre-existing behaviour. Once the ingest function stamps orgId this
+    // condition should be tightened to `inOrg(resource)` alone.
+    match /greenhouses/{sensorId} {
+      allow read: if request.auth != null
+                  && (!('orgId' in resource.data) || inOrg(resource));
+      allow write: if false;
+
+      match /thermal_scans/{scanId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+
+    // Shared measurement rows — @cognitex/data's `readings`.
+    match /readings/{readingId} {
+      allow read: if inOrg(resource);
+      allow write: if false;
+    }
+
+    // Shared alarm feed. Operators may acknowledge, and may change nothing else.
+    match /alerts/{alertId} {
+      allow read: if inOrg(resource);
+      allow create, delete: if false;
+      allow update: if inOrg(resource)
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['acknowledgedAt']);
+    }
+  }
+}

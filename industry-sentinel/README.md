@@ -1,90 +1,78 @@
 # Industry Sentinel
 
-**Industry Sentinel** is the smart manufacturing and predictive maintenance platform within the Cognitex Industrial Ecosystem. Real-time monitoring for factory floors, production lines, and OEE (Overall Equipment Effectiveness).
+Smart-manufacturing console: OEE, availability, downtime and predictive
+maintenance across five machines.
 
-## Features
+Rewritten in TypeScript on the shared `@cognitex/*` packages. The previous
+version was a single 448-line `Dashboard.jsx` that "navigated" by swapping a
+`selectedVariable` string, and it aliased its physics into agro-sentinel's
+field names — vibration in `vpd`, power in `co2`, OEE in `battery`. It now
+reads `IndustryReading` from `@cognitex/data`, where every measurement carries
+its own name and unit.
 
-- **Real-time Dashboard**: Live monitoring with interactive charts (Recharts)
-- **Geospatial Visualization**: Factory floor mapping via Leaflet
-- **Multi-tenant Admin**: Tenant management panel
-- **AI Chat Assistant**: Conversational AI for plant status queries
-- **Routing**: Multi-page SPA with React Router DOM v7
-- **Theme**: Cyan / Industrial Blue
+## Layout
 
-## Tech Stack
+| Path | What lives there |
+| :--- | :--- |
+| `src/domain` | Pure typed calculations with vitest coverage: OEE decomposition, downtime episodes, MTBF/MTTR, the vibration-trend forecast, alarm rules |
+| `src/data` | Firestore through `@cognitex/data` when configured, a deterministic generator otherwise — and the answer always says which |
+| `src/views` | One view per section of the shell |
+| `src/components` | The panel, the machine picker, the alarm ticker |
 
-| Category | Technology | Version |
-| :--- | :--- | :--- |
-| UI Framework | React | 19 |
-| Build Tool | Vite | 7.3.3 (pinned) |
-| Styling | Tailwind CSS (PostCSS) | 4 |
-| Animations | Framer Motion | 12 |
-| Charts | Recharts | 2 |
-| Maps | Leaflet + React-Leaflet | 5.0.0 (pinned) |
-| Routing | React Router DOM | 7 |
-| Auth / Backend | Firebase | 11 |
-| Icons | Lucide React | 0.563 |
-| Date Utilities | date-fns | 4 |
+Everything else — the console shell, login, theme, metric cards, chart, build
+and lint config — comes from `packages/`.
 
-## Getting Started
+## What the numbers mean
 
-### Prerequisites
-- Node.js v20+
-- npm v10+
+- **Availability** is running time over *scheduled* time. The shift is
+  `[06:00, 22:00)`, so a machine that is off at 03:00 is not downtime.
+- **Performance** is mean speed against each machine's own rated speed.
+- **Quality** is not measurable from this telemetry, so it is back-computed
+  from the MES-reported OEE and returns null when it cannot be. A value over
+  100% means the reported OEE cannot be reconciled with the sensors, and the
+  summary says so rather than hiding it.
+- **MTBF/MTTR** are null when nothing failed. A machine that never stopped has
+  no MTBF, and reporting zero says the opposite.
+- **The maintenance horizon** is null when vibration is flat or falling. No
+  fabricated "next service in 340 hrs".
 
-### Installation
+## Running it
+
 ```bash
-cd industry-sentinel
-npm install
-npm run dev
+npm install --workspaces --include-workspace-root   # from the repo root
+npm run dev --workspace industry-sentinel           # http://localhost:5175
 ```
 
-Runs on **port 5175** → [http://localhost:5175](http://localhost:5175)
-
-### Authentication
-
-The app uses dual-mode auth in `src/firebase.js`:
-
-- **Mock mode** (default): Leave `VITE_FIREBASE_API_KEY` empty → auto-login as `Dev User`. No Firebase project needed.
-- **Real mode**: Fill all `VITE_FIREBASE_*` vars → Firebase Email/Password auth.
+Leave `VITE_FIREBASE_API_KEY` empty (see `.env.example`) and the console runs
+unconfigured: open demo login, generated data, and a `Datos simulados` badge on
+every view. It never presents generated numbers as measurement.
 
 ```bash
-cp .env.example .env
-# Edit .env and add your Firebase config values
+npm run typecheck --workspace industry-sentinel
+npm run test --workspace industry-sentinel
+npm run lint --workspace industry-sentinel
+npm run build --workspace industry-sentinel    # tsc --noEmit && vite build
 ```
 
-### Production Build
-```bash
-npm run build    # Output → dist/
-npm run preview  # Preview production build locally
-```
+## Docker
 
-### Docker
+The image builds from the **repository root**: the app depends on workspace
+packages outside its own directory, so an `./industry-sentinel` context cannot
+resolve them.
 
 ```bash
-# Mock auth (no credentials needed)
-docker build -t industry-sentinel .
+docker build -f industry-sentinel/Dockerfile -t industry-sentinel .
 docker run -p 8080:8080 industry-sentinel
-
-# Real Firebase auth
-docker build \
-  --build-arg VITE_FIREBASE_API_KEY=your_key \
-  --build-arg VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com \
-  --build-arg VITE_FIREBASE_PROJECT_ID=your_project_id \
-  --build-arg VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com \
-  --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id \
-  --build-arg VITE_FIREBASE_APP_ID=your_app_id \
-  -t industry-sentinel .
 ```
 
-> Container listens on port **8080** (Cloud Run requirement).
+Firebase config is passed as `--build-arg VITE_FIREBASE_*`, exactly as the
+workflow does. The container listens on 8080 for Cloud Run.
 
 ## Production
 
-**URL**: `https://industry-sentinel-myvq6twbpa-uk.a.run.app`  
-**Platform**: Google Cloud Run (`cognitex-485919`, `us-east4`)  
-**Deploy**: Automatic via GitHub Actions on push to `industry-sentinel/**` on `main`  
-**Auth state**: Mock mode (real Firebase auth pending — see `docs/ARCHITECTURE.md`)
+Deployed to Cloud Run (`cognitex-485919`, `us-east4`) by
+`.github/workflows/deploy-industry.yaml` on pushes to `main` touching
+`industry-sentinel/**`, `packages/**` or the root manifests.
 
 ## License
 
