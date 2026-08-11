@@ -1,0 +1,210 @@
+---
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const cycle = t.home.cycle;
+const phases = cycle.phases;
+---
+
+<section id="ciclo" class="relative overflow-hidden bg-navy-deep py-24 sm:py-32">
+    {/* Depth, drifting slowly against the scroll. */}
+    <div
+        class="pointer-events-none absolute -top-40 left-1/2 size-[52rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.09),transparent_65%)] blur-3xl"
+        data-anim="parallax"
+        data-anim-distance="70"
+        aria-hidden="true"
+    >
+    </div>
+
+    <div class="container-page relative">
+        <header class="max-w-3xl">
+            <p
+                class="mb-4 font-mono text-xs font-semibold tracking-[0.2em] uppercase text-cyan-electric"
+                data-anim="rise"
+            >
+                {cycle.kicker}
+            </p>
+            <h2 class="text-[length:var(--text-h2)]" data-anim="headline">{cycle.title}</h2>
+            <p
+                class="mt-6 text-[length:var(--text-lead)] leading-relaxed text-steel"
+                data-anim="rise"
+                data-anim-delay="120"
+            >
+                {cycle.lead}
+            </p>
+        </header>
+
+        <div class="mt-16 grid gap-8 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-14">
+            {/* The rail */}
+            <div
+                role="tablist"
+                aria-label={cycle.title}
+                class="relative flex flex-col gap-1"
+                data-cycle-rail
+            >
+                {/* The spine the active marker travels along. */}
+                <span
+                    class="absolute top-3 bottom-3 left-[1.4rem] w-px bg-white/10"
+                    aria-hidden="true"></span>
+
+                {
+                    phases.map((phase, i) => (
+                        <button
+                            type="button"
+                            role="tab"
+                            id={`cycle-tab-${phase.id}`}
+                            aria-controls={`cycle-panel-${phase.id}`}
+                            aria-selected={i === 0 ? 'true' : 'false'}
+                            tabindex={i === 0 ? 0 : -1}
+                            data-cycle-tab={phase.id}
+                            class="group relative flex min-h-14 items-center gap-4 rounded-xl px-3 text-left transition-colors duration-300 hover:bg-white/[0.03]"
+                        >
+                            <span
+                                class="relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-navy-deep font-mono text-[11px] font-semibold text-steel transition-[color,border-color,background-color,box-shadow] duration-300 group-aria-selected:border-cyan-electric/60 group-aria-selected:bg-cyan-electric/10 group-aria-selected:text-cyan-electric group-aria-selected:shadow-[0_0_18px_-4px_rgba(0,229,255,0.55)]"
+                                aria-hidden="true"
+                            >
+                                {phase.n}
+                            </span>
+                            <span class="font-display text-base font-medium text-steel transition-colors duration-300 group-aria-selected:text-ice">
+                                {phase.name}
+                            </span>
+                        </button>
+                    ))
+                }
+            </div>
+
+            {/* The detail */}
+            <div class="relative min-h-[19rem]">
+                {
+                    phases.map((phase, i) => (
+                        <div
+                            role="tabpanel"
+                            id={`cycle-panel-${phase.id}`}
+                            aria-labelledby={`cycle-tab-${phase.id}`}
+                            data-cycle-panel={phase.id}
+                            hidden={i !== 0}
+                            class="glass p-7 sm:p-9"
+                        >
+                            <p class="font-mono text-xs tracking-[0.18em] uppercase text-cyan-electric">
+                                {cycle.phaseLabel} {phase.n} · {phase.name}
+                            </p>
+
+                            <h3 class="mt-5 font-display text-[length:var(--text-h3)] leading-tight">
+                                {phase.headline}
+                            </h3>
+
+                            <p class="mt-5 max-w-xl text-[length:var(--text-lead)] leading-relaxed text-steel">
+                                {phase.body}
+                            </p>
+
+                            <p class="mt-8 border-t border-white/8 pt-5 font-mono text-xs leading-relaxed tracking-wide text-steel/75">
+                                {phase.detail}
+                            </p>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    import { animate } from 'motion';
+
+    const rail = document.querySelector<HTMLElement>('[data-cycle-rail]');
+
+    if (rail) {
+        const tabs = Array.from(rail.querySelectorAll<HTMLButtonElement>('[data-cycle-tab]'));
+        const panels = tabs.map((tab) =>
+            document.querySelector<HTMLElement>(`[data-cycle-panel="${tab.dataset.cycleTab}"]`)
+        );
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        let index = 0;
+        let timer = 0;
+        // Stops for good once the visitor picks a phase — continuing to cycle
+        // under someone who is reading is the thing that makes carousels
+        // hated.
+        let surrendered = false;
+
+        const show = (next: number) => {
+            if (next === index) return;
+
+            tabs[index]?.setAttribute('aria-selected', 'false');
+            tabs[index]?.setAttribute('tabindex', '-1');
+            const leaving = panels[index];
+
+            index = next;
+
+            tabs[index]?.setAttribute('aria-selected', 'true');
+            tabs[index]?.setAttribute('tabindex', '0');
+            const entering = panels[index];
+
+            if (leaving) leaving.hidden = true;
+            if (!entering) return;
+
+            entering.hidden = false;
+
+            if (!reduced) {
+                animate(
+                    entering,
+                    { opacity: [0, 1], transform: ['translateY(14px)', 'translateY(0px)'] },
+                    { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+                );
+            }
+        };
+
+        const stop = () => {
+            surrendered = true;
+            clearInterval(timer);
+        };
+
+        tabs.forEach((tab, i) => {
+            tab.addEventListener('click', () => {
+                stop();
+                show(i);
+            });
+        });
+
+        // Roving tabindex: arrows move between phases, as a tablist should.
+        rail.addEventListener('keydown', (event) => {
+            const keys = ['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft', 'Home', 'End'];
+            if (!keys.includes(event.key)) return;
+
+            event.preventDefault();
+            stop();
+
+            let next = index;
+            if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+                next = (index + 1) % tabs.length;
+            } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+                next = (index - 1 + tabs.length) % tabs.length;
+            } else if (event.key === 'Home') {
+                next = 0;
+            } else {
+                next = tabs.length - 1;
+            }
+
+            show(next);
+            tabs[next]?.focus();
+        });
+
+        // Advance on its own only while on screen, and only until touched.
+        if (!reduced && 'IntersectionObserver' in window) {
+            new IntersectionObserver(
+                ([entry]) => {
+                    clearInterval(timer);
+                    if (entry?.isIntersecting && !surrendered) {
+                        timer = window.setInterval(() => show((index + 1) % tabs.length), 5200);
+                    }
+                },
+                { threshold: 0.35 }
+            ).observe(rail);
+        }
+    }
+</script>

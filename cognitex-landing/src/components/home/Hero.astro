@@ -4,7 +4,7 @@ import NeuralField from '~/components/NeuralField.astro';
 import Button from '~/components/ui/Button.astro';
 import logo from '~/assets/cognitex_icon.png';
 import { whatsappLink } from '~/config';
-import { route, useTranslations, type Locale } from '~/i18n/utils';
+import { useTranslations, type Locale } from '~/i18n/utils';
 
 interface Props {
     locale: Locale;
@@ -13,8 +13,6 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const hero = t.home.hero;
-
-const stats = [hero.stats.assets, hero.stats.events, hero.stats.uptime, hero.stats.sectors];
 ---
 
 <section
@@ -82,7 +80,7 @@ const stats = [hero.stats.assets, hero.stats.events, hero.stats.uptime, hero.sta
                     >
                         {hero.ctaPrimary}
                     </Button>
-                    <Button href={route('demo', locale)} variant="ghost" size="lg">
+                    <Button href="#ciclo" variant="ghost" size="lg">
                         {hero.ctaSecondary}
                     </Button>
                 </div>
@@ -106,24 +104,41 @@ const stats = [hero.stats.assets, hero.stats.events, hero.stats.uptime, hero.sta
             </div>
         </div>
 
-        <dl
-            class="mt-16 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-white/10 pt-8 lg:grid-cols-4"
+        {/* Invitation rather than a metrics band. The story starts one screen
+            down, so the hero's job is to make you want to go there. */}
+        <a
+            href="#ciclo"
+            class="group mt-20 inline-flex items-center gap-3 text-sm text-steel transition-colors duration-300 hover:text-ice"
         >
-            {
-                stats.map((stat) => (
-                    <div>
-                        <dt class="sr-only">{stat.label}</dt>
-                        <dd>
-                            <span class="block font-display text-3xl font-semibold text-cyan-electric tabular sm:text-4xl">
-                                {stat.value}
-                            </span>
-                            <span class="mt-1.5 block text-sm leading-snug text-steel">
-                                {stat.label}
-                            </span>
-                        </dd>
-                    </div>
-                ))
-            }
-        </dl>
+            <span
+                class="flex size-10 items-center justify-center rounded-full border border-white/15 transition-colors duration-300 group-hover:border-cyan-electric/50"
+                aria-hidden="true"
+            >
+                <svg
+                    class="size-4 text-cyan-electric motion-safe:animate-[nudge_2.4s_ease-in-out_infinite]"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M8 3v10M4 9l4 4 4-4" />
+                </svg>
+            </span>
+            {hero.scrollCue}
+        </a>
     </div>
 </section>
+
+<style>
+    @keyframes nudge {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(3px);
+        }
+    }
+</style>

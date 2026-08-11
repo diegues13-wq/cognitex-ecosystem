@@ -1,0 +1,48 @@
+---
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const tension = t.home.tension;
+---
+
+{/*
+  The hook. Deliberately sparse — one statement, a lot of air around it.
+  It opens in the reader's operation rather than in our credentials, because
+  someone arriving for the first time has no reason yet to care who we are.
+*/}
+<section class="relative overflow-hidden bg-navy-900 py-28 sm:py-40">
+    <div
+        class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-electric/30 to-transparent"
+        aria-hidden="true"
+    >
+    </div>
+
+    <div class="container-page relative">
+        <p
+            class="mb-6 font-mono text-xs font-semibold tracking-[0.2em] uppercase text-cyan-electric"
+            data-anim="rise"
+        >
+            {tension.kicker}
+        </p>
+
+        <h2 class="max-w-4xl text-[length:var(--text-h2)] leading-[1.08]" data-anim="headline">
+            {tension.title}<br />
+            <span class="text-steel">{tension.titleAccent}</span>
+        </h2>
+
+        <div class="mt-12 grid gap-8 sm:grid-cols-2 sm:gap-14" data-anim="stagger">
+            {
+                tension.body.map((paragraph: string) => (
+                    <p class="text-[length:var(--text-lead)] leading-relaxed text-steel">
+                        {paragraph}
+                    </p>
+                ))
+            }
+        </div>
+    </div>
+</section>

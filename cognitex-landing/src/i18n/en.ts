@@ -50,13 +50,19 @@ export const en: Translated<Dictionary> = {
             lead: 'We bring together edge hardware, real-time analytics and expert AI so your plant, your fleet and your customer service stop reacting and start anticipating.',
             slogan: 'From raw data to operational command.',
             ctaPrimary: 'Tell us your challenge',
-            ctaSecondary: 'See the live demo',
-            stats: {
-                assets: { value: '850+', label: 'Assets monitored' },
-                events: { value: '1.2M', label: 'Events per second' },
-                uptime: { value: '99.97%', label: 'Uptime SLA' },
-                sectors: { value: '12+', label: 'Industrial sectors' },
-            },
+            ctaSecondary: 'See how it works',
+            scrollCue: 'The data cycle',
+        },
+
+        /* The hook. Opens in the reader's world, not in our credentials. */
+        tension: {
+            kicker: 'The starting point',
+            title: 'Your operation is already talking.',
+            titleAccent: 'Nobody is listening.',
+            body: [
+                'The motor that has been vibrating differently since Tuesday. The fuel-up that does not square with the kilometers. The message that came in at 9pm on a Saturday and nobody answered.',
+                'Those are signals. They exist today, inside your operation, and they are lost because nothing is capturing them. The distance between a plant that reacts and one that anticipates is not more technology: it is listening to what is already there.',
+            ],
         },
 
         identity: {
@@ -64,7 +70,7 @@ export const en: Translated<Dictionary> = {
             title: 'We are not a technology vendor. We are the digital brain of your operation.',
             body: [
                 'We integrate edge hardware, cloud computing and expert AI systems to turn industrial infrastructure into intelligent assets: machines that warn before they fail, fleets that explain their own consumption, processes that correct themselves.',
-                'We come from operating and maintaining critical infrastructure — a USD 2 billion system at the Quito Metro — not from a sales deck. That is where you learn to distrust a pretty dashboard and to demand an instrument behind every number.',
+                'We come from maintaining critical infrastructure, where a failure is not a ticket in a queue: it is a stopped operation and people waiting. That is where you learn to distrust pretty dashboards and to demand an instrument behind every number.',
             ],
             pillars: {
                 edge: {
@@ -82,6 +88,60 @@ export const en: Translated<Dictionary> = {
             },
             commitment:
                 'Our commitment is measurable: zero unplanned downtime, maximum efficiency, and autonomous decisions backed by data you can audit.',
+        },
+
+        /*
+         * The centerpiece. Everything Cognitex sells is one of these five
+         * stages; the products further down are this cycle applied to a
+         * domain. It is the spine of the story, so it gets the most room.
+         */
+        cycle: {
+            kicker: 'How it works',
+            title: 'The data cycle',
+            lead: 'A data point that never closes the loop is a cost. This is the full path, from the physical signal to the decision that makes itself — and where we come in depends on where your operation stands today.',
+            phaseLabel: 'Phase',
+            phases: [
+                {
+                    id: 'consultoria',
+                    n: '01',
+                    name: 'Consulting',
+                    headline: 'First we find out what hurts',
+                    body: 'Before we install a single sensor, we walk your operation and measure the baseline. Without it, any improvement we promise you later is an opinion.',
+                    detail: 'Instrumented diagnostic · Measured baseline · 3× guarantee',
+                },
+                {
+                    id: 'captura',
+                    n: '02',
+                    name: 'Capture',
+                    headline: 'We instrument physical reality',
+                    body: 'Sensors, PLCs and gateways that read what the machine does, not what the shift reports. The signal leaves the plant floor without depending on someone writing it down.',
+                    detail: 'Industrial sensing · Modbus and OPC-UA · Edge gateways',
+                },
+                {
+                    id: 'procesamiento',
+                    n: '03',
+                    name: 'Processing',
+                    headline: 'We clean, correlate, persist',
+                    body: 'Raw data lies: it cuts out, it duplicates, it arrives late. We normalize it and store it with its context, so that two years from now it still means the same thing.',
+                    detail: 'Real-time ingestion · Time series · Traceability',
+                },
+                {
+                    id: 'analitica',
+                    n: '04',
+                    name: 'Analytics',
+                    headline: 'We find the pattern before the operator does',
+                    body: 'Models that learn the normal behavior of each asset and speak up when it drifts. The alert arrives while it is still maintenance, not once it is already downtime.',
+                    detail: 'Anomaly detection · Predictive maintenance · Live dashboards',
+                },
+                {
+                    id: 'autonomia',
+                    n: '05',
+                    name: 'Autonomy',
+                    headline: 'The system decides and you supervise',
+                    body: 'Agents that answer, adjust and escalate on their own, inside the limits you set. Your people stop watching screens and go back to doing engineering.',
+                    detail: 'AI agents · Guardrailed rules · Monthly report in USD',
+                },
+            ],
         },
 
         pain: {
@@ -155,8 +215,8 @@ export const en: Translated<Dictionary> = {
             title: 'Field engineering, not slide decks',
             cards: {
                 metro: {
-                    title: 'Quito Metro',
-                    body: 'Operation and maintenance of a USD 2 billion system. That is where you learn that a badly placed sensor costs more than the sensor.',
+                    title: 'Critical infrastructure',
+                    body: 'We come from running systems where a failure stops the service and people notice. That is where you learn that a badly placed sensor costs more than the sensor.',
                 },
                 cross: {
                     title: 'OT + IT + AI',
@@ -441,7 +501,7 @@ export const en: Translated<Dictionary> = {
         title: 'Engineer to engineer',
         lead: 'Cognitex came out of operating critical infrastructure, not out of a sales deck.',
         body: [
-            'We come from the operation and maintenance of the Quito Metro, a USD 2 billion system where a failure is not a ticket: it is a station full of people waiting. That is where you learn to distrust pretty dashboards and to demand that every number have an instrument behind it.',
+            'We come from operating and maintaining critical infrastructure, where a failure is not a ticket in a queue: it is a stopped service and people waiting. That is where you learn to distrust pretty dashboards and to demand an instrument behind every number.',
             'Most suppliers know industrial automation or they know software. The money shows up at the intersection of the two, when a PLC hands clean data to a cloud that an artificial intelligence can use to decide. That intersection is what we do.',
             'We run our own company on the same agents we sell, and we monitor our office and our vehicle with the same systems. What you see in the live demo is our operation, not a simulation.',
         ],

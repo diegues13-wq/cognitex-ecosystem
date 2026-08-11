@@ -56,29 +56,12 @@ const t = useTranslations(locale);
         <Analytics {locale} />
 
         <script>
-            // Staggered section reveal. The `reveal-ready` class is added by JS,
-            // so with JS off nothing is ever hidden.
-            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            const targets = document.querySelectorAll<HTMLElement>('[data-reveal]');
+            // One motion system for the whole site — see src/lib/motion.ts.
+            // Elements are hidden by JS only, so with scripting off every
+            // section is simply visible.
+            import { initMotion } from '~/lib/motion';
 
-            if (!reduced && targets.length && 'IntersectionObserver' in window) {
-                document.body.classList.add('reveal-ready');
-
-                const observer = new IntersectionObserver(
-                    (entries) => {
-                        for (const entry of entries) {
-                            if (!entry.isIntersecting) continue;
-                            const el = entry.target as HTMLElement;
-                            const delay = Number(el.dataset.revealDelay ?? 0);
-                            setTimeout(() => el.classList.add('is-visible'), delay);
-                            observer.unobserve(el);
-                        }
-                    },
-                    { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
-                );
-
-                targets.forEach((el) => observer.observe(el));
-            }
+            initMotion();
         </script>
     </body>
 </html>

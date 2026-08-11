@@ -43,13 +43,19 @@ export const es = {
             lead: 'Unificamos hardware de borde, analítica en tiempo real e IA experta para que su planta, su flota y su atención dejen de reaccionar y empiecen a anticiparse.',
             slogan: 'Del dato bruto al dominio operativo.',
             ctaPrimary: 'Cuéntenos su desafío',
-            ctaSecondary: 'Ver la demo viva',
-            stats: {
-                assets: { value: '850+', label: 'Activos monitoreados' },
-                events: { value: '1.2M', label: 'Eventos por segundo' },
-                uptime: { value: '99.97%', label: 'Uptime SLA' },
-                sectors: { value: '12+', label: 'Sectores industriales' },
-            },
+            ctaSecondary: 'Ver cómo funciona',
+            scrollCue: 'El ciclo del dato',
+        },
+
+        /* The hook. Opens in the reader's world, not in our credentials. */
+        tension: {
+            kicker: 'El punto de partida',
+            title: 'Su operación ya está hablando.',
+            titleAccent: 'Nadie la está escuchando.',
+            body: [
+                'El motor que vibra distinto desde el martes. La tanqueada que no cuadra con los kilómetros. El mensaje que llegó a las 21h00 de un sábado y nadie respondió.',
+                'Son señales. Existen hoy, en su operación, y se pierden porque no hay nada capturándolas. La distancia entre una planta que reacciona y una que se anticipa no es más tecnología: es escuchar lo que ya está ahí.',
+            ],
         },
 
         identity: {
@@ -57,7 +63,7 @@ export const es = {
             title: 'No somos un proveedor de tecnología. Somos el cerebro digital de su operación.',
             body: [
                 'Integramos hardware de borde, computación en la nube y sistemas de IA experta para convertir infraestructura industrial en activos inteligentes: máquinas que avisan antes de fallar, flotas que explican su propio consumo, procesos que se corrigen solos.',
-                'Venimos de operar y mantener infraestructura crítica —un sistema de USD 2 000 millones en el Metro de Quito—, no de una presentación de ventas. Ahí se aprende a desconfiar de los tableros bonitos y a exigir que cada número tenga un instrumento detrás.',
+                'Venimos del mantenimiento de infraestructura crítica, donde una falla no es un ticket en una cola: es una operación detenida y gente esperando. Ahí se aprende a desconfiar de los tableros bonitos y a exigir que cada número tenga un instrumento detrás.',
             ],
             pillars: {
                 edge: {
@@ -75,6 +81,60 @@ export const es = {
             },
             commitment:
                 'Nuestro compromiso es medible: cero tiempo de inactividad no planificado, eficiencia máxima y decisiones autónomas sostenidas por datos que usted puede auditar.',
+        },
+
+        /*
+         * The centerpiece. Everything Cognitex sells is one of these five
+         * stages; the products further down are this cycle applied to a
+         * domain. It is the spine of the story, so it gets the most room.
+         */
+        cycle: {
+            kicker: 'Cómo funciona',
+            title: 'El ciclo del dato',
+            lead: 'Un dato que no cierra el círculo es un costo. Este es el recorrido completo, de la señal física a la decisión que se toma sola — y el punto donde entramos depende de dónde esté hoy su operación.',
+            phaseLabel: 'Fase',
+            phases: [
+                {
+                    id: 'consultoria',
+                    n: '01',
+                    name: 'Consultoría',
+                    headline: 'Primero entendemos qué duele',
+                    body: 'Antes de instalar un solo sensor, recorremos su operación y medimos la línea base. Sin ella, cualquier mejora que le prometamos después es una opinión.',
+                    detail: 'Diagnóstico instrumentado · Línea base medida · Garantía 3×',
+                },
+                {
+                    id: 'captura',
+                    n: '02',
+                    name: 'Captura',
+                    headline: 'Instrumentamos la realidad física',
+                    body: 'Sensores, PLC y gateways que leen lo que la máquina hace, no lo que el turno reporta. La señal sale del piso de planta sin depender de que alguien la anote.',
+                    detail: 'Sensórica industrial · Modbus y OPC-UA · Gateways en el borde',
+                },
+                {
+                    id: 'procesamiento',
+                    n: '03',
+                    name: 'Procesamiento',
+                    headline: 'Limpiamos, correlacionamos, persistimos',
+                    body: 'El dato crudo miente: se corta, se duplica, llega tarde. Lo normalizamos y lo guardamos con su contexto, para que dos años después siga significando lo mismo.',
+                    detail: 'Ingesta en tiempo real · Series temporales · Trazabilidad',
+                },
+                {
+                    id: 'analitica',
+                    n: '04',
+                    name: 'Analítica',
+                    headline: 'Encontramos el patrón antes que el operador',
+                    body: 'Modelos que aprenden el comportamiento normal de cada activo y avisan cuando se desvía. La alerta llega mientras todavía es mantenimiento, no cuando ya es paro.',
+                    detail: 'Detección de anomalías · Mantenimiento predictivo · Tableros vivos',
+                },
+                {
+                    id: 'autonomia',
+                    n: '05',
+                    name: 'Autonomía',
+                    headline: 'El sistema decide y usted supervisa',
+                    body: 'Agentes que responden, ajustan y escalan solos dentro de los límites que usted define. Su gente deja de vigilar pantallas y vuelve a hacer ingeniería.',
+                    detail: 'Agentes de IA · Reglas con guardarraíles · Informe mensual en USD',
+                },
+            ],
         },
 
         pain: {
@@ -148,8 +208,8 @@ export const es = {
             title: 'Ingeniería de campo, no diapositivas',
             cards: {
                 metro: {
-                    title: 'Metro de Quito',
-                    body: 'Operación y mantenimiento de un sistema de USD 2 000 millones. Ahí se aprende que un sensor mal puesto cuesta más que el sensor.',
+                    title: 'Infraestructura crítica',
+                    body: 'Venimos de operar sistemas donde una falla detiene el servicio y la gente lo nota. Ahí se aprende que un sensor mal puesto cuesta más que el sensor.',
                 },
                 cross: {
                     title: 'OT + IT + IA',
@@ -434,7 +494,7 @@ export const es = {
         title: 'De ingeniero a ingeniero',
         lead: 'Cognitex nació de operar infraestructura crítica, no de una presentación de ventas.',
         body: [
-            'Venimos de la operación y el mantenimiento del Metro de Quito, un sistema de USD 2 000 millones donde una falla no es un ticket: es una estación llena de gente esperando. Ahí se aprende a desconfiar de los tableros bonitos y a exigir que cada número tenga un instrumento detrás.',
+            'Venimos de la operación y el mantenimiento de infraestructura crítica, donde una falla no es un ticket en una cola: es un servicio detenido y gente esperando. Ahí se aprende a desconfiar de los tableros bonitos y a exigir que cada número tenga un instrumento detrás.',
             'La mayoría de proveedores sabe de automatización industrial o sabe de software. El dinero aparece en el cruce de los dos, cuando un PLC entrega datos limpios a una nube que una inteligencia artificial puede usar para decidir. Ese cruce es lo que hacemos.',
             'Corremos nuestra propia empresa con los mismos agentes que vendemos y monitoreamos nuestra oficina y nuestro vehículo con los mismos sistemas. Lo que ve en la demo viva es nuestra operación, no una simulación.',
         ],
