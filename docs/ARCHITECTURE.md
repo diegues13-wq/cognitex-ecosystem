@@ -21,16 +21,13 @@ the `@cognitex/*` packages; `cognitex-landing` is not, and installs on its own.
 | Directory | Workspace name | Role | Deploys to | Dev port |
 | :--- | :--- | :--- | :--- | :--- |
 | `agro-sentinel/web` | `agro-sentinel-web` | Greenhouse climate, ISA-18.2 alarms, thermal scans | Cloud Run | 5174 |
-| `cash-sentinel` | `cash-sentinel` | Public USD ⇄ RUB remittance calculator | Cloud Run | 5175 |
+| `cash-sentinel` | `cash-sentinel` | Public USD ⇄ RUB remittance calculator | Cloud Run | 5179 |
 | `industry-sentinel` | `industry-sentinel` | OEE, availability, downtime, maintenance | Cloud Run | 5175 |
 | `personal-sentinel` | `personal-sentinel` | Fatigue, exposure, PPE, man-down | Cloud Run | 5176 |
 | `transport-sentinel` | `transport-sentinel` | Rail operations control centre | Cloud Run | 5177 |
 | `productivity-sentinel` | `productivity-sentinel` | Last Planner: failure log, PPC, constraints | Cloud Run | 5178 |
 | `cognitex-landing` | — | Corporate site, Astro static | Firebase Hosting | 4321 |
 | `services/demo-api` | `demo-api` | Live-demo feed behind the landing | Cloud Run | 8080 |
-
-`cash-sentinel` and `industry-sentinel` are both configured for 5175 and cannot
-run concurrently without an override.
 
 `agro-sentinel` is the only multi-component app: `/web` (the console),
 `/edge` (Python gateway), `/cloud` (Python Cloud Functions) and `/terraform`.
@@ -47,8 +44,8 @@ cites file and line.
                "productivity-sentinel", "transport-sentinel"]
 ```
 
-`services/*` currently matches nothing — there is no `services/` directory.
-`transport-sentinel/api` is intentionally excluded: it is a separate npm
+`services/*` matches `services/demo-api`, the Express service feeding the
+landing's live demo. `transport-sentinel/api` is intentionally excluded: it is a separate npm
 package with its own lockfile so the API image installs without the frontend's
 dependency tree.
 
@@ -306,7 +303,51 @@ longer accepts arbitrary credentials.
 
 ---
 
-## 7. Known issues & past fixes — do not revert
+## 7. Traps that have already cost a day
+
+### The Firebase plan and GCP billing are one switch, seen from two consoles
+
+Selecting the Spark (free) plan in the Firebase console **unlinks the billing
+account from the GCP project**. Nothing in that dialog mentions Cloud Run,
+Firestore or Vertex AI, and the failure arrives later and somewhere else.
+
+What it looks like when it happens: every Cloud Run service in the project
+answers **HTTP 500**, and any workflow pushing an image fails with
+`denied: This API method requires billing to be enabled` — *after* building
+the image successfully, so the logs look like a code problem right up to the
+last line. Firebase Hosting keeps serving, because static hosting is inside
+the free tier; that makes the site look healthy while every console behind it
+is down.
+
+Diagnose it in one command:
+
+```bash
+gcloud beta billing projects describe cognitex-485919   # billingEnabled: true
+```
+
+Cloud Run requires the **Blaze** plan. Services recover on their own once
+billing is restored — no redeploy needed.
+
+### Cloud Run's reported URL is not always the one that routes
+
+See §4. `status.url` and the deploy action's output both report the legacy
+`SERVICE-PROJECTHASH-REGIONCODE.a.run.app` form, which does not route for
+recently created services. The authoritative URL is the one `gcloud run
+deploy` prints.
+
+### A workflow can go green having deployed nothing
+
+`deploy-cloudrun` joins `env_vars` with `^,^`, so a comma inside a value
+splits it into a second, malformed variable. gcloud rejects the command and
+the action still reports success — the step finished in twelve seconds having
+created no service. Every Cloud Run workflow should end with a smoke test that
+probes `/api/health`; `deploy-demo-api.yaml` shows the pattern. Also set
+`env_vars_update_strategy: overwrite`, because the default merges and a
+variable set once by mistake survives every later deploy.
+
+---
+
+## 8. Known issues & past fixes — do not revert
 
 | Issue | Fix |
 | :--- | :--- |
@@ -335,7 +376,7 @@ customers' own laptops rather than on panel PCs, and it has not been migrated.
 
 ---
 
-## 8. Open work
+## 9. Open work
 
 - **`services/*` is declared as a workspace glob but `services/` does not
   exist.** Either a service is expected to land there or the glob should go.
