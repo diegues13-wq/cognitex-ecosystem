@@ -1,6 +1,8 @@
 ---
+import { Image } from 'astro:assets';
+import NeuralField from '~/components/NeuralField.astro';
 import Button from '~/components/ui/Button.astro';
-import Stat from '~/components/ui/Stat.astro';
+import logo from '~/assets/cognitex_icon.png';
 import { whatsappLink } from '~/config';
 import { route, useTranslations, type Locale } from '~/i18n/utils';
 
@@ -12,139 +14,116 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const hero = t.home.hero;
 
-// Placeholder telemetry until /api/public/demo exists. Values are rendered
-// server-side so the figures are in the HTML; the live feed will replace them.
-const counters = {
-    power: 4.7,
-    distance: 38,
-    queries: 126,
-};
+const stats = [hero.stats.assets, hero.stats.events, hero.stats.uptime, hero.stats.sectors];
 ---
 
 <section
-    class="relative flex min-h-[calc(100dvh-5rem)] items-center overflow-hidden bg-navy-900 py-16"
+    class="relative flex min-h-[calc(100dvh-5rem)] flex-col justify-center overflow-hidden bg-navy-900 py-16"
 >
-    {/* Hexagonal brand mesh. Pure inline SVG (~1KB) rather than a WebGL
-        canvas — spec §4.8 caps initial JS at 150KB and a Three.js scene would
-        consume the whole budget for a background.
-        No negative z-index: the section paints its own background, which would
-        cover anything behind it in the same stacking context. */}
-    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-        <svg class="size-full opacity-[0.14]" data-hex-mesh>
-            <defs>
-                <pattern
-                    id="hexmesh"
-                    width="56"
-                    height="97"
-                    patternUnits="userSpaceOnUse"
-                    patternTransform="scale(1.4)"
-                >
-                    <path
-                        d="M28 0L56 16v32L28 64L0 48V16Z M28 64v33"
-                        fill="none"
-                        stroke="#00E5FF"
-                        stroke-width="1"
-                    ></path>
-                </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#hexmesh)"></rect>
-        </svg>
+    <NeuralField density={110} />
 
-        {/* Cyan bloom anchored to the mark's optical centre. */}
-        <div
-            class="absolute top-1/4 -right-24 size-[36rem] rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.16),transparent_65%)] blur-2xl"
-        >
-        </div>
-        <div
-            class="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-navy-900 to-transparent"
-        >
-        </div>
+    {/* Vignette. Tuned deliberately low: the mesh is the brand, so it stays
+        visible through the whole hero and only darkens enough behind the
+        headline to hold contrast. White on navy has margin to spare — an
+        earlier, heavier version hid the network everywhere except the
+        corners, which defeated the point of having it. */}
+    <div
+        class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_28%_45%,rgba(5,13,26,0.82)_0%,rgba(5,13,26,0.45)_45%,transparent_78%)]"
+        aria-hidden="true"
+    >
+    </div>
+    <div
+        class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-navy-900 to-transparent"
+        aria-hidden="true"
+    >
     </div>
 
     <div class="container-page relative z-10">
         <p
-            class="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-electric/25 px-4 py-1.5 text-xs font-semibold tracking-[0.16em] uppercase text-cyan-electric"
+            class="mb-7 inline-flex items-center gap-2.5 rounded-full border border-cyan-electric/25 bg-navy-900/40 px-4 py-1.5 font-mono text-[11px] font-medium tracking-[0.18em] text-cyan-electric"
         >
-            <span class="relative flex size-2">
+            <span class="relative flex size-2" aria-hidden="true">
                 <span
                     class="absolute inline-flex size-full animate-ping rounded-full bg-green-ok opacity-70"
                 ></span>
                 <span class="relative inline-flex size-2 rounded-full bg-green-ok"></span>
             </span>
-            {hero.eyebrow}
+            {hero.status}
         </p>
 
-        <h1 class="max-w-4xl text-[length:var(--text-hero)]">
-            {hero.title}<br />
-            <span class="text-cyan-electric text-glow">{hero.titleAccent}</span>
-        </h1>
+        <div class="flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-16">
+            <div class="max-w-3xl">
+                <h1 class="text-[length:var(--text-hero)]">
+                    {hero.title}<br />
+                    <span class="text-cyan-electric text-glow">{hero.titleAccent}</span>
+                </h1>
 
-        <p class="mt-7 max-w-2xl text-[length:var(--text-lead)] leading-relaxed text-steel">
-            {hero.lead}
-        </p>
+                <p class="mt-6 font-display text-[length:var(--text-h3)] text-ice/90">
+                    {hero.subtitle}
+                </p>
 
-        <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button
-                href={whatsappLink()}
-                size="lg"
-                external
-                data-analytics="click_whatsapp"
-                data-source="hero"
-            >
-                {hero.ctaPrimary}
-            </Button>
-            <Button href={route('demo', locale)} variant="ghost" size="lg">
-                {hero.ctaSecondary}
-            </Button>
+                <p class="mt-5 max-w-2xl text-[length:var(--text-lead)] leading-relaxed text-steel">
+                    {hero.lead}
+                </p>
+
+                <p
+                    class="mt-6 border-l-2 border-cyan-electric/40 pl-4 font-mono text-sm text-cyan-electric/85"
+                >
+                    {hero.slogan}
+                </p>
+
+                <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <Button
+                        href={whatsappLink()}
+                        size="lg"
+                        external
+                        data-analytics="click_whatsapp"
+                        data-source="hero"
+                    >
+                        {hero.ctaPrimary}
+                    </Button>
+                    <Button href={route('demo', locale)} variant="ghost" size="lg">
+                        {hero.ctaSecondary}
+                    </Button>
+                </div>
+            </div>
+
+            {/* The mark, sitting inside the mesh it is drawn from. */}
+            <div class="relative hidden shrink-0 lg:block" aria-hidden="true">
+                <div
+                    class="absolute inset-0 -m-16 rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.14),transparent_68%)] blur-2xl"
+                >
+                </div>
+                <Image
+                    src={logo}
+                    alt=""
+                    width={224}
+                    height={254}
+                    densities={[1, 2]}
+                    loading="eager"
+                    class="relative w-56 drop-shadow-[0_0_40px_rgba(0,229,255,0.25)]"
+                />
+            </div>
         </div>
 
-        {/* Live counters from our own operation (spec §4.3.1). */}
-        <div class="mt-16 border-t border-white/8 pt-8">
-            <p class="mb-6 text-xs font-medium tracking-wide text-steel/80">
-                {hero.liveNote}
-            </p>
-            <dl class="grid gap-8 sm:grid-cols-3">
-                <Stat
-                    value={counters.power}
-                    decimals={1}
-                    unit={hero.counters.power.unit}
-                    label={hero.counters.power.label}
-                />
-                <Stat
-                    value={counters.distance}
-                    unit={hero.counters.distance.unit}
-                    label={hero.counters.distance.label}
-                />
-                <Stat value={counters.queries} label={hero.counters.queries.label} />
-            </dl>
-        </div>
+        <dl
+            class="mt-16 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-white/10 pt-8 lg:grid-cols-4"
+        >
+            {
+                stats.map((stat) => (
+                    <div>
+                        <dt class="sr-only">{stat.label}</dt>
+                        <dd>
+                            <span class="block font-display text-3xl font-semibold text-cyan-electric tabular sm:text-4xl">
+                                {stat.value}
+                            </span>
+                            <span class="mt-1.5 block text-sm leading-snug text-steel">
+                                {stat.label}
+                            </span>
+                        </dd>
+                    </div>
+                ))
+            }
+        </dl>
     </div>
 </section>
-
-<script>
-    // Parallax drift on the mesh — a few lines instead of a 3D engine.
-    // Disabled under reduced motion and on coarse pointers (no hover to track).
-    const mesh = document.querySelector<SVGElement>('[data-hex-mesh]');
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const fine = window.matchMedia('(pointer: fine)').matches;
-
-    if (mesh && !reduced && fine) {
-        let frame = 0;
-
-        window.addEventListener(
-            'pointermove',
-            (event) => {
-                if (frame) return;
-                frame = requestAnimationFrame(() => {
-                    const x = (event.clientX / window.innerWidth - 0.5) * 18;
-                    const y = (event.clientY / window.innerHeight - 0.5) * 18;
-                    mesh.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                    frame = 0;
-                });
-            },
-            { passive: true }
-        );
-
-        mesh.style.transition = 'transform 600ms cubic-bezier(.16,1,.3,1)';
-    }
-</script>

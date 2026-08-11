@@ -1,0 +1,295 @@
+---
+/**
+ * The neural field — Cognitex's signature background.
+ *
+ * This is the v1 concept rebuilt, not replaced: neurons that breathe, synapses
+ * whose opacity falls off with the square of distance, a cursor that repels
+ * inside 80px and attracts out to 280px (opening an "eye" in the mesh), and
+ * white data sparks firing along connections.
+ *
+ * What changed is everything around it. The original ran ~5,000 distance
+ * checks per frame with a `shadowBlur` on every particle, never stopped when
+ * scrolled out of view or when the tab was hidden, ignored
+ * prefers-reduced-motion, and rendered at CSS pixels so it was soft on any
+ * retina display.
+ */
+
+interface Props {
+    /** Particles at 1920×1080; scaled by area, floored and capped. */
+    density?: number;
+    class?: string;
+}
+
+const { density = 110, class: className = '' } = Astro.props;
+---
+
+<canvas
+    data-neural-field
+    data-density={density}
+    class={`pointer-events-none absolute inset-0 size-full ${className}`}
+    aria-hidden="true"></canvas>
+
+<script>
+    interface Neuron {
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        base: number;
+        size: number;
+        angle: number;
+        speed: number;
+        hue: 'cyan' | 'blue';
+    }
+
+    const CONNECT = 140;
+    const CONNECT_SQ = CONNECT * CONNECT;
+    const CURSOR_REACH = 280;
+    const CURSOR_REACH_SQ = CURSOR_REACH * CURSOR_REACH;
+    const REPEL_RADIUS = 80;
+    const SPARK_CHANCE = 0.003;
+
+    const canvas = document.querySelector<HTMLCanvasElement>('[data-neural-field]');
+    const ctx = canvas?.getContext('2d', { alpha: true });
+
+    if (canvas && ctx) {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const fine = window.matchMedia('(pointer: fine)');
+
+        let neurons: Neuron[] = [];
+        let width = 0;
+        let height = 0;
+        let frame = 0;
+        let running = false;
+        const cursor = { x: null as number | null, y: null as number | null };
+
+        /*
+         * Pre-rendered glow sprite.
+         *
+         * The original set ctx.shadowBlur before every arc(), which makes the
+         * renderer blur each dot individually — the single most expensive
+         * thing it did. A radial gradient drawn once into an offscreen canvas
+         * and blitted with drawImage looks the same and costs almost nothing.
+         */
+        const makeSprite = (rgb: string) => {
+            const size = 32;
+            const sprite = document.createElement('canvas');
+            sprite.width = sprite.height = size;
+            const sctx = sprite.getContext('2d')!;
+            const gradient = sctx.createRadialGradient(
+                size / 2,
+                size / 2,
+                0,
+                size / 2,
+                size / 2,
+                size / 2
+            );
+            gradient.addColorStop(0, `rgba(${rgb},1)`);
+            gradient.addColorStop(0.25, `rgba(${rgb},0.55)`);
+            gradient.addColorStop(1, `rgba(${rgb},0)`);
+            sctx.fillStyle = gradient;
+            sctx.fillRect(0, 0, size, size);
+            return sprite;
+        };
+
+        const sprites = {
+            cyan: makeSprite('0,229,255'),
+            blue: makeSprite('56,140,255'),
+            spark: makeSprite('255,255,255'),
+        };
+
+        const resize = () => {
+            const rect = canvas.getBoundingClientRect();
+            // Cap DPR at 2: beyond that the extra pixels cost real time and
+            // nobody can see the difference on a soft glow.
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            width = rect.width;
+            height = rect.height;
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        };
+
+        const seed = () => {
+            const declared = Number(canvas.dataset.density ?? 110);
+            // Scale by area so a phone does not run a desktop's particle count,
+            // and clamp so an ultrawide does not run away with it.
+            const scale = (width * height) / (1920 * 1080);
+            const count = Math.max(28, Math.min(declared, Math.round(declared * scale)));
+
+            neurons = Array.from({ length: count }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.8,
+                vy: (Math.random() - 0.5) * 0.8,
+                base: Math.random() * 1.5 + 0.5,
+                size: 1,
+                angle: Math.random() * Math.PI * 2,
+                speed: 0.02 + Math.random() * 0.05,
+                hue: Math.random() > 0.2 ? 'cyan' : 'blue',
+            }));
+        };
+
+        const step = (n: Neuron) => {
+            n.angle += n.speed;
+            n.size = Math.max(0.1, n.base + Math.sin(n.angle) * 0.6);
+
+            n.x += n.vx;
+            n.y += n.vy;
+
+            if (n.x < 0 || n.x > width) n.vx *= -1;
+            if (n.y < 0 || n.y > height) n.vy *= -1;
+
+            if (cursor.x !== null && cursor.y !== null) {
+                const dx = cursor.x - n.x;
+                const dy = cursor.y - n.y;
+                const distSq = dx * dx + dy * dy;
+
+                if (distSq < CURSOR_REACH_SQ && distSq > 0) {
+                    const dist = Math.sqrt(distSq);
+                    const ux = dx / dist;
+                    const uy = dy / dist;
+
+                    if (dist < REPEL_RADIUS) {
+                        // Push away, which opens the eye in the mesh.
+                        n.vx -= ux * 0.4;
+                        n.vy -= uy * 0.4;
+                    } else {
+                        n.vx += ux * 0.03;
+                        n.vy += uy * 0.03;
+                    }
+                }
+            }
+
+            n.vx *= 0.98;
+            n.vy *= 0.98;
+
+            const speedSq = n.vx * n.vx + n.vy * n.vy;
+            if (speedSq < 0.04) {
+                // Never let one go completely still.
+                n.vx += (Math.random() - 0.5) * 0.1;
+                n.vy += (Math.random() - 0.5) * 0.1;
+            } else if (speedSq > 6.25) {
+                const speed = Math.sqrt(speedSq);
+                n.vx = (n.vx / speed) * 2.5;
+                n.vy = (n.vy / speed) * 2.5;
+            }
+        };
+
+        const blit = (sprite: HTMLCanvasElement, x: number, y: number, radius: number) => {
+            const d = radius * 6;
+            ctx.drawImage(sprite, x - d / 2, y - d / 2, d, d);
+        };
+
+        const render = () => {
+            ctx.clearRect(0, 0, width, height);
+
+            // Synapses first, so neurons sit on top of their own links.
+            ctx.lineCap = 'round';
+            for (let i = 0; i < neurons.length; i++) {
+                const a = neurons[i]!;
+                for (let j = i + 1; j < neurons.length; j++) {
+                    const b = neurons[j]!;
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const distSq = dx * dx + dy * dy;
+                    // Compare squares — the sqrt only happens for pairs that
+                    // are actually close enough to draw.
+                    if (distSq >= CONNECT_SQ) continue;
+
+                    const falloff = 1 - Math.sqrt(distSq) / CONNECT;
+                    const opacity = falloff * falloff;
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(0,229,255,${opacity * 0.5})`;
+                    ctx.lineWidth = opacity * 1.5;
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+                    ctx.stroke();
+
+                    // A packet of data firing along the synapse.
+                    if (Math.random() < SPARK_CHANCE) {
+                        const t = Math.random();
+                        blit(sprites.spark, a.x - dx * t, a.y - dy * t, 2);
+                    }
+                }
+            }
+
+            for (const n of neurons) {
+                blit(sprites[n.hue], n.x, n.y, n.size);
+            }
+        };
+
+        const tick = () => {
+            if (!running) return;
+            for (const n of neurons) step(n);
+            render();
+            frame = requestAnimationFrame(tick);
+        };
+
+        const start = () => {
+            if (running || reduced.matches) return;
+            running = true;
+            frame = requestAnimationFrame(tick);
+        };
+
+        const stop = () => {
+            running = false;
+            cancelAnimationFrame(frame);
+        };
+
+        const init = () => {
+            resize();
+            seed();
+            // Under reduced motion the field is drawn once and left alone: the
+            // texture is part of the brand, the movement is what people asked
+            // to be spared.
+            if (reduced.matches) render();
+        };
+
+        init();
+
+        // Only animate while the hero is actually on screen.
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(
+                ([entry]) => (entry?.isIntersecting ? start() : stop()),
+                { threshold: 0.01 }
+            ).observe(canvas);
+        } else {
+            start();
+        }
+
+        // And never in a hidden tab.
+        document.addEventListener('visibilitychange', () => {
+            document.hidden ? stop() : start();
+        });
+
+        let resizeTimer = 0;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = window.setTimeout(init, 150);
+        });
+
+        if (fine.matches) {
+            window.addEventListener(
+                'pointermove',
+                (event) => {
+                    const rect = canvas.getBoundingClientRect();
+                    cursor.x = event.clientX - rect.left;
+                    cursor.y = event.clientY - rect.top;
+                },
+                { passive: true }
+            );
+            window.addEventListener('pointerleave', () => {
+                cursor.x = cursor.y = null;
+            });
+        }
+
+        reduced.addEventListener('change', () => {
+            stop();
+            init();
+            if (!reduced.matches) start();
+        });
+    }
+</script>

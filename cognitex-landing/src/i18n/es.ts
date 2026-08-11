@@ -36,18 +36,45 @@ export const es = {
         },
 
         hero: {
-            eyebrow: 'Quito · Ecuador',
-            title: 'Su operación pierde dinero en tres lugares.',
-            titleAccent: 'Se lo demostramos en una semana — o no nos paga.',
-            lead: 'Energía, atención al cliente y combustible. Medimos los tres con instrumentos, no con opiniones, y le entregamos la cifra en dólares antes de que firme nada.',
-            ctaPrimary: 'Hablar con el agente',
+            status: 'COGNITEX AI NETWORK · ONLINE',
+            title: 'Inteligencia Artificial',
+            titleAccent: 'aplicada a la industria',
+            subtitle: 'El cerebro digital de su operación.',
+            lead: 'Unificamos hardware de borde, analítica en tiempo real e IA experta para que su planta, su flota y su atención dejen de reaccionar y empiecen a anticiparse.',
+            slogan: 'Del dato bruto al dominio operativo.',
+            ctaPrimary: 'Cuéntenos su desafío',
             ctaSecondary: 'Ver la demo viva',
-            counters: {
-                power: { label: 'kW de nuestra oficina', unit: 'kW' },
-                distance: { label: 'km de nuestro vehículo hoy', unit: 'km' },
-                queries: { label: 'consultas que atendió el agente esta semana', unit: '' },
+            stats: {
+                assets: { value: '850+', label: 'Activos monitoreados' },
+                events: { value: '1.2M', label: 'Eventos por segundo' },
+                uptime: { value: '99.97%', label: 'Uptime SLA' },
+                sectors: { value: '12+', label: 'Sectores industriales' },
             },
-            liveNote: 'Datos de nuestra propia operación, ahora mismo.',
+        },
+
+        identity: {
+            kicker: 'Quiénes somos',
+            title: 'No somos un proveedor de tecnología. Somos el cerebro digital de su operación.',
+            body: [
+                'Integramos hardware de borde, computación en la nube y sistemas de IA experta para convertir infraestructura industrial en activos inteligentes: máquinas que avisan antes de fallar, flotas que explican su propio consumo, procesos que se corrigen solos.',
+                'Venimos de operar y mantener infraestructura crítica —un sistema de USD 2 000 millones en el Metro de Quito—, no de una presentación de ventas. Ahí se aprende a desconfiar de los tableros bonitos y a exigir que cada número tenga un instrumento detrás.',
+            ],
+            pillars: {
+                edge: {
+                    title: 'Hardware de borde',
+                    body: 'Sensores, PLC y gateways que capturan la realidad física de su planta y la entregan limpia, sin depender de que alguien la anote.',
+                },
+                cloud: {
+                    title: 'Nube y analítica',
+                    body: 'Telemetría que persiste, se correlaciona y se consulta. Historia real contra la que medir cada mejora que prometemos.',
+                },
+                ai: {
+                    title: 'IA experta',
+                    body: 'Modelos que detectan la anomalía antes que el operador y agentes que responden con el catálogo y el precio correctos.',
+                },
+            },
+            commitment:
+                'Nuestro compromiso es medible: cero tiempo de inactividad no planificado, eficiencia máxima y decisiones autónomas sostenidas por datos que usted puede auditar.',
         },
 
         pain: {

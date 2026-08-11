@@ -1,6 +1,7 @@
 ---
 import Base from '~/layouts/Base.astro';
 import Hero from '~/components/home/Hero.astro';
+import Identity from '~/components/home/Identity.astro';
 import PainSelector from '~/components/home/PainSelector.astro';
 import LiveDemo from '~/components/home/LiveDemo.astro';
 import Process from '~/components/home/Process.astro';
@@ -25,6 +26,7 @@ const t = useTranslations(locale);
     schema={[faqSchema(t.home.faq.items)]}
 >
     <Hero {locale} />
+    <Identity {locale} />
     <PainSelector {locale} />
     <LiveDemo {locale} />
     <Process {locale} />

@@ -43,18 +43,45 @@ export const en: Translated<Dictionary> = {
         },
 
         hero: {
-            eyebrow: 'Quito · Ecuador',
-            title: 'Your operation is losing money in three places.',
-            titleAccent: "We'll prove it in a week — or you don't pay.",
-            lead: 'Energy, customer service and fuel. We measure all three with instruments, not opinions, and hand you the figure in dollars before you sign anything.',
-            ctaPrimary: 'Talk to the agent',
+            status: 'COGNITEX AI NETWORK · ONLINE',
+            title: 'Artificial intelligence',
+            titleAccent: 'applied to industry',
+            subtitle: 'The digital brain of your operation.',
+            lead: 'We bring together edge hardware, real-time analytics and expert AI so your plant, your fleet and your customer service stop reacting and start anticipating.',
+            slogan: 'From raw data to operational command.',
+            ctaPrimary: 'Tell us your challenge',
             ctaSecondary: 'See the live demo',
-            counters: {
-                power: { label: 'kW at our office', unit: 'kW' },
-                distance: { label: 'km our vehicle has driven today', unit: 'km' },
-                queries: { label: 'queries the agent handled this week', unit: '' },
+            stats: {
+                assets: { value: '850+', label: 'Assets monitored' },
+                events: { value: '1.2M', label: 'Events per second' },
+                uptime: { value: '99.97%', label: 'Uptime SLA' },
+                sectors: { value: '12+', label: 'Industrial sectors' },
             },
-            liveNote: 'Data from our own operation, right now.',
+        },
+
+        identity: {
+            kicker: 'Who we are',
+            title: 'We are not a technology vendor. We are the digital brain of your operation.',
+            body: [
+                'We integrate edge hardware, cloud computing and expert AI systems to turn industrial infrastructure into intelligent assets: machines that warn before they fail, fleets that explain their own consumption, processes that correct themselves.',
+                'We come from operating and maintaining critical infrastructure — a USD 2 billion system at the Quito Metro — not from a sales deck. That is where you learn to distrust a pretty dashboard and to demand an instrument behind every number.',
+            ],
+            pillars: {
+                edge: {
+                    title: 'Edge hardware',
+                    body: 'Sensors, PLCs and gateways that capture the physical reality of your plant and deliver it clean, without depending on someone writing it down.',
+                },
+                cloud: {
+                    title: 'Cloud and analytics',
+                    body: 'Telemetry that persists, correlates and can be queried. Real history to measure every improvement we promise against.',
+                },
+                ai: {
+                    title: 'Expert AI',
+                    body: 'Models that catch the anomaly before the operator does, and agents that answer with the right catalogue and the right price.',
+                },
+            },
+            commitment:
+                'Our commitment is measurable: zero unplanned downtime, maximum efficiency, and autonomous decisions backed by data you can audit.',
         },
 
         pain: {
