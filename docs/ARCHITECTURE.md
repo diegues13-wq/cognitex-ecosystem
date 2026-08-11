@@ -69,10 +69,37 @@ Gemini. It is the reference pattern for any future Cloud Run backend.
 Live services: `agro-sentinel`, `industry-sentinel`, `personal-sentinel`,
 `productivity-sentinel`, `transport-sentinel`.
 
+### Service URLs — read this before debugging a 404
+
+Cloud Run reports a URL in `status.url` that **does not necessarily route**.
+
+The five original services answer on the legacy form
+`SERVICE-myvq6twbpa-uk.a.run.app`. Services created after Google changed the
+URL format answer only on `SERVICE-530498544659.us-east4.run.app`, and
+`gcloud run services describe --format='value(status.url)'` still reports the
+legacy one for them. So does the `deploy-cloudrun` GitHub action's output.
+
+The authoritative URL is the one **`gcloud run deploy` prints in its own
+output**. Deriving it from the project number also works:
+
+```
+https://<service>-530498544659.us-east4.run.app
+```
+
+This cost hours on `demo-api`: healthy revisions, 100% traffic, `allUsers`
+invoker, ingress `all`, and every request to the reported URL returning a 404
+from the Google frontend.
+
+Related: a bare `/healthz` on a `*.run.app` host is answered by the Google
+frontend and never reaches the container. Health endpoints live under
+`/api/health`.
+
 ### Ports
 
 Cloud Run requires the container to listen on **8080**. All five sentinel apps
 use `EXPOSE 8080` and `listen 8080` in `nginx.conf`.
+
+`services/demo-api` is a Node service and listens on 8080 directly.
 
 `cognitex-landing` is the exception — it uses port **80**, because it is served
 as a static site and its Dockerfile is not used by any deploy.
@@ -88,9 +115,21 @@ as a static site and its Dockerfile is not used by any deploy.
 | `deploy-personal.yaml` | `personal-sentinel/**` | Cloud Run `personal-sentinel` |
 | `deploy-productivity.yaml` | `productivity-sentinel/**` | Cloud Run `productivity-sentinel` |
 | `deploy-transport.yaml` | `transport-sentinel/**` | Cloud Run `transport-sentinel` |
-| `deploy-landing.yaml` | `cognitex-landing/**` | GitHub Pages |
+| `deploy-landing.yaml` | `cognitex-landing/**` | Firebase Hosting |
+| `deploy-demo-api.yaml` | `services/demo-api/**` | Cloud Run `demo-api` |
 
 All trigger on push to `main` only.
+
+`deploy-demo-api.yaml` probes `/api/health` after deploying and fails if
+nothing answers. It exists because an earlier run reported success while
+creating no service at all: a comma inside `ALLOWED_ORIGINS` was split by the
+action's `^,^` join, gcloud rejected the malformed variable, and the step went
+green in twelve seconds. Every Cloud Run workflow should grow the same probe.
+
+Also note `env_vars_update_strategy: overwrite`. The default `merge` only adds
+and updates, so a variable set once by mistake survives every later deploy —
+`demo-api` carried one literally named `https://cognitexindustrial.com` across
+five revisions.
 
 Sentinel build flow: `checkout → GCP auth → configure Docker → docker build
 (with Firebase --build-args) → push to Artifact Registry → deploy to Cloud Run`.
