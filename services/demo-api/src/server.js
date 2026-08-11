@@ -30,6 +30,25 @@ import { buildPayload, dayKey } from './feed.js';
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+/*
+ * Firestore is an optional dependency of this service: without it the feed
+ * serves simulated data and says so. It must therefore never be able to kill
+ * the process — but google-auth-library rejects from a detached promise when
+ * Application Default Credentials are missing, which escapes the try/catch
+ * around the call and, under Node's default, terminates the process.
+ *
+ * That is exactly what happened on Cloud Run: the container bound its port,
+ * logged "listening", then died on the credential lookup. The service had a
+ * URL and a public IAM policy, and every request still returned a 404 from
+ * the Google frontend, because no healthy revision was left to serve it.
+ *
+ * Deliberately narrow in effect: the request handlers all have their own
+ * try/catch and answer 500 on failure, so this only catches background work.
+ */
+process.on('unhandledRejection', (reason) => {
+    console.error('[demo-api] unhandled rejection, continuing with simulated data:', reason);
+});
+
 /**
  * Allowed origins, separated by semicolons, commas or whitespace.
  *
@@ -178,11 +197,30 @@ app.get('/healthz', (_req, res) =>
 
 // ─── Start ───────────────────────────────────────────────────────────────────
 
-await initStore();
-
+/*
+ * Listen FIRST, connect to Firestore after.
+ *
+ * This used to `await initStore()` before listening. initStore performs a
+ * real round trip to prove the credentials work — and when Firestore is not
+ * provisioned in the project, that call retries with backoff rather than
+ * failing fast. The container therefore never bound the port, Cloud Run's
+ * startup probe timed out, and the revision was discarded: the service
+ * existed, had a URL and a public IAM policy, and every request still got a
+ * 404 from the Google frontend because no healthy revision was serving.
+ *
+ * The store is optional by design — the feed falls back to simulated data
+ * and labels it — so it must never gate the process coming up.
+ */
 app.listen(PORT, () => {
     console.log(`[demo-api] listening on ${PORT}`);
-    console.log(`[demo-api] firestore=${isAvailable()} ingest=${Boolean(INGEST_TOKEN)}`);
+
+    initStore()
+        .then((ready) => {
+            console.log(`[demo-api] firestore=${ready} ingest=${Boolean(INGEST_TOKEN)}`);
+        })
+        .catch((err) => {
+            console.error('[demo-api] store init failed, serving simulated data:', err.message);
+        });
 });
 
 export { app, buildPayload };

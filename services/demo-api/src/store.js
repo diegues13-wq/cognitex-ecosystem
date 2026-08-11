@@ -32,10 +32,19 @@ export async function initStore() {
 
         db = new Firestore(projectId ? { projectId } : {});
 
-        // The constructor is lazy, so a bad configuration would not surface
-        // until the first read — during a request. Force one round trip now
-        // and fall back to simulation at startup instead.
-        await db.listCollections();
+        // NO startup probe.
+        //
+        // This used to call listCollections() to prove the credentials worked.
+        // When they do not, the Firestore client rethrows synchronously from a
+        // native callback — an uncaught exception, not a rejection, so neither
+        // the try/catch here nor a process-level unhandledRejection handler
+        // can stop it. The container logged "listening" and then died, which
+        // is why the deployed service answered 404 from the Google frontend
+        // despite having a URL and a public IAM policy.
+        //
+        // The client is lazy by design, so the first real read is where a
+        // credential or provisioning problem surfaces — and every read path
+        // already falls back to simulated data and labels it as such.
 
         live = true;
         console.log('[store] Firestore connected');
@@ -48,7 +57,23 @@ export async function initStore() {
     }
 }
 
+/**
+ * True while reads are believed to work.
+ *
+ * Starts optimistic — the client is constructed but never probed at startup,
+ * for the reason above — and is demoted the first time a read actually fails.
+ * `healthz` therefore reports what the service can do, not merely what it was
+ * configured to attempt.
+ */
 export const isAvailable = () => live;
+
+/** Called by the read paths when Firestore refuses, so status stops lying. */
+function markUnavailable(err) {
+    if (live) {
+        console.error('[store] Firestore read failed, falling back to simulation:', err.message);
+    }
+    live = false;
+}
 
 /**
  * Appends one power reading.
@@ -68,17 +93,22 @@ export async function saveOfficeReading(kw) {
 export async function readOfficeSeries(hours = 24) {
     if (!live) return [];
 
-    const since = Timestamp.fromMillis(Date.now() - hours * 60 * 60 * 1000);
-    const snapshot = await db
-        .collection(OFFICE_COLLECTION)
-        .where('at', '>=', since)
-        .orderBy('at', 'asc')
-        .get();
+    try {
+        const since = Timestamp.fromMillis(Date.now() - hours * 60 * 60 * 1000);
+        const snapshot = await db
+            .collection(OFFICE_COLLECTION)
+            .where('at', '>=', since)
+            .orderBy('at', 'asc')
+            .get();
 
-    return snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return { at: data.at.toMillis(), kw: data.kw };
-    });
+        return snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return { at: data.at.toMillis(), kw: data.kw };
+        });
+    } catch (err) {
+        markUnavailable(err);
+        return [];
+    }
 }
 
 /**
@@ -98,16 +128,21 @@ export async function saveVehicleDay(dayKey, payload) {
 export async function readVehicleDay(dayKey) {
     if (!live) return null;
 
-    const doc = await db.collection(VEHICLE_COLLECTION).doc(dayKey).get();
-    if (!doc.exists) return null;
+    try {
+        const doc = await db.collection(VEHICLE_COLLECTION).doc(dayKey).get();
+        if (!doc.exists) return null;
 
-    const data = doc.data();
-    return {
-        kmToday: data.kmToday ?? 0,
-        litersPer100km: data.litersPer100km ?? 0,
-        stops: data.stops ?? 0,
-        at: data.at?.toMillis?.() ?? 0,
-    };
+        const data = doc.data();
+        return {
+            kmToday: data.kmToday ?? 0,
+            litersPer100km: data.litersPer100km ?? 0,
+            stops: data.stops ?? 0,
+            at: data.at?.toMillis?.() ?? 0,
+        };
+    } catch (err) {
+        markUnavailable(err);
+        return null;
+    }
 }
 
 /**
