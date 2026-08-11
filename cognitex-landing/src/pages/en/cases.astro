@@ -1,0 +1,40 @@
+---
+import Base from '~/layouts/Base.astro';
+import PageHero from '~/components/ui/PageHero.astro';
+import Cases from '~/components/home/Cases.astro';
+import FinalCta from '~/components/home/FinalCta.astro';
+import { breadcrumbSchema } from '~/lib/schema';
+import { SITE } from '~/config';
+import { route, useTranslations } from '~/i18n/utils';
+
+const locale = 'en' as const;
+const t = useTranslations(locale);
+const cases = t.casesPage;
+
+const schema = [
+    breadcrumbSchema([
+        { name: SITE.name, url: route('home', locale) },
+        { name: t.nav.casos, url: route('casos', locale) },
+    ]),
+];
+---
+
+<Base
+    {locale}
+    routeId="casos"
+    title={cases.seo.title}
+    description={cases.seo.description}
+    {schema}
+>
+    <PageHero title={cases.title} lead={cases.lead} eyebrow={t.nav.casos} />
+
+    {/*
+      No client logos and no invented figures: the home placeholder already
+      says exactly what is true today — first projects running, numbers
+      published once twelve months are measured — and links to the live demo.
+      Reusing it keeps one sentence to update when the first case closes.
+    */}
+    <Cases {locale} />
+
+    <FinalCta {locale} />
+</Base>

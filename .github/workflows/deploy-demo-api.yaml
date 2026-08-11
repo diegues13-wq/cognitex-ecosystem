@@ -1,0 +1,129 @@
+name: Deploy Demo API
+
+# svc-demo — the public feed behind the landing page's live demo.
+# Firebase Hosting rewrites /api/public/** to this Cloud Run service.
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "services/demo-api/**"
+      - ".github/workflows/deploy-demo-api.yaml"
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-east4
+  GAR_LOCATION: us-east4
+  REPOSITORY: cognitex-repo
+  SERVICE: demo-api
+  CONTEXT: ./services/demo-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: services/demo-api/package-lock.json
+
+      - name: Install
+        working-directory: ./services/demo-api
+        run: npm ci
+
+      # The provenance logic decides whether the site tells the truth about
+      # its own data, so it gates the deploy.
+      - name: Test
+        working-directory: ./services/demo-api
+        run: npm test
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
+
+      - name: Build and Push
+        run: |
+          GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c1-7)
+          IMAGE_NAME=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${GITHUB_SHA_SHORT}
+          docker build -t $IMAGE_NAME ${{ env.CONTEXT }}
+          docker push $IMAGE_NAME
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - uses: google-github-actions/deploy-cloudrun@v2
+        id: deploy
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          image: ${{ env.IMAGE_NAME }}
+          # Public: the landing fetches it from the browser. Writes are
+          # protected by INGEST_TOKEN, not by the invoker role.
+          flags: '--allow-unauthenticated --memory=256Mi --max-instances=3'
+          # INGEST_TOKEN is intentionally an env var rather than a Secret
+          # Manager reference: if the GitHub secret is unset the value is
+          # empty, and the service then refuses every write with 503 instead
+          # of failing the deploy. Reads keep working either way.
+          # Replace the environment, never merge into it. The default `merge`
+          # only adds and updates, so a variable set once by mistake survives
+          # every later deploy — this service carried a variable literally
+          # named `https://cognitexindustrial.com` across five revisions,
+          # invisible unless you read the resource.
+          env_vars_update_strategy: overwrite
+
+          # Semicolons, not commas: deploy-cloudrun joins these lines with
+          # `^,^`, so a comma inside a value splits it into a second, bogus
+          # variable — which is how that stray variable was created.
+          env_vars: |
+            GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+            FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+            ALLOWED_ORIGINS=https://www.cognitexindustrial.com;https://cognitexindustrial.com
+            INGEST_TOKEN=${{ secrets.DEMO_INGEST_TOKEN }}
+
+      # Prove the thing actually answers.
+      #
+      # The first deploy of this service reported success while creating
+      # nothing at all — gcloud had rejected a malformed env var and the
+      # action swallowed the error. A green workflow that deploys nothing is
+      # worse than a red one, so the URL is printed and probed here.
+      - name: Smoke test
+        run: |
+          # Probe every URL the service might answer on.
+          #
+          # Neither the action output nor `describe --format='value(status.url)'`
+          # is reliable here: both reported the legacy
+          # SERVICE-PROJECTHASH-REGIONCODE.a.run.app form, which does not route
+          # for services created after Google changed the URL format. The
+          # authoritative URL is the one `gcloud run deploy` prints — the
+          # SERVICE-PROJECTNUMBER.REGION.run.app form. This service answered on
+          # the new URL while the old one 404'd for hours of debugging.
+          PROJECT_NUMBER=$(gcloud projects describe "${{ env.PROJECT_ID }}" --format='value(projectNumber)')
+          CANDIDATES="https://${{ env.SERVICE }}-${PROJECT_NUMBER}.${{ env.REGION }}.run.app ${{ steps.deploy.outputs.url }}"
+
+          OK=0
+          for URL in $CANDIDATES; do
+            [ -z "$URL" ] && continue
+            CODE=$(curl -s -o /tmp/health.json -w '%{http_code}' --max-time 30 "$URL/api/health" || echo 000)
+            echo "GET $URL/api/health -> $CODE"
+            if [ "$CODE" = "200" ]; then
+              cat /tmp/health.json; echo
+              echo "SERVICE_URL=$URL" >> "$GITHUB_ENV"
+              OK=1
+              break
+            fi
+          done
+
+          if [ "$OK" != "1" ]; then
+            echo "::error::No candidate URL answered 200. A 403/404 on all of them means either the revision is not serving or --allow-unauthenticated did not apply (the deployer needs run.services.setIamPolicy)."
+            exit 1
+          fi

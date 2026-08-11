@@ -1,0 +1,19 @@
+---
+import Section from '~/components/ui/Section.astro';
+import Accordion from '~/components/ui/Accordion.astro';
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const faq = t.home.faq;
+---
+
+<Section kicker={faq.kicker} title={faq.title} tone="deep" id="faq">
+    <div class="mt-12 max-w-3xl" data-reveal>
+        <Accordion items={faq.items} />
+    </div>
+</Section>

@@ -1,0 +1,191 @@
+---
+import Base from '~/layouts/Base.astro';
+import Section from '~/components/ui/Section.astro';
+import PageHero from '~/components/ui/PageHero.astro';
+import Button from '~/components/ui/Button.astro';
+import { breadcrumbSchema } from '~/lib/schema';
+import { SITE } from '~/config';
+import { route, useTranslations } from '~/i18n/utils';
+
+const locale = 'es' as const;
+const t = useTranslations(locale);
+const legal = t.legalPage;
+
+/*
+ * The only page on the site whose prose is not in the i18n dictionaries: a
+ * privacy policy has to be drafted, reviewed and amended as one legal text per
+ * language, not assembled from interchangeable keys. The English version lives
+ * in `src/pages/en/legal/privacy.astro`.
+ *
+ * Written against the Ley Orgánica de Protección de Datos Personales (LOPDP)
+ * del Ecuador and describing what this site actually does today — including
+ * that the contact form has no backend and hands the message to WhatsApp.
+ */
+const UPDATED_ISO = '2026-08-10';
+const UPDATED_LABEL = '10 de agosto de 2026';
+
+type Clause = { title: string; paragraphs: string[]; items?: string[] };
+
+const clauses: Clause[] = [
+    {
+        title: 'Quién trata sus datos',
+        paragraphs: [
+            `${SITE.legalName}, con domicilio en Quito, provincia de Pichincha, Ecuador, es el responsable del tratamiento de los datos personales que usted entrega a través de este sitio y de los servicios contratados.`,
+            `Para cualquier asunto relacionado con esta política, incluido el ejercicio de sus derechos, escriba a ${SITE.email}.`,
+            'Este tratamiento se rige por la Ley Orgánica de Protección de Datos Personales del Ecuador (LOPDP) y su reglamento de aplicación.',
+        ],
+    },
+    {
+        title: 'Qué datos recogemos',
+        paragraphs: [
+            'Pedimos lo mínimo necesario para responderle. A través del formulario de contacto se recogen los datos que usted escriba en él:',
+        ],
+        items: [
+            'Nombre.',
+            'Empresa, si decide indicarla.',
+            'Teléfono, si decide indicarlo.',
+            'Correo electrónico.',
+            'Motor de interés: energía, agentes de atención o flotas.',
+            'El mensaje que usted redacte.',
+        ],
+    },
+    {
+        title: 'Cómo viaja el formulario',
+        paragraphs: [
+            'Este sitio es estático y el formulario de contacto no envía nada a un servidor nuestro. Al pulsar «Enviar», el navegador arma un mensaje con los campos que usted llenó y lo abre en WhatsApp. Mientras usted no envíe ese mensaje, los datos no salen de su dispositivo.',
+            'Cuando lo envía, la conversación queda alojada en WhatsApp y le aplica además la política de privacidad de WhatsApp/Meta, sobre la que no tenemos control. Si prefiere no usar ese canal, escríbanos por correo: la dirección aparece en la misma página de contacto.',
+        ],
+    },
+    {
+        title: 'Datos de navegación y analítica',
+        paragraphs: [
+            'Si usted acepta la analítica, recogemos datos técnicos agregados de navegación: páginas vistas, tiempo en página, tipo de dispositivo, navegador y país aproximado derivado de la dirección IP. La medición la realiza Google Analytics 4, y Google LLC actúa como encargado del tratamiento. No construimos perfiles publicitarios, no hacemos seguimiento entre sitios y no vendemos ni cedemos estos datos.',
+            'No recogemos datos sensibles en el sentido de la LOPDP —origen étnico, salud, creencias, afiliación política o sindical, datos biométricos u orientación sexual—, ni le pedimos número de cédula, datos bancarios o de tarjeta a través de este sitio.',
+        ],
+    },
+    {
+        title: 'Para qué los usamos y con qué base legal',
+        paragraphs: [
+            'La finalidad declarada del tratamiento de los datos de contacto es una sola: atender su consulta comercial, preparar una cotización, un diagnóstico o una propuesta, y mantener la comunicación mientras esa conversación esté viva. No los usamos para publicidad de terceros ni para ninguna finalidad distinta de la que motivó su contacto.',
+            'La base legal es su consentimiento libre, específico e informado, otorgado al enviarnos el formulario, junto con la ejecución de medidas precontractuales solicitadas por usted. Para la analítica, la base es únicamente su consentimiento, que puede retirar en cualquier momento.',
+            'Si en el futuro necesitáramos tratar sus datos para una finalidad distinta, se lo comunicaríamos y le pediríamos un consentimiento nuevo antes de hacerlo.',
+        ],
+    },
+    {
+        title: 'Cuánto tiempo los conservamos',
+        paragraphs: [
+            'Los datos del formulario se conservan mientras dure la conversación comercial y hasta veinticuatro (24) meses después del último contacto. Cumplido ese plazo se eliminan, salvo que exista una obligación legal, tributaria o contractual de conservarlos por más tiempo, en cuyo caso quedan bloqueados y solo se usan para atender esa obligación.',
+            'Los datos de analítica se conservan de forma agregada por un máximo de catorce (14) meses.',
+            'Si usted pide la eliminación antes de esos plazos, la atendemos según se explica más abajo.',
+        ],
+    },
+    {
+        title: 'Dónde se procesan',
+        paragraphs: [
+            'Este sitio, las plataformas Sentinel y la telemetría que capturamos se ejecutan sobre infraestructura de Google Cloud Platform, que actúa como encargado del tratamiento por cuenta nuestra y bajo nuestras instrucciones.',
+            'Esto implica que los datos pueden almacenarse y procesarse en centros de datos ubicados fuera del Ecuador, incluidos los Estados Unidos. Para esas transferencias internacionales exigimos a nuestros proveedores garantías contractuales de seguridad, confidencialidad y limitación de finalidad equivalentes al nivel de protección que exige la LOPDP.',
+            'Aplicamos cifrado en tránsito y en reposo, acceso por credencial nominal con el mínimo privilegio necesario y registro de accesos.',
+        ],
+    },
+    {
+        title: 'Telemetría de clientes',
+        paragraphs: [
+            'La telemetría que capturamos de una planta, una flota o un canal de atención pertenece al cliente que la genera. Cada cliente vive en un espacio lógicamente segmentado, con credenciales y controles de acceso propios: ningún cliente puede consultar los datos de otro, y nuestro personal accede únicamente al proyecto que está atendiendo.',
+            'No entrenamos modelos con la información de un cliente para servir a otro cliente. Cuando un agente de atención usa modelos de lenguaje, lo hace sobre el contexto de ese cliente y bajo acuerdos con el proveedor del modelo que prohíben el uso de esos datos para entrenar modelos de propósito general.',
+            'Al terminar la relación entregamos el histórico en un formato estructurado y de uso común y lo eliminamos de nuestros sistemas dentro de los treinta (30) días siguientes, salvo instrucción escrita distinta del cliente.',
+        ],
+    },
+    {
+        title: 'Cookies y cómo desactivarlas',
+        paragraphs: [
+            'Este sitio no usa cookies publicitarias ni de seguimiento entre sitios. Las únicas cookies no estrictamente necesarias son las de Google Analytics 4, que sirven para saber qué secciones se leen y cuáles no.',
+            'La analítica arranca denegada. El consentimiento se pide en el aviso que aparece la primera vez que entra y, hasta que usted lo acepte, no se carga ningún script de Google ni se instala ninguna cookie de medición. Cuando se activa, la dirección IP se anonimiza y no se habilita ninguna función publicitaria.',
+            'Su elección queda guardada en el almacenamiento local de su navegador, bajo la clave «cgx-consent». Para cambiarla, borre los datos de este sitio desde su navegador: al volver a entrar, el aviso aparece otra vez. Rechazar la analítica no limita ninguna función del sitio.',
+        ],
+    },
+    {
+        title: 'Sus derechos',
+        paragraphs: [
+            'La LOPDP le reconoce, sobre sus propios datos personales, los siguientes derechos:',
+        ],
+        items: [
+            'Acceso: saber qué datos suyos tratamos, de dónde los obtuvimos, con qué finalidad y a quién se comunican.',
+            'Rectificación y actualización: corregir lo que esté equivocado, desactualizado o incompleto.',
+            'Eliminación: pedir que borremos sus datos cuando ya no sean necesarios para la finalidad declarada o cuando retire su consentimiento.',
+            'Portabilidad: recibir sus datos en un formato estructurado, de uso común y lectura mecánica, o pedir que se los entreguemos directamente a otro responsable.',
+            'Oposición: oponerse a un tratamiento concreto, incluida la analítica, sin tener que justificarlo cuando se basa en su consentimiento.',
+            'Suspensión del tratamiento mientras se resuelve una solicitud de rectificación u oposición, y a no ser objeto de decisiones automatizadas que produzcan efectos jurídicos sobre usted.',
+        ],
+    },
+    {
+        title: 'Cómo ejercerlos',
+        paragraphs: [
+            `Escriba a ${SITE.email} desde la dirección con la que nos contactó, indicando qué derecho quiere ejercer. Si no podemos identificarlo con razonable certeza, le pediremos una verificación adicional antes de actuar: entregar sus datos a un tercero sería peor que no entregarlos.`,
+            'Respondemos dentro del plazo de quince (15) días que establece la LOPDP. Si la solicitud es compleja se lo avisamos dentro de ese mismo plazo y le explicamos cuánto más necesitamos y por qué. El trámite es gratuito.',
+            'Si considera que no atendimos bien su solicitud, puede presentar un reclamo ante la Superintendencia de Protección de Datos Personales del Ecuador.',
+        ],
+    },
+    {
+        title: 'Cambios a esta política',
+        paragraphs: [
+            'Si esta política cambia, publicamos aquí la versión nueva con su fecha de actualización. Cuando el cambio afecte la finalidad del tratamiento o incorpore un destinatario nuevo, se lo comunicamos por el correo con el que nos escribió antes de aplicarlo.',
+        ],
+    },
+];
+
+const schema = [
+    breadcrumbSchema([
+        { name: SITE.name, url: route('home', locale) },
+        { name: legal.title, url: route('privacidad', locale) },
+    ]),
+];
+---
+
+<Base
+    {locale}
+    routeId="privacidad"
+    title={legal.seo.title}
+    description={legal.seo.description}
+    {schema}
+>
+    <PageHero title={legal.title}>
+        <p class="mt-7 text-sm text-steel">
+            {legal.updated}: <time datetime={UPDATED_ISO} class="text-ice">{UPDATED_LABEL}</time>
+        </p>
+    </PageHero>
+
+    {/* Light band and a 65ch measure: this is the longest read on the site. */}
+    <Section tone="ice">
+        <div class="max-w-[65ch] space-y-12">
+            {
+                clauses.map((clause) => (
+                    <article data-reveal>
+                        <h2 class="text-[length:var(--text-h3)]">{clause.title}</h2>
+
+                        {clause.paragraphs.map((paragraph) => (
+                            <p class="mt-4 leading-relaxed text-ink/80">{paragraph}</p>
+                        ))}
+
+                        {clause.items && (
+                            <ul class="mt-5 space-y-3">
+                                {clause.items.map((item) => (
+                                    <li class="flex gap-3 leading-relaxed text-ink/80">
+                                        <span
+                                            class="mt-2.5 size-1.5 shrink-0 rounded-full bg-cyan-600"
+                                            aria-hidden="true"
+                                        />
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </article>
+                ))
+            }
+
+            <div data-reveal>
+                <Button href={`mailto:${SITE.email}`} variant="primary">{SITE.email}</Button>
+            </div>
+        </div>
+    </Section>
+</Base>

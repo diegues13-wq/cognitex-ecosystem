@@ -1,0 +1,57 @@
+---
+import Base from '~/layouts/Base.astro';
+import Hero from '~/components/home/Hero.astro';
+import Tension from '~/components/home/Tension.astro';
+import Identity from '~/components/home/Identity.astro';
+import DataCycle from '~/components/home/DataCycle.astro';
+import PainSelector from '~/components/home/PainSelector.astro';
+import Platforms from '~/components/home/Platforms.astro';
+import LiveDemo from '~/components/home/LiveDemo.astro';
+import Process from '~/components/home/Process.astro';
+import WhyBento from '~/components/home/WhyBento.astro';
+import Coverage from '~/components/home/Coverage.astro';
+import Cases from '~/components/home/Cases.astro';
+import Faq from '~/components/home/Faq.astro';
+import FinalCta from '~/components/home/FinalCta.astro';
+import { faqSchema } from '~/lib/schema';
+import { useTranslations } from '~/i18n/utils';
+
+const locale = 'en' as const;
+const t = useTranslations(locale);
+---
+
+{/*
+  The page is a story, in this order:
+
+    1  who we are          Hero, Tension, Identity
+    2  how it works        DataCycle — the spine everything else hangs from
+    3  what it is for      PainSelector, the three domains
+    4  what we deliver     Platforms
+    5  proof               LiveDemo
+    6  why us              Process, WhyBento, Coverage, Cases
+    7  objections + ask    Faq, FinalCta
+
+  A first-time visitor meets their own problem before they meet us, and the
+  products only appear once the method that produces them has been explained.
+*/}
+<Base
+    {locale}
+    routeId="home"
+    title={t.home.seo.title}
+    description={t.home.seo.description}
+    schema={[faqSchema(t.home.faq.items)]}
+>
+    <Hero {locale} />
+    <Tension {locale} />
+    <Identity {locale} />
+    <DataCycle {locale} />
+    <PainSelector {locale} />
+    <Platforms {locale} />
+    <LiveDemo {locale} />
+    <Process {locale} />
+    <WhyBento {locale} />
+    <Coverage {locale} />
+    <Cases {locale} />
+    <Faq {locale} />
+    <FinalCta {locale} />
+</Base>

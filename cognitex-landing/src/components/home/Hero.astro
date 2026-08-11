@@ -1,0 +1,144 @@
+---
+import { Image } from 'astro:assets';
+import NeuralField from '~/components/NeuralField.astro';
+import Button from '~/components/ui/Button.astro';
+import logo from '~/assets/cognitex_icon.png';
+import { whatsappLink } from '~/config';
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const hero = t.home.hero;
+---
+
+<section
+    class="relative flex min-h-[calc(100dvh-5rem)] flex-col justify-center overflow-hidden bg-navy-900 py-16"
+>
+    <NeuralField density={110} />
+
+    {/* Vignette. Tuned deliberately low: the mesh is the brand, so it stays
+        visible through the whole hero and only darkens enough behind the
+        headline to hold contrast. White on navy has margin to spare — an
+        earlier, heavier version hid the network everywhere except the
+        corners, which defeated the point of having it. */}
+    <div
+        class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_28%_45%,rgba(5,13,26,0.82)_0%,rgba(5,13,26,0.45)_45%,transparent_78%)]"
+        aria-hidden="true"
+    >
+    </div>
+    <div
+        class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-navy-900 to-transparent"
+        aria-hidden="true"
+    >
+    </div>
+
+    <div class="container-page relative z-10">
+        <p
+            class="mb-7 inline-flex items-center gap-2.5 rounded-full border border-cyan-electric/25 bg-navy-900/40 px-4 py-1.5 font-mono text-[11px] font-medium tracking-[0.18em] text-cyan-electric"
+        >
+            <span class="relative flex size-2" aria-hidden="true">
+                <span
+                    class="absolute inline-flex size-full animate-ping rounded-full bg-green-ok opacity-70"
+                ></span>
+                <span class="relative inline-flex size-2 rounded-full bg-green-ok"></span>
+            </span>
+            {hero.status}
+        </p>
+
+        <div class="flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-16">
+            <div class="max-w-3xl">
+                <h1 class="text-[length:var(--text-hero)]">
+                    {hero.title}<br />
+                    <span class="text-cyan-electric text-glow">{hero.titleAccent}</span>
+                </h1>
+
+                <p class="mt-6 font-display text-[length:var(--text-h3)] text-ice/90">
+                    {hero.subtitle}
+                </p>
+
+                <p class="mt-5 max-w-2xl text-[length:var(--text-lead)] leading-relaxed text-steel">
+                    {hero.lead}
+                </p>
+
+                <p
+                    class="mt-6 border-l-2 border-cyan-electric/40 pl-4 font-mono text-sm text-cyan-electric/85"
+                >
+                    {hero.slogan}
+                </p>
+
+                <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <Button
+                        href={whatsappLink()}
+                        size="lg"
+                        external
+                        data-analytics="click_whatsapp"
+                        data-source="hero"
+                    >
+                        {hero.ctaPrimary}
+                    </Button>
+                    <Button href="#ciclo" variant="ghost" size="lg">
+                        {hero.ctaSecondary}
+                    </Button>
+                </div>
+            </div>
+
+            {/* The mark, sitting inside the mesh it is drawn from. */}
+            <div class="relative hidden shrink-0 lg:block" aria-hidden="true">
+                <div
+                    class="absolute inset-0 -m-16 rounded-full bg-[radial-gradient(circle,rgba(0,229,255,0.14),transparent_68%)] blur-2xl"
+                >
+                </div>
+                <Image
+                    src={logo}
+                    alt=""
+                    width={224}
+                    height={254}
+                    densities={[1, 2]}
+                    loading="eager"
+                    class="relative w-56 drop-shadow-[0_0_40px_rgba(0,229,255,0.25)]"
+                />
+            </div>
+        </div>
+
+        {/* Invitation rather than a metrics band. The story starts one screen
+            down, so the hero's job is to make you want to go there. */}
+        <a
+            href="#ciclo"
+            class="group mt-20 inline-flex items-center gap-3 text-sm text-steel transition-colors duration-300 hover:text-ice"
+        >
+            <span
+                class="flex size-10 items-center justify-center rounded-full border border-white/15 transition-colors duration-300 group-hover:border-cyan-electric/50"
+                aria-hidden="true"
+            >
+                <svg
+                    class="size-4 text-cyan-electric motion-safe:animate-[nudge_2.4s_ease-in-out_infinite]"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M8 3v10M4 9l4 4 4-4" />
+                </svg>
+            </span>
+            {hero.scrollCue}
+        </a>
+    </div>
+</section>
+
+<style>
+    @keyframes nudge {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(3px);
+        }
+    }
+</style>

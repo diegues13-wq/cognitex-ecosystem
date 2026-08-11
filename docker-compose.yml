@@ -1,33 +1,49 @@
 # Local production-mode stack.
 #
-# Port mapping note: the sentinel containers listen on 8080 (Cloud Run
-# requirement), cognitex-landing listens on 80. The host ports below match
-# each app's documented dev port.
+# Every build context is the repository root, not the app directory. The apps
+# depend on the `@cognitex/*` workspace packages, and Docker cannot COPY from
+# outside its context — so an `./app` context cannot see `packages/` and the
+# install fails. This bit three services silently after the migration: their
+# Dockerfiles were updated to copy `packages/` while compose still pointed at
+# the app directory.
 #
-# transport-sentinel is intentionally absent — it needs Firestore credentials
-# and Vertex AI access, so it is not runnable as a plain container.
+# Containers listen on 8080 (a Cloud Run requirement); host ports match each
+# app's documented dev port.
+#
+# transport-sentinel is absent on purpose — it needs Firestore credentials and
+# Vertex AI access, so it is not runnable as a plain container.
+# cognitex-landing is absent too: it is a static Astro site on Firebase
+# Hosting and has no image.
 
 services:
-  cognitex-landing:
-    build: ./cognitex-landing
-    ports:
-      - "5173:80"
-    restart: always
-
   agro-sentinel-web:
-    build: ./agro-sentinel/web
+    build:
+      context: .
+      dockerfile: agro-sentinel/web/Dockerfile
     ports:
       - "5174:8080"
     restart: always
 
+  cash-sentinel:
+    build:
+      context: .
+      dockerfile: cash-sentinel/Dockerfile
+    ports:
+      - "5179:8080"
+    restart: always
+
   industry-sentinel:
-    build: ./industry-sentinel
+    build:
+      context: .
+      dockerfile: industry-sentinel/Dockerfile
     ports:
       - "5175:8080"
     restart: always
 
   personal-sentinel:
-    build: ./personal-sentinel
+    build:
+      context: .
+      dockerfile: personal-sentinel/Dockerfile
     ports:
       - "5176:8080"
     restart: always
@@ -37,5 +53,5 @@ services:
       context: .
       dockerfile: productivity-sentinel/Dockerfile
     ports:
-      - "5177:8080"
+      - "5178:8080"
     restart: always

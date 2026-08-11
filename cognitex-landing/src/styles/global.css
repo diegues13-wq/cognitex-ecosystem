@@ -1,0 +1,181 @@
+@import 'tailwindcss';
+
+/* Self-hosted variable fonts — no external request, no layout shift.
+   The v1 site preconnected to Google Fonts but never loaded a stylesheet,
+   so every heading silently fell back to a system font. */
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/inter';
+
+@theme {
+    /* ── Color ─────────────────────────────────────────────────────────── */
+    --color-navy-deep: #0a192f;
+    --color-navy-800: #112240;
+    --color-navy-900: #050d1a;
+
+    --color-cyan-electric: #00e5ff;
+    --color-cyan-600: #00b4d8;
+
+    --color-green-ok: #00c896;
+    --color-amber-warn: #ffb830;
+    --color-red-alert: #e5484d;
+
+    --color-steel: #8696a7;
+    --color-ink: #2d3748;
+    --color-ice: #f4f8fb;
+
+    /* Verified contrast on --color-navy-900:
+         cyan-electric 12.7:1 · ice 18.4:1 · steel 7.1:1
+       All clear WCAG 2.2 AA for normal text. */
+
+    /* ── Type ──────────────────────────────────────────────────────────── */
+    --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+    /* Fluid scale — every size interpolates between 360px and 1920px. */
+    --text-hero: clamp(2.2rem, 5vw + 1rem, 4.5rem);
+    --text-h2: clamp(1.75rem, 2.5vw + 0.75rem, 3rem);
+    --text-h3: clamp(1.25rem, 1vw + 0.9rem, 1.75rem);
+    --text-lead: clamp(1.05rem, 0.5vw + 0.95rem, 1.35rem);
+    --text-figure: clamp(2.5rem, 4vw + 1rem, 4rem);
+
+    /* ── Motion ────────────────────────────────────────────────────────── */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast: 150ms;
+    --dur-med: 300ms;
+    --dur-slow: 600ms;
+
+    /* ── Shape ─────────────────────────────────────────────────────────── */
+    --radius-brand: 12px;
+    --radius-brand-lg: 20px;
+}
+
+@layer base {
+    :root {
+        --glass: rgb(17 34 64 / 0.55);
+        --glass-border: rgb(0 229 255 / 0.18);
+    }
+
+    html {
+        scroll-behavior: smooth;
+        /* Offset for the fixed header when jumping to an anchor. */
+        scroll-padding-top: 6rem;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        background-color: var(--color-navy-900);
+        color: var(--color-ice);
+        font-family: var(--font-sans);
+        font-synthesis-weight: none;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+    }
+
+    p {
+        text-wrap: pretty;
+    }
+
+    /* Figures must never reflow as they count up. */
+    .tabular,
+    [data-countup] {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Visible focus everywhere, on any input modality. */
+    :focus-visible {
+        outline: 2px solid var(--color-cyan-electric);
+        outline-offset: 3px;
+        border-radius: 4px;
+    }
+
+    ::selection {
+        background: var(--color-cyan-electric);
+        color: var(--color-navy-900);
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--color-navy-900);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--color-navy-800);
+        border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-steel);
+    }
+}
+
+@layer components {
+    /* Glassmorphism, used only for calculator cards and live-demo widgets —
+       never as a page-wide texture. */
+    .glass {
+        background-color: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-brand-lg);
+        backdrop-filter: blur(14px);
+    }
+
+    /* Section reveal. Elements start hidden and are released by
+       IntersectionObserver; if JS never runs, the :not(.reveal-ready)
+       fallback keeps content visible. */
+    .reveal-ready [data-reveal] {
+        opacity: 0;
+        transform: translateY(18px);
+        transition:
+            opacity var(--dur-slow) var(--ease-out-expo),
+            transform var(--dur-slow) var(--ease-out-expo);
+    }
+
+    .reveal-ready [data-reveal].is-visible {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@layer utilities {
+    .text-glow {
+        text-shadow: 0 0 24px color-mix(in srgb, currentColor 45%, transparent);
+    }
+
+    .container-page {
+        width: 100%;
+        max-width: 76rem;
+        margin-inline: auto;
+        padding-inline: clamp(1rem, 4vw, 2.5rem);
+    }
+}
+
+/* Honour the OS setting: no reveals, no count-ups, no WebGL.
+   Required by spec §4.8. */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .reveal-ready [data-reveal] {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

@@ -1,0 +1,142 @@
+---
+import Base from '~/layouts/Base.astro';
+import Section from '~/components/ui/Section.astro';
+import Card from '~/components/ui/Card.astro';
+import Button from '~/components/ui/Button.astro';
+import RoiCalculator from '~/components/RoiCalculator.astro';
+import Faq from '~/components/home/Faq.astro';
+import FinalCta from '~/components/home/FinalCta.astro';
+import { serviceSchema, breadcrumbSchema } from '~/lib/schema';
+import { PRICING, SITE } from '~/config';
+import { route, useTranslations, type Locale, type RouteId } from '~/i18n/utils';
+import type { EngineId } from '~/config';
+
+interface Props {
+    locale: Locale;
+    engine: EngineId;
+}
+
+const { locale, engine } = Astro.props;
+const t = useTranslations(locale);
+const data = t.engines[engine];
+const routeId = engine as RouteId;
+
+const accents: Record<EngineId, string> = {
+    energia: 'var(--color-amber-warn)',
+    agentes: 'var(--color-cyan-electric)',
+    flotas: 'var(--color-green-ok)',
+};
+
+const url = new URL(route(routeId, locale), SITE.url).href;
+
+const schema = [
+    serviceSchema({
+        name: data.hero.title,
+        description: data.seo.description,
+        url,
+        // Only the agents engine has a published price (spec §4.4); the other
+        // two are quoted per project, so no Offer is emitted.
+        price: engine === 'agentes' ? PRICING.agentsMonthly : undefined,
+    }),
+    breadcrumbSchema([
+        { name: SITE.name, url: route('home', locale) },
+        { name: data.hero.eyebrow, url: route(routeId, locale) },
+    ]),
+];
+---
+
+<Base
+    {locale}
+    {routeId}
+    title={data.seo.title}
+    description={data.seo.description}
+    {schema}
+>
+    {/* Hero — the quantified pain for this sector (spec §4.4). */}
+    <section class="relative overflow-hidden bg-navy-900 pt-16 pb-20 sm:pt-24">
+        <div
+            class="pointer-events-none absolute top-0 right-0 size-[32rem] rounded-full blur-3xl"
+            style={`background:radial-gradient(circle, color-mix(in srgb, ${accents[engine]} 14%, transparent), transparent 65%)`}
+            aria-hidden="true"
+        >
+        </div>
+
+        <div class="container-page relative">
+            <p
+                class="mb-6 inline-flex rounded-full border px-4 py-1.5 text-xs font-semibold tracking-[0.16em] uppercase"
+                style={`color:${accents[engine]}; border-color:color-mix(in srgb, ${accents[engine]} 32%, transparent)`}
+            >
+                {data.hero.eyebrow}
+            </p>
+
+            <h1 class="max-w-4xl text-[length:var(--text-hero)]">{data.hero.title}</h1>
+            <p class="mt-7 max-w-2xl text-[length:var(--text-lead)] leading-relaxed text-steel">
+                {data.hero.lead}
+            </p>
+        </div>
+    </section>
+
+    {/* Calculator */}
+    <section class="bg-navy-deep py-16 sm:py-20">
+        <div class="container-page">
+            <RoiCalculator {locale} {engine} />
+        </div>
+    </section>
+
+    {/* What it includes + the guarantee */}
+    <Section tone="navy">
+        <div class="grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
+            <div data-reveal>
+                <h2 class="font-display text-[length:var(--text-h2)]">{data.includes.title}</h2>
+                <ul class="mt-8 space-y-4">
+                    {
+                        data.includes.items.map((item) => (
+                            <li class="flex gap-4">
+                                <svg
+                                    class="mt-1 size-5 shrink-0"
+                                    style={`color:${accents[engine]}`}
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.75"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M4 10.5l4 4 8-9" />
+                                </svg>
+                                <span class="leading-relaxed text-steel">{item}</span>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
+
+            <Card variant="outline" class="h-fit p-7" data-reveal data-reveal-delay={120}>
+                <h3 class="font-display text-[length:var(--text-h3)]">{t.common.guarantee}</h3>
+                <p class="mt-4 leading-relaxed text-steel">{t.common.guaranteeBody}</p>
+
+                {
+                    engine === 'agentes' && (
+                        <p class="mt-6 border-t border-white/8 pt-6">
+                            <span class="text-sm text-steel">{t.common.pricingFrom}</span>
+                            <span class="ml-2 text-2xl font-semibold text-cyan-electric tabular">
+                                USD {PRICING.agentsMonthly}
+                            </span>
+                            <span class="ml-1 text-sm text-steel">{t.common.perMonth}</span>
+                        </p>
+                    )
+                }
+
+                <div class="mt-7">
+                    <Button href={route('contacto', locale)} variant="ghost">
+                        {t.nav.contacto}
+                    </Button>
+                </div>
+            </Card>
+        </div>
+    </Section>
+
+    <Faq {locale} />
+    <FinalCta {locale} />
+</Base>

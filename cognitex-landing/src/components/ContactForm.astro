@@ -1,0 +1,236 @@
+---
+import Card from '~/components/ui/Card.astro';
+import { useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const form = t.contactPage.form;
+
+type Field = {
+    name: string;
+    label: string;
+    type: 'text' | 'tel' | 'email';
+    autocomplete: string;
+    required?: boolean;
+};
+
+const fields: Field[] = [
+    { name: 'name', label: form.name, type: 'text', autocomplete: 'name', required: true },
+    { name: 'company', label: form.company, type: 'text', autocomplete: 'organization' },
+    { name: 'phone', label: form.phone, type: 'tel', autocomplete: 'tel' },
+    { name: 'email', label: form.email, type: 'email', autocomplete: 'email', required: true },
+];
+
+const engineOptions = [
+    { value: 'energia', label: form.engineOptions.energia },
+    { value: 'agentes', label: form.engineOptions.agentes },
+    { value: 'flotas', label: form.engineOptions.flotas },
+    { value: 'other', label: form.engineOptions.other },
+];
+
+// Shared by every control: 44px+ target, visible border, cyan focus ring.
+const control =
+    'mt-2 min-h-12 w-full rounded-xl border border-white/12 bg-navy-900 px-4 py-3 text-ice ' +
+    'placeholder:text-steel/50 focus:border-cyan-electric focus:outline-none ' +
+    'aria-[invalid=true]:border-red-alert';
+const labelClass = 'block text-sm font-medium text-ice';
+// `empty:` keeps the node in the DOM at zero cost, so role="alert" fires on
+// the text change instead of on an insertion screen readers may miss.
+const errorClass = 'mt-1.5 text-sm text-red-alert empty:mt-0';
+---
+
+{/*
+  There is no backend yet, so this form deliberately posts nowhere. On submit
+  it validates in the browser and hands the composed message to WhatsApp — the
+  channel the rest of the site already uses. Nothing is silently dropped and no
+  third-party form service sees the visitor's data.
+*/}
+<Card variant="glass" class="p-7 sm:p-9">
+    <form
+        data-contact-form
+        data-msg-required={form.required}
+        data-msg-invalid-email={form.invalidEmail}
+        data-msg-success={form.success}
+        novalidate
+    >
+        <div class="grid gap-5 sm:grid-cols-2">
+            {
+                fields.map((field) => (
+                    <div data-field={field.name}>
+                        <label class={labelClass} for={`contact-${field.name}`}>
+                            <span data-label-text>{field.label}</span>
+                            {field.required && (
+                                <span class="ml-1 text-cyan-electric" aria-hidden="true">
+                                    *
+                                </span>
+                            )}
+                        </label>
+                        <input
+                            id={`contact-${field.name}`}
+                            name={field.name}
+                            type={field.type}
+                            autocomplete={field.autocomplete}
+                            required={field.required}
+                            aria-describedby={`contact-${field.name}-error`}
+                            class={control}
+                        />
+                        <p
+                            id={`contact-${field.name}-error`}
+                            data-error={field.name}
+                            class={errorClass}
+                            role="alert"
+                        />
+                    </div>
+                ))
+            }
+
+            <div class="sm:col-span-2" data-field="engine">
+                <label class={labelClass} for="contact-engine">
+                    <span data-label-text>{form.engine}</span>
+                </label>
+                <select id="contact-engine" name="engine" class={control}>
+                    <option value="">{form.enginePlaceholder}</option>
+                    {engineOptions.map((option) => <option value={option.value}>{option.label}</option>)}
+                </select>
+            </div>
+
+            <div class="sm:col-span-2" data-field="message">
+                <label class={labelClass} for="contact-message">
+                    <span data-label-text>{form.message}</span>
+                    <span class="ml-1 text-cyan-electric" aria-hidden="true">*</span>
+                </label>
+                <textarea
+                    id="contact-message"
+                    name="message"
+                    rows="5"
+                    required
+                    aria-describedby="contact-message-error"
+                    class={control}></textarea>
+                <p id="contact-message-error" data-error="message" class={errorClass} role="alert">
+                </p>
+            </div>
+        </div>
+
+        <button
+            type="submit"
+            data-analytics="contact_submit"
+            class="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-cyan-electric px-5 font-semibold text-navy-900 transition-[background-color,box-shadow] duration-150 hover:bg-cyan-600 hover:shadow-[0_8px_28px_-6px_rgba(0,229,255,0.5)] sm:w-auto"
+        >
+            {form.submit}
+        </button>
+
+        <p
+            data-status
+            role="status"
+            aria-live="polite"
+            class="mt-6 rounded-xl border border-green-ok/30 bg-green-ok/8 px-4 py-3 text-sm text-ice empty:hidden"
+        >
+        </p>
+    </form>
+</Card>
+
+<script>
+    import { whatsappLink } from '~/config';
+
+    const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+
+    if (form) {
+        type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+        const REQUIRED = ['name', 'email', 'message'];
+        const msgRequired = form.dataset.msgRequired ?? '';
+        const msgInvalidEmail = form.dataset.msgInvalidEmail ?? '';
+        const msgSuccess = form.dataset.msgSuccess ?? '';
+        const status = form.querySelector<HTMLElement>('[data-status]');
+
+        const control = (name: string) => form.elements.namedItem(name) as Control | null;
+        const value = (name: string) => control(name)?.value.trim() ?? '';
+
+        const setError = (name: string, message: string) => {
+            const el = control(name);
+            const box = form.querySelector<HTMLElement>(`[data-error="${name}"]`);
+            if (!el || !box) return;
+            box.textContent = message;
+            el.setAttribute('aria-invalid', message ? 'true' : 'false');
+        };
+
+        // Shape check only. The single honest test of an address is a reply,
+        // so anything stricter would reject valid mail for no gain.
+        const looksLikeEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+
+        const validate = () => {
+            const invalid: string[] = [];
+
+            for (const name of REQUIRED) {
+                const missing = value(name) === '';
+                setError(name, missing ? msgRequired : '');
+                if (missing) invalid.push(name);
+            }
+
+            if (value('email') !== '' && !looksLikeEmail(value('email'))) {
+                setError('email', msgInvalidEmail);
+                if (!invalid.includes('email')) invalid.push('email');
+            }
+
+            return invalid;
+        };
+
+        /** One `· Label: value` line per filled field, in the order they appear —
+            the same shape the calculators hand the agent. */
+        const compose = () =>
+            Array.from(form.querySelectorAll<HTMLElement>('[data-field]'))
+                .map((wrapper) => {
+                    const el = wrapper.querySelector<Control>('input, select, textarea');
+                    if (!el || el.value.trim() === '') return '';
+
+                    const label =
+                        wrapper.querySelector('[data-label-text]')?.textContent?.trim() ?? el.name;
+                    const text =
+                        el instanceof HTMLSelectElement
+                            ? (el.selectedOptions[0]?.textContent?.trim() ?? el.value)
+                            : el.value.trim();
+
+                    return `· ${label}: ${text}`;
+                })
+                .filter(Boolean)
+                .join('\n');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const invalid = validate();
+            if (invalid.length) {
+                if (status) status.textContent = '';
+                control(invalid[0] as string)?.focus();
+                return;
+            }
+
+            const link = whatsappLink(compose());
+            const opened = window.open(link, '_blank');
+            // Popup blocked: fall back to navigating this tab rather than
+            // leaving the visitor with a success message and nothing sent.
+            if (opened) opened.opener = null;
+            else window.location.href = link;
+
+            if (status) status.textContent = msgSuccess;
+
+            document.dispatchEvent(
+                new CustomEvent('analytics', { detail: { event: 'contact_submit' } })
+            );
+        });
+
+        // Clear a field's error as soon as it stops being wrong.
+        form.addEventListener('input', (event) => {
+            const el = event.target as Control;
+            if (!el?.name || el.getAttribute('aria-invalid') !== 'true') return;
+
+            const filled = el.value.trim() !== '';
+            const ok = el.name === 'email' ? filled && looksLikeEmail(el.value.trim()) : filled;
+            if (ok) setError(el.name, '');
+        });
+    }
+</script>

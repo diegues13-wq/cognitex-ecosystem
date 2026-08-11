@@ -1,0 +1,186 @@
+---
+import Base from '~/layouts/Base.astro';
+import Section from '~/components/ui/Section.astro';
+import PageHero from '~/components/ui/PageHero.astro';
+import Button from '~/components/ui/Button.astro';
+import { breadcrumbSchema } from '~/lib/schema';
+import { SITE } from '~/config';
+import { route, useTranslations } from '~/i18n/utils';
+
+const locale = 'en' as const;
+const t = useTranslations(locale);
+const legal = t.legalPage;
+
+/*
+ * The only page on the site whose prose is not in the i18n dictionaries: a
+ * privacy policy has to be drafted, reviewed and amended as one legal text per
+ * language, not assembled from interchangeable keys. The Spanish version — the
+ * governing one for a controller established in Ecuador — lives in
+ * `src/pages/legal/privacidad.astro`.
+ */
+const UPDATED_ISO = '2026-08-10';
+const UPDATED_LABEL = '10 August 2026';
+
+type Clause = { title: string; paragraphs: string[]; items?: string[] };
+
+const clauses: Clause[] = [
+    {
+        title: 'Who handles your data',
+        paragraphs: [
+            `${SITE.legalName}, established in Quito, province of Pichincha, Ecuador, is the data controller for the personal data you submit through this site and through the services you contract.`,
+            `For anything to do with this policy, including exercising your rights, write to ${SITE.email}.`,
+            "This processing is governed by Ecuador's Ley Orgánica de Protección de Datos Personales (LOPDP) and its implementing regulation.",
+        ],
+    },
+    {
+        title: 'What we collect',
+        paragraphs: [
+            'We ask for the minimum needed to reply to you. The contact form collects the fields you fill in:',
+        ],
+        items: [
+            'Name.',
+            'Company, if you choose to give it.',
+            'Phone, if you choose to give it.',
+            'Email address.',
+            'Engine of interest: energy, support agents or fleets.',
+            'The message you write.',
+        ],
+    },
+    {
+        title: 'How the form travels',
+        paragraphs: [
+            'This site is static and the contact form posts nothing to a server of ours. When you press "Send", the browser assembles a message from the fields you filled in and opens it in WhatsApp. Until you send that message, the data never leaves your device.',
+            "Once you send it, the conversation is hosted by WhatsApp and WhatsApp/Meta's own privacy policy applies as well — something outside our control. If you would rather not use that channel, email us instead: the address is on the same contact page.",
+        ],
+    },
+    {
+        title: 'Browsing data and analytics',
+        paragraphs: [
+            'If you accept analytics, we collect aggregate technical browsing data: pages viewed, time on page, device type, browser and approximate country derived from the IP address. Measurement is done with Google Analytics 4, with Google LLC acting as a data processor. We do not build advertising profiles, we do not track you across sites, and we neither sell nor share this data.',
+            'We do not collect sensitive data in the sense of the LOPDP — ethnic origin, health, beliefs, political or union affiliation, biometric data or sexual orientation — and we never ask for national ID numbers, bank details or card data through this site.',
+        ],
+    },
+    {
+        title: 'Why we use it, and on what legal basis',
+        paragraphs: [
+            'The declared purpose for contact data is a single one: to answer your commercial enquiry, prepare a quote, a diagnostic or a proposal, and keep the conversation going while it is live. We do not use it for third-party advertising or for any purpose other than the one that prompted your message.',
+            'The legal basis is your free, specific and informed consent, given when you submit the form, together with pre-contractual steps taken at your request. For analytics the basis is your consent alone, and you may withdraw it at any time.',
+            'If we ever needed to process your data for a different purpose, we would tell you and ask for fresh consent before doing so.',
+        ],
+    },
+    {
+        title: 'How long we keep it',
+        paragraphs: [
+            'Contact form data is kept for as long as the commercial conversation lasts and for up to twenty-four (24) months after the last contact. After that it is deleted, unless a legal, tax or contractual obligation requires us to keep it longer, in which case it is blocked and used only to meet that obligation.',
+            'Analytics data is kept in aggregate form for a maximum of fourteen (14) months.',
+            'If you ask for deletion before those periods elapse, we act on it as described below.',
+        ],
+    },
+    {
+        title: 'Where it is processed',
+        paragraphs: [
+            'This site, the Sentinel platforms and the telemetry we capture run on Google Cloud Platform infrastructure, which acts as a data processor on our behalf and under our instructions.',
+            'This means data may be stored and processed in data centres outside Ecuador, including in the United States. For those international transfers we require our providers to give contractual guarantees of security, confidentiality and purpose limitation equivalent to the level of protection the LOPDP demands.',
+            'We apply encryption in transit and at rest, named credentials with least privilege, and access logging.',
+        ],
+    },
+    {
+        title: 'Client telemetry',
+        paragraphs: [
+            "The telemetry we capture from a plant, a fleet or a support channel belongs to the client that generates it. Each client lives in a logically segmented space with its own credentials and access controls: no client can read another client's data, and our staff access only the project they are working on.",
+            'We do not train models on one client\'s information in order to serve another client. When a support agent uses language models, it does so over that client\'s context and under agreements with the model provider that forbid using the data to train general-purpose models.',
+            'When the relationship ends we hand over the history in a structured, commonly used format and delete it from our systems within thirty (30) days, unless the client instructs otherwise in writing.',
+        ],
+    },
+    {
+        title: 'Cookies and how to switch them off',
+        paragraphs: [
+            'This site uses no advertising cookies and no cross-site tracking. The only cookies that are not strictly necessary are Google Analytics 4 cookies, which tell us which sections get read and which do not.',
+            'Analytics starts denied. Consent is asked for in the notice shown on your first visit and, until you accept, no Google script loads and no measurement cookie is set. Once enabled, IP addresses are anonymised and no advertising feature is switched on.',
+            'Your choice is stored in your browser\'s local storage under the key "cgx-consent". To change it, clear this site\'s data from your browser: the notice appears again on your next visit. Declining analytics limits no feature of the site.',
+        ],
+    },
+    {
+        title: 'Your rights',
+        paragraphs: ['The LOPDP grants you the following rights over your own personal data:'],
+        items: [
+            'Access: to know what data of yours we process, where we got it, for what purpose and to whom it is disclosed.',
+            'Rectification and updating: to correct anything wrong, out of date or incomplete.',
+            'Deletion: to have your data erased once it is no longer needed for the declared purpose, or when you withdraw consent.',
+            'Portability: to receive your data in a structured, commonly used and machine-readable format, or to have us hand it directly to another controller.',
+            'Objection: to object to a specific processing activity, analytics included, with no need to justify it where the basis is your consent.',
+            'Suspension of processing while a rectification or objection request is resolved, and not to be subject to automated decisions producing legal effects on you.',
+        ],
+    },
+    {
+        title: 'How to exercise them',
+        paragraphs: [
+            `Write to ${SITE.email} from the address you contacted us with, saying which right you want to exercise. If we cannot identify you with reasonable certainty we will ask for further verification before acting: handing your data to someone else would be worse than not handing it over at all.`,
+            'We reply within the fifteen (15) day period set by the LOPDP. If the request is complex we tell you within that same period how much longer we need and why. The process is free of charge.',
+            "If you believe we handled your request badly, you may complain to Ecuador's Superintendencia de Protección de Datos Personales.",
+        ],
+    },
+    {
+        title: 'Changes to this policy',
+        paragraphs: [
+            'If this policy changes, the new version is published here with its update date. Where the change affects the purpose of processing or adds a new recipient, we tell you by the email address you wrote to us from before it takes effect.',
+        ],
+    },
+];
+
+const schema = [
+    breadcrumbSchema([
+        { name: SITE.name, url: route('home', locale) },
+        { name: legal.title, url: route('privacidad', locale) },
+    ]),
+];
+---
+
+<Base
+    {locale}
+    routeId="privacidad"
+    title={legal.seo.title}
+    description={legal.seo.description}
+    {schema}
+>
+    <PageHero title={legal.title}>
+        <p class="mt-7 text-sm text-steel">
+            {legal.updated}: <time datetime={UPDATED_ISO} class="text-ice">{UPDATED_LABEL}</time>
+        </p>
+    </PageHero>
+
+    {/* Light band and a 65ch measure: this is the longest read on the site. */}
+    <Section tone="ice">
+        <div class="max-w-[65ch] space-y-12">
+            {
+                clauses.map((clause) => (
+                    <article data-reveal>
+                        <h2 class="text-[length:var(--text-h3)]">{clause.title}</h2>
+
+                        {clause.paragraphs.map((paragraph) => (
+                            <p class="mt-4 leading-relaxed text-ink/80">{paragraph}</p>
+                        ))}
+
+                        {clause.items && (
+                            <ul class="mt-5 space-y-3">
+                                {clause.items.map((item) => (
+                                    <li class="flex gap-3 leading-relaxed text-ink/80">
+                                        <span
+                                            class="mt-2.5 size-1.5 shrink-0 rounded-full bg-cyan-600"
+                                            aria-hidden="true"
+                                        />
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </article>
+                ))
+            }
+
+            <div data-reveal>
+                <Button href={`mailto:${SITE.email}`} variant="primary">{SITE.email}</Button>
+            </div>
+        </div>
+    </Section>
+</Base>

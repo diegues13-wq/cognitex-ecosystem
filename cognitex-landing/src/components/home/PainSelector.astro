@@ -1,0 +1,132 @@
+---
+import Section from '~/components/ui/Section.astro';
+import Card from '~/components/ui/Card.astro';
+import { route, useTranslations, type Locale } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const pain = t.home.pain;
+
+// Each card owns its accent and its own micro-preview graphic, drawn inline as
+// SVG so the hover cue costs nothing to load.
+const cards = [
+    {
+        ...pain.cards.energia,
+        href: route('energia', locale),
+        accent: 'var(--color-amber-warn)',
+        preview: 'sparkline',
+    },
+    {
+        ...pain.cards.agentes,
+        href: route('agentes', locale),
+        accent: 'var(--color-cyan-electric)',
+        preview: 'chat',
+    },
+    {
+        ...pain.cards.flotas,
+        href: route('flotas', locale),
+        accent: 'var(--color-green-ok)',
+        preview: 'gauge',
+    },
+];
+---
+
+<Section kicker={pain.kicker} title={pain.title} description={pain.description}>
+    <div class="mt-14 grid gap-6 lg:grid-cols-3">
+        {
+            cards.map((card, i) => (
+                <Card
+                    href={card.href}
+                    class="group flex flex-col gap-5 p-7"
+                    data-reveal
+                    data-reveal-delay={i * 90}
+                >
+                    <div class="flex items-start justify-between gap-4">
+                        <h3
+                            class="font-display text-[length:var(--text-h3)]"
+                            style={`color:${card.accent}`}
+                        >
+                            {card.title}
+                        </h3>
+
+                        <div
+                            class="h-10 w-20 shrink-0 opacity-45 transition-opacity duration-300 group-hover:opacity-100"
+                            aria-hidden="true"
+                        >
+                            {card.preview === 'sparkline' && (
+                                <svg viewBox="0 0 80 40" class="size-full" fill="none">
+                                    <path
+                                        d="M0 30 L12 22 L24 26 L36 12 L48 18 L60 6 L80 14"
+                                        stroke={card.accent}
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    />
+                                </svg>
+                            )}
+                            {card.preview === 'chat' && (
+                                <svg viewBox="0 0 80 40" class="size-full" fill="none">
+                                    <rect x="2" y="6" width="44" height="16" rx="8" fill={card.accent} opacity="0.25" />
+                                    <rect x="30" y="24" width="48" height="14" rx="7" fill={card.accent} opacity="0.5" />
+                                    <circle cx="52" cy="31" r="2" fill={card.accent}>
+                                        <animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite" />
+                                    </circle>
+                                    <circle cx="60" cy="31" r="2" fill={card.accent}>
+                                        <animate attributeName="opacity" values="1;0.2;1" dur="1.4s" begin="0.2s" repeatCount="indefinite" />
+                                    </circle>
+                                    <circle cx="68" cy="31" r="2" fill={card.accent}>
+                                        <animate attributeName="opacity" values="1;0.2;1" dur="1.4s" begin="0.4s" repeatCount="indefinite" />
+                                    </circle>
+                                </svg>
+                            )}
+                            {card.preview === 'gauge' && (
+                                <svg viewBox="0 0 80 40" class="size-full" fill="none">
+                                    <path d="M10 34 A30 30 0 0 1 70 34" stroke="currentColor" class="text-white/15" stroke-width="5" stroke-linecap="round" />
+                                    <path
+                                        d="M10 34 A30 30 0 0 1 70 34"
+                                        stroke={card.accent}
+                                        stroke-width="5"
+                                        stroke-linecap="round"
+                                        class="[stroke-dasharray:94] [stroke-dashoffset:66] transition-[stroke-dashoffset] duration-700 ease-out group-hover:[stroke-dashoffset:28]"
+                                    />
+                                </svg>
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        <p
+                            class="text-[length:var(--text-figure)] leading-none font-semibold tabular"
+                            style={`color:${card.accent}`}
+                        >
+                            {card.stat}
+                        </p>
+                        <p class="mt-2 text-sm leading-snug text-steel">{card.statLabel}</p>
+                    </div>
+
+                    <p class="text-sm leading-relaxed text-steel/90">{card.body}</p>
+
+                    <p class="mt-auto flex items-center gap-2 pt-2 text-sm font-semibold text-ice">
+                        {card.cta}
+                        <svg
+                            class="size-4 transition-transform duration-300 ease-[cubic-bezier(.16,1,.3,1)] group-hover:translate-x-1"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.75"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M3 8h10M9 4l4 4-4 4" />
+                        </svg>
+                    </p>
+                </Card>
+            ))
+        }
+    </div>
+</Section>

@@ -1,0 +1,351 @@
+---
+import Card from '~/components/ui/Card.astro';
+import { PRICING, ASSUMPTIONS, WHATSAPP_NUMBER, whatsappLink } from '~/config';
+import { useTranslations, type Locale } from '~/i18n/utils';
+import type { EngineId } from '~/config';
+
+interface Props {
+    locale: Locale;
+    engine: EngineId;
+}
+
+const { locale, engine } = Astro.props;
+const t = useTranslations(locale);
+
+type Field =
+    | { kind: 'number'; name: string; label: string; unit?: string; help?: string; value?: number; step?: string; min?: string }
+    | { kind: 'select'; name: string; label: string; help?: string; options: { value: string; label: string }[] };
+
+type Row = { key: string; label: string; primary?: boolean; kind: 'money' | 'months' };
+
+/*
+ * Each engine's dictionary slice has a different shape — only energy has
+ * `pfOptions`, only energy has a `payback` result row. Reading through
+ * `t.engines[engine]` would widen to a union with none of those keys, so each
+ * branch reads its own concrete slice.
+ */
+function buildForm(): { fields: Field[]; rows: Row[]; band: string; title: string; subtitle: string; cta: string; disclaimer: string } {
+    if (engine === 'energia') {
+        const c = t.engines.energia.calc;
+        return {
+            title: c.title, subtitle: c.subtitle, cta: c.cta, disclaimer: c.disclaimer, band: c.results.band,
+            fields: [
+                { kind: 'number', name: 'monthlyBill', label: c.fields.bill.label, unit: c.fields.bill.unit, help: c.fields.bill.help, min: '0' },
+                {
+                    kind: 'select',
+                    name: 'powerFactorPenalty',
+                    label: c.fields.pf.label,
+                    help: c.fields.pf.help,
+                    options: [
+                        { value: 'no', label: c.pfOptions.no },
+                        { value: 'yes', label: c.pfOptions.yes },
+                        { value: 'unknown', label: c.pfOptions.unknown },
+                    ],
+                },
+                { kind: 'number', name: 'penaltyAmount', label: c.fields.pfPct.label, unit: c.fields.pfPct.unit, help: c.fields.pfPct.help, min: '0' },
+                { kind: 'number', name: 'gensetHours', label: c.fields.genset.label, unit: c.fields.genset.unit, help: c.fields.genset.help, min: '0' },
+            ],
+            rows: [
+                { key: 'monthly', label: c.results.monthly, primary: true, kind: 'money' },
+                { key: 'annual', label: c.results.annual, kind: 'money' },
+                { key: 'payback', label: c.results.payback, kind: 'months' },
+            ],
+        };
+    }
+
+    if (engine === 'agentes') {
+        const c = t.engines.agentes.calc;
+        return {
+            title: c.title, subtitle: c.subtitle, cta: c.cta, disclaimer: c.disclaimer, band: c.results.band,
+            fields: [
+                { kind: 'number', name: 'chatsPerWeek', label: c.fields.chats.label, unit: c.fields.chats.unit, help: c.fields.chats.help, min: '0' },
+                { kind: 'number', name: 'unansweredPercent', label: c.fields.unanswered.label, unit: c.fields.unanswered.unit, help: c.fields.unanswered.help, min: '0' },
+                { kind: 'number', name: 'averageTicket', label: c.fields.ticket.label, unit: c.fields.ticket.unit, help: c.fields.ticket.help, min: '0' },
+                { kind: 'number', name: 'closeRatePercent', label: c.fields.closeRate.label, unit: c.fields.closeRate.unit, help: c.fields.closeRate.help, min: '0' },
+            ],
+            rows: [
+                { key: 'monthly', label: c.results.monthly, primary: true, kind: 'money' },
+                { key: 'annual', label: c.results.annual, kind: 'money' },
+                { key: 'cost', label: c.results.cost, kind: 'money' },
+                { key: 'net', label: c.results.net, kind: 'money' },
+            ],
+        };
+    }
+
+    const c = t.engines.flotas.calc;
+    return {
+        title: c.title, subtitle: c.subtitle, cta: c.cta, disclaimer: c.disclaimer, band: c.results.band,
+        fields: [
+            { kind: 'number', name: 'vehicles', label: c.fields.vehicles.label, unit: c.fields.vehicles.unit, help: c.fields.vehicles.help, min: '0' },
+            { kind: 'number', name: 'gallonsPerMonth', label: c.fields.gallons.label, unit: c.fields.gallons.unit, help: c.fields.gallons.help, min: '0' },
+            { kind: 'number', name: 'pricePerGallon', label: c.fields.price.label, unit: c.fields.price.unit, help: c.fields.price.help, value: ASSUMPTIONS.fuelPricePerGallon, step: '0.01', min: '0' },
+        ],
+        rows: [
+            { key: 'monthly', label: c.results.monthly, primary: true, kind: 'money' },
+            { key: 'annual', label: c.results.annual, kind: 'money' },
+            { key: 'cost', label: c.results.cost, kind: 'money' },
+            { key: 'net', label: c.results.net, kind: 'money' },
+        ],
+    };
+}
+
+const calc = buildForm();
+const { fields, rows } = calc;
+---
+
+<Card variant="glass" class="p-7 sm:p-9" data-reveal>
+    <h2 class="font-display text-[length:var(--text-h3)]">{calc.title}</h2>
+    <p class="mt-2 text-sm text-steel">{calc.subtitle}</p>
+
+    <form
+        class="mt-8 grid gap-6 lg:grid-cols-2 lg:gap-10"
+        data-roi
+        data-engine={engine}
+        data-locale={locale}
+        data-agents-cost={PRICING.agentsMonthly}
+        data-fleet-cost={PRICING.fleetPerVehicleMonthly}
+        data-energy-investment={PRICING.energySystemInvestment}
+        data-fuel-price={ASSUMPTIONS.fuelPricePerGallon}
+        data-wa={WHATSAPP_NUMBER}
+        novalidate
+    >
+        <div class="space-y-5">
+            {
+                fields.map((field) => (
+                    <div data-field={field.name}>
+                        <label class="block">
+                            <span class="flex items-baseline justify-between gap-3">
+                                <span class="text-sm font-medium text-ice">{field.label}</span>
+                                {field.kind === 'number' && field.unit && (
+                                    <span class="shrink-0 text-xs text-steel">{field.unit}</span>
+                                )}
+                            </span>
+
+                            {field.kind === 'number' ? (
+                                <input
+                                    type="number"
+                                    inputmode="decimal"
+                                    name={field.name}
+                                    value={field.value ?? ''}
+                                    step={field.step ?? '1'}
+                                    min={field.min}
+                                    class="mt-2 min-h-12 w-full rounded-xl border border-white/12 bg-navy-900 px-4 text-ice tabular focus:border-cyan-electric focus:outline-none"
+                                />
+                            ) : (
+                                <select
+                                    name={field.name}
+                                    class="mt-2 min-h-12 w-full rounded-xl border border-white/12 bg-navy-900 px-4 text-ice focus:border-cyan-electric focus:outline-none"
+                                >
+                                    {field.options.map((option) => (
+                                        <option value={option.value}>{option.label}</option>
+                                    ))}
+                                </select>
+                            )}
+                        </label>
+                        {field.help && <p class="mt-1.5 text-xs text-steel/80">{field.help}</p>}
+                    </div>
+                ))
+            }
+        </div>
+
+        <div class="flex flex-col">
+            <dl class="space-y-4" data-results aria-live="polite">
+                {
+                    rows.map((row) => (
+                        <div
+                            class={
+                                row.primary
+                                    ? 'rounded-xl border border-cyan-electric/25 bg-cyan-electric/8 p-5'
+                                    : 'flex items-baseline justify-between gap-4 border-b border-white/8 pb-3'
+                            }
+                            data-row={row.key}
+                        >
+                            <dt class={row.primary ? 'text-sm text-steel' : 'text-sm text-steel'}>
+                                {row.label}
+                            </dt>
+                            <dd
+                                class={
+                                    row.primary
+                                        ? 'mt-1 text-[length:var(--text-figure)] leading-none font-semibold text-cyan-electric tabular'
+                                        : 'text-base font-semibold text-ice tabular'
+                                }
+                                data-value={row.key}
+                                data-kind={row.kind}
+                                data-primary={row.primary ? 'true' : 'false'}
+                            >
+                                —
+                            </dd>
+                        </div>
+                    ))
+                }
+                <p class="pt-1 text-xs text-steel/70" data-band-note>{calc.band}</p>
+            </dl>
+
+            <p class="mt-6 hidden text-sm text-red-alert" data-error role="alert">
+                {t.common.calcError}
+            </p>
+
+            <div class="mt-auto pt-8">
+                {/* Defaults to a plain WhatsApp link so the CTA still works
+                    with JS disabled; the script swaps in the payload version
+                    once there is a result. */}
+                <a
+                    href={whatsappLink()}
+                    data-wa-link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-analytics="calc_submit"
+                    class="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-cyan-electric px-5 font-semibold text-navy-900 transition-[opacity,background-color] duration-150 hover:bg-cyan-600"
+                >
+                    {calc.cta}
+                </a>
+                <p class="mt-4 text-xs leading-relaxed text-steel/70">{calc.disclaimer}</p>
+            </div>
+        </div>
+    </form>
+</Card>
+
+<script>
+    import { calculateAgents, calculateEnergy, calculateFleet } from '~/lib/roi';
+    import {
+        buildWhatsappMessage,
+        formatBand,
+        moneyFormatter,
+        whatsappUrl,
+        type BandKind,
+    } from '~/lib/calculator-ui';
+
+    const form = document.querySelector<HTMLFormElement>('[data-roi]');
+
+    if (form) {
+        const engine = form.dataset.engine as 'energia' | 'agentes' | 'flotas';
+        const waNumber = form.dataset.wa ?? '';
+        const link = form.querySelector<HTMLAnchorElement>('[data-wa-link]');
+        const penaltyField = form.querySelector<HTMLElement>('[data-field="penaltyAmount"]');
+
+        const money = moneyFormatter(form.dataset.locale ?? 'es');
+
+        const num = (name: string) => {
+            const el = form.elements.namedItem(name) as HTMLInputElement | null;
+            return el ? Number.parseFloat(el.value) : Number.NaN;
+        };
+        const str = (name: string) => {
+            const el = form.elements.namedItem(name) as HTMLSelectElement | null;
+            return el?.value ?? '';
+        };
+
+        const showBand = (b: Parameters<typeof formatBand>[0], kind: string | undefined) =>
+            formatBand(b, (kind as BandKind) ?? 'money', money);
+
+        const compute = () => {
+            if (engine === 'energia') {
+                return calculateEnergy({
+                    monthlyBill: num('monthlyBill'),
+                    powerFactorPenalty: str('powerFactorPenalty') as 'yes' | 'no' | 'unknown',
+                    penaltyAmount: num('penaltyAmount'),
+                    gensetHours: num('gensetHours'),
+                    // No fuel-price field on this form: the energy calculator
+                    // uses the country assumption from config.
+                    fuelPricePerGallon: Number(form.dataset.fuelPrice ?? 0),
+                    systemInvestment: Number(form.dataset.energyInvestment ?? 0),
+                });
+            }
+            if (engine === 'agentes') {
+                return calculateAgents({
+                    chatsPerWeek: num('chatsPerWeek'),
+                    unansweredPercent: num('unansweredPercent'),
+                    averageTicket: num('averageTicket'),
+                    closeRatePercent: num('closeRatePercent'),
+                    monthlyCost: Number(form.dataset.agentsCost ?? 0),
+                });
+            }
+            return calculateFleet({
+                vehicles: num('vehicles'),
+                gallonsPerMonth: num('gallonsPerMonth'),
+                pricePerGallon: num('pricePerGallon'),
+                costPerVehicle: Number(form.dataset.fleetCost ?? 0),
+            });
+        };
+
+        const render = () => {
+            // The penalty amount only makes sense once "yes" is selected.
+            if (penaltyField) {
+                penaltyField.classList.toggle('hidden', str('powerFactorPenalty') !== 'yes');
+            }
+
+            const result = compute();
+            const hasResult = result.monthly.high > 0;
+
+            for (const cell of form.querySelectorAll<HTMLElement>('[data-value]')) {
+                const key = cell.dataset.value;
+                const kind = cell.dataset.kind;
+
+                let text = '—';
+                if (hasResult) {
+                    if (key === 'monthly') text = showBand(result.monthly, kind);
+                    else if (key === 'annual') text = showBand(result.annual, kind);
+                    else if (key === 'net' && result.net) text = showBand(result.net, kind);
+                    else if (key === 'cost' && result.monthlyCost !== undefined)
+                        text = money.format(result.monthlyCost);
+                    else if (key === 'payback' && result.paybackMonths)
+                        text = showBand(result.paybackMonths, kind);
+                }
+                cell.textContent = text;
+
+                // An em dash at figure size reads as a solid bar, so the empty
+                // state is dimmed and shown at body size instead.
+                const empty = text === '—';
+                cell.classList.toggle('opacity-30', empty);
+                cell.classList.toggle('text-[length:var(--text-figure)]', !empty && cell.dataset.primary === 'true');
+                cell.classList.toggle('text-2xl', empty && cell.dataset.primary === 'true');
+            }
+
+            if (link) {
+                link.classList.toggle('pointer-events-none', !hasResult);
+                link.classList.toggle('opacity-40', !hasResult);
+                link.setAttribute('aria-disabled', String(!hasResult));
+
+                if (hasResult) {
+                    // Hand the sales agent the visitor's own numbers (spec §4.4).
+                    const entries = Array.from(
+                        form.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+                            'input[name], select[name]'
+                        )
+                    )
+                        // Skip the penalty amount while it is hidden, so the
+                        // message never reports a field the visitor never saw.
+                        .filter((el) => el.value !== '' && !el.closest('.hidden'))
+                        .map((el) => ({
+                            label:
+                                el.closest('[data-field]')?.querySelector('span span')
+                                    ?.textContent ?? el.name,
+                            value: el.value,
+                        }));
+
+                    link.href = whatsappUrl(
+                        waNumber,
+                        buildWhatsappMessage({
+                            engineLabel: engine,
+                            entries,
+                            monthly: showBand(result.monthly, 'money'),
+                            annual: showBand(result.annual, 'money'),
+                            locale: form.dataset.locale ?? 'es',
+                        })
+                    );
+                }
+            }
+        };
+
+        form.addEventListener('input', render);
+        form.addEventListener('change', render);
+        form.addEventListener('submit', (event) => event.preventDefault());
+
+        link?.addEventListener('click', () => {
+            document.dispatchEvent(
+                new CustomEvent('analytics', { detail: { event: 'calc_submit', engine } })
+            );
+        });
+
+        render();
+    }
+</script>

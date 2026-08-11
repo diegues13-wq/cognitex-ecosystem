@@ -1,0 +1,107 @@
+---
+import { SITE } from '~/config';
+import { ROUTES, useTranslations, type Locale, type RouteId } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+    /** Page id — drives canonical and the hreflang pair. */
+    routeId: RouteId;
+    title: string;
+    description: string;
+    /** Extra JSON-LD blocks (FAQPage, Service, …) merged with the site-wide graph. */
+    schema?: Record<string, unknown>[];
+}
+
+const { locale, routeId, title, description, schema = [] } = Astro.props;
+const t = useTranslations(locale);
+
+const canonical = new URL(ROUTES[routeId][locale], SITE.url).href;
+const esHref = new URL(ROUTES[routeId].es, SITE.url).href;
+const enHref = new URL(ROUTES[routeId].en, SITE.url).href;
+const ogImage = new URL('/og-cover.png', SITE.url).href;
+
+// Site-wide graph. Emitted on every page so any entry point carries the
+// organisation identity; @id lets the per-page blocks reference it.
+const organization = {
+    '@type': 'Organization',
+    '@id': `${SITE.url}/#organization`,
+    name: SITE.name,
+    url: SITE.url,
+    logo: new URL('/apple-touch-icon.png', SITE.url).href,
+    email: SITE.email,
+    address: {
+        '@type': 'PostalAddress',
+        addressLocality: SITE.city,
+        addressRegion: SITE.region,
+        addressCountry: SITE.country,
+    },
+};
+
+const localBusiness = {
+    '@type': 'ProfessionalService',
+    '@id': `${SITE.url}/#localbusiness`,
+    name: SITE.name,
+    url: SITE.url,
+    email: SITE.email,
+    parentOrganization: { '@id': `${SITE.url}/#organization` },
+    address: {
+        '@type': 'PostalAddress',
+        addressLocality: SITE.city,
+        addressRegion: SITE.region,
+        addressCountry: SITE.country,
+    },
+    geo: {
+        '@type': 'GeoCoordinates',
+        latitude: SITE.geo.lat,
+        longitude: SITE.geo.lng,
+    },
+    areaServed: [
+        { '@type': 'AdministrativeArea', name: 'Pichincha' },
+        { '@type': 'AdministrativeArea', name: 'Guayas' },
+        { '@type': 'Country', name: 'Ecuador' },
+    ],
+};
+
+const website = {
+    '@type': 'WebSite',
+    '@id': `${SITE.url}/#website`,
+    url: SITE.url,
+    name: SITE.name,
+    inLanguage: t.meta.htmlLang,
+    publisher: { '@id': `${SITE.url}/#organization` },
+};
+
+const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [organization, localBusiness, website, ...schema],
+};
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+{/* Both locales plus x-default, so English is finally indexable. */}
+<link rel="alternate" hreflang="es-EC" href={esHref} />
+<link rel="alternate" hreflang="es" href={esHref} />
+<link rel="alternate" hreflang="en" href={enHref} />
+<link rel="alternate" hreflang="x-default" href={esHref} />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:locale" content={t.meta.ogLocale} />
+<meta property="og:locale:alternate" content={locale === 'es' ? 'en_US' : 'es_EC'} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={SITE.name} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(graph)} />

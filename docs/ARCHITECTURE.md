@@ -26,7 +26,8 @@ the `@cognitex/*` packages; `cognitex-landing` is not, and installs on its own.
 | `personal-sentinel` | `personal-sentinel` | Fatigue, exposure, PPE, man-down | Cloud Run | 5176 |
 | `transport-sentinel` | `transport-sentinel` | Rail operations control centre | Cloud Run | 5177 |
 | `productivity-sentinel` | `productivity-sentinel` | Last Planner: failure log, PPC, constraints | Cloud Run | 5178 |
-| `cognitex-landing` | — | Corporate site | GitHub Pages | 5173 |
+| `cognitex-landing` | — | Corporate site, Astro static | Firebase Hosting | 4321 |
+| `services/demo-api` | `demo-api` | Live-demo feed behind the landing | Cloud Run | 8080 |
 
 `cash-sentinel` and `industry-sentinel` are both configured for 5175 and cannot
 run concurrently without an override.
@@ -101,10 +102,19 @@ beyond a port.
 - **Auth/DB:** Firebase 11 (`firebase/auth`, `firebase/firestore`).
 - **Tests:** Vitest, plus `node --test` inside `transport-sentinel/api`.
 
-`cognitex-landing` is **not** on this stack. It is React 19 + Vite 7 +
-Tailwind v4 through PostCSS, with `framer-motion` and
-`react-leaflet@5.0.0-rc.2`, and its own ESLint config. It has not been
-migrated.
+`cognitex-landing` is **not** on this stack, by design. It is an Astro 7
+static site — the marketing site has to ship real HTML for search engines,
+which a client-rendered SPA cannot. It carries no UI framework at all: every
+interactive piece is vanilla TypeScript that Astro inlines, with `motion` for
+the scroll choreography. It installs on its own rather than as a workspace
+member.
+
+`services/demo-api` is a small Express service on Cloud Run that feeds the
+landing's live-demo widgets. Firebase Hosting rewrites `/api/public/**` to it,
+so the page fetches same-origin and no API URL is baked into the bundle. Its
+payload always carries a `source` field which reads `"live"` only when a device
+reported inside the freshness window — otherwise the site says on screen that
+it is showing a reference curve.
 
 `transport-sentinel` is the only app with a server: an Express API in `api/`
 that serves the built SPA from `./public` and talks to Firestore and Vertex AI
@@ -116,7 +126,7 @@ Gemini. It is the reference pattern for any future Cloud Run backend.
 | :--- | :--- | :--- |
 | `vite` | `^7.3.3` (7.3.1 and earlier had a rollup incompatibility) | 7.3.6 resolved at the root; `cash-sentinel` still declares `^7.3.1` |
 | `rollup` | was pinned to `4.60.4` for a source-phase-imports bug in 4.57.x | **no longer pinned** — 4.62.4 resolves transitively, with all 25 `@rollup/rollup-*` native binaries present. Builds pass. |
-| `react-leaflet` | `5.0.0`, never an RC (RCs export `LeafletProvider` instead of `LeafletContext`) | no platform depends on it; `cognitex-landing` still uses `5.0.0-rc.2` |
+| `react-leaflet` | `5.0.0`, never an RC (RCs export `LeafletProvider` instead of `LeafletContext`) | removed everywhere — no platform and no site depends on it |
 
 ---
 

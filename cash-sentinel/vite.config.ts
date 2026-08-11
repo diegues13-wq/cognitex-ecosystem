@@ -5,4 +5,4 @@ import { createViteConfig } from '@cognitex/config/vite';
  * apps also carried, plus the postcss.config.js and autoprefixer that only
  * this app still needed while it was on Tailwind v3.
  */
-export default createViteConfig({ port: 5175 });
+export default createViteConfig({ port: 5179 });

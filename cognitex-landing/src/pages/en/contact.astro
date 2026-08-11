@@ -1,0 +1,107 @@
+---
+import Base from '~/layouts/Base.astro';
+import Section from '~/components/ui/Section.astro';
+import PageHero from '~/components/ui/PageHero.astro';
+import Card from '~/components/ui/Card.astro';
+import ContactForm from '~/components/ContactForm.astro';
+import { breadcrumbSchema } from '~/lib/schema';
+import { SITE, whatsappLink } from '~/config';
+import { route, useTranslations } from '~/i18n/utils';
+
+const locale = 'en' as const;
+const t = useTranslations(locale);
+const contact = t.contactPage;
+
+const schema = [
+    breadcrumbSchema([
+        { name: SITE.name, url: route('home', locale) },
+        { name: t.nav.contacto, url: route('contacto', locale) },
+    ]),
+];
+---
+
+{/* hideMobileCta: the page already ends in a form, so the sticky bar would
+    only cover it. */}
+<Base
+    {locale}
+    routeId="contacto"
+    title={contact.seo.title}
+    description={contact.seo.description}
+    {schema}
+    hideMobileCta={true}
+>
+    <PageHero title={contact.title} lead={contact.lead} eyebrow={t.nav.contacto} />
+
+    <Section tone="deep">
+        <div class="grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
+            <div data-reveal>
+                <ContactForm {locale} />
+            </div>
+
+            <div data-reveal data-reveal-delay={120}>
+                <Card variant="outline" class="p-7">
+                    <h2 class="text-[length:var(--text-h3)]">{contact.alt.title}</h2>
+
+                    <ul class="mt-6 space-y-5">
+                        <li>
+                            <a
+                                href={whatsappLink()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                data-analytics="click_whatsapp"
+                                data-source="contact_alt"
+                                class="flex min-h-12 items-center gap-3 text-sm font-semibold text-cyan-electric transition-colors duration-150 hover:text-ice"
+                            >
+                                <svg
+                                    class="size-5 shrink-0"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.75"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M21 11.5a8.5 8.5 0 01-12.4 7.6L3 20.5l1.4-5.5A8.5 8.5 0 1121 11.5z"
+                                    ></path>
+                                </svg>
+                                {contact.alt.whatsapp}
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href={`mailto:${SITE.email}`}
+                                class="flex min-h-12 items-start gap-3 text-sm text-steel transition-colors duration-150 hover:text-ice"
+                            >
+                                <svg
+                                    class="mt-0.5 size-5 shrink-0 text-cyan-electric"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.75"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                                    <path d="M3.5 6.5l8.5 6 8.5-6"></path>
+                                </svg>
+                                <span>
+                                    <span class="block font-semibold text-ice">
+                                        {contact.alt.email}
+                                    </span>
+                                    <span class="mt-1 block break-all">{SITE.email}</span>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <p class="mt-8 border-t border-white/8 pt-6 text-sm leading-relaxed text-steel">
+                        {t.footer.lopdp}
+                    </p>
+                </Card>
+            </div>
+        </div>
+    </Section>
+</Base>

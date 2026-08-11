@@ -1,0 +1,67 @@
+---
+import '~/styles/global.css';
+import Seo from '~/components/Seo.astro';
+import Nav from '~/components/Nav.astro';
+import Footer from '~/components/Footer.astro';
+import MobileCta from '~/components/MobileCta.astro';
+import Analytics from '~/components/Analytics.astro';
+import { useTranslations, type Locale, type RouteId } from '~/i18n/utils';
+
+interface Props {
+    locale: Locale;
+    routeId: RouteId;
+    title: string;
+    description: string;
+    schema?: Record<string, unknown>[];
+    /** Hide the sticky mobile CTA on pages that already end in a form. */
+    hideMobileCta?: boolean;
+}
+
+const { locale, routeId, title, description, schema, hideMobileCta = false } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<!doctype html>
+<html lang={t.meta.htmlLang}>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#050d1a" />
+        <meta name="generator" content={Astro.generator} />
+
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        <Seo {locale} {routeId} {title} {description} {schema} />
+    </head>
+
+    <body class="min-h-dvh bg-navy-900 text-ice antialiased">
+        <a
+            href="#main"
+            class="sr-only rounded-lg bg-cyan-electric px-4 py-2 font-semibold text-navy-900 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[100]"
+        >
+            {t.nav.skipToContent}
+        </a>
+
+        <Nav {locale} {routeId} />
+
+        <main id="main">
+            <slot />
+        </main>
+
+        <Footer {locale} />
+
+        {!hideMobileCta && <MobileCta {locale} />}
+
+        <Analytics {locale} />
+
+        <script>
+            // One motion system for the whole site — see src/lib/motion.ts.
+            // Elements are hidden by JS only, so with scripting off every
+            // section is simply visible.
+            import { initMotion } from '~/lib/motion';
+
+            initMotion();
+        </script>
+    </body>
+</html>

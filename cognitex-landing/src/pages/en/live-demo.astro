@@ -1,0 +1,36 @@
+---
+import Base from '~/layouts/Base.astro';
+import PageHero from '~/components/ui/PageHero.astro';
+import LiveDemo from '~/components/home/LiveDemo.astro';
+import FinalCta from '~/components/home/FinalCta.astro';
+import { breadcrumbSchema } from '~/lib/schema';
+import { SITE } from '~/config';
+import { route, useTranslations } from '~/i18n/utils';
+
+const locale = 'en' as const;
+const t = useTranslations(locale);
+const demo = t.demoPage;
+
+const schema = [
+    breadcrumbSchema([
+        { name: SITE.name, url: route('home', locale) },
+        { name: t.nav.demo, url: route('demo', locale) },
+    ]),
+];
+---
+
+<Base
+    {locale}
+    routeId="demo"
+    title={demo.seo.title}
+    description={demo.seo.description}
+    {schema}
+>
+    <PageHero title={demo.title} lead={demo.lead} eyebrow={t.nav.demo} />
+
+    {/* The charts live in one place. When `/api/public/demo` lands, the feed
+        is wired inside LiveDemo and both the home and this page follow. */}
+    <LiveDemo {locale} />
+
+    <FinalCta {locale} />
+</Base>

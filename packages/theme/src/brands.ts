@@ -88,7 +88,15 @@ export const BRANDS: Record<PlatformId, Brand> = {
         accent: '#3b82f6',
         accentDim: '#2563eb',
         icon: 'Landmark',
-        // No deployment pipeline exists yet.
+        /*
+         * Still null, deliberately.
+         *
+         * `deploy-cash.yaml` now exists, but it has never run — the workflow
+         * lands with this branch and the service does not exist yet. Fill this
+         * in from the URL the first successful deploy prints, not from the
+         * pattern the other services follow: Cloud Run's `status.url` reports
+         * a form that does not route for recently created services.
+         */
         url: null,
     },
 };

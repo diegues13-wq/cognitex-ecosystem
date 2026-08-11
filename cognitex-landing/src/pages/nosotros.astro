@@ -1,0 +1,46 @@
+---
+import Base from '~/layouts/Base.astro';
+import Section from '~/components/ui/Section.astro';
+import PageHero from '~/components/ui/PageHero.astro';
+import FinalCta from '~/components/home/FinalCta.astro';
+import { breadcrumbSchema } from '~/lib/schema';
+import { SITE } from '~/config';
+import { route, useTranslations } from '~/i18n/utils';
+
+const locale = 'es' as const;
+const t = useTranslations(locale);
+const about = t.aboutPage;
+
+const schema = [
+    breadcrumbSchema([
+        { name: SITE.name, url: route('home', locale) },
+        { name: t.nav.nosotros, url: route('nosotros', locale) },
+    ]),
+];
+---
+
+<Base
+    {locale}
+    routeId="nosotros"
+    title={about.seo.title}
+    description={about.seo.description}
+    {schema}
+>
+    <PageHero title={about.title} lead={about.lead} eyebrow={t.footer.location} />
+
+    {/* The light band is reserved for long reading (Section.astro `tone`), and
+        the measure is capped at 65ch so no line runs past a comfortable scan. */}
+    <Section tone="ice">
+        <div class="max-w-[65ch] space-y-7" data-reveal>
+            {
+                about.body.map((paragraph) => (
+                    <p class="text-[length:var(--text-lead)] leading-relaxed text-ink/80">
+                        {paragraph}
+                    </p>
+                ))
+            }
+        </div>
+    </Section>
+
+    <FinalCta {locale} />
+</Base>
