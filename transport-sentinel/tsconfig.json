@@ -1,0 +1,7 @@
+{
+    "extends": "@cognitex/config/tsconfig.json",
+    "include": ["src/**/*", "vite.config.ts", "vitest.config.ts", "eslint.config.js"],
+    "compilerOptions": {
+        "types": ["vite/client"]
+    }
+}

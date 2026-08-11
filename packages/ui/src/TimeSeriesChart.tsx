@@ -40,7 +40,18 @@ export function TimeSeriesChart({
     const gradientId = useId();
 
     const geometry = useMemo(() => {
-        if (points.length === 0) return null;
+        /*
+         * Drop non-finite readings before anything touches them.
+         *
+         * A single NaN used to propagate through the extent into every
+         * coordinate, producing `d="M0.0 NaN L22.1 NaN …"`. The browser
+         * rejects the whole path, so the chart disappeared with nothing but a
+         * console error — and the way to hit it is ordinary: during a rolling
+         * deploy the previous revision answers without a field the new client
+         * already reads.
+         */
+        const series = points.filter((point) => Number.isFinite(point.value));
+        if (series.length === 0) return null;
 
         /*
          * Two different extents, deliberately.
@@ -56,7 +67,7 @@ export function TimeSeriesChart({
          */
         let dataLo = Infinity;
         let dataHi = -Infinity;
-        for (const point of points) {
+        for (const point of series) {
             if (point.value < dataLo) dataLo = point.value;
             if (point.value > dataHi) dataHi = point.value;
         }
@@ -69,8 +80,8 @@ export function TimeSeriesChart({
 
         const toY = (value: number) => height - PAD_Y - ((value - scaleLo) / span) * usable;
 
-        const coords = points.map((point, i) => {
-            const x = points.length === 1 ? VIEW_W / 2 : (i / (points.length - 1)) * VIEW_W;
+        const coords = series.map((point, i) => {
+            const x = series.length === 1 ? VIEW_W / 2 : (i / (series.length - 1)) * VIEW_W;
             return [x, toY(point.value)] as const;
         });
 
@@ -89,6 +100,9 @@ export function TimeSeriesChart({
             single: coords.length === 1 ? coords[0]! : null,
             lo: dataLo,
             hi: dataHi,
+            // The last value that survived the filter — reading it off the
+            // raw prop would announce "NaN" for exactly the case above.
+            latest: series.at(-1)!.value,
         };
     }, [points, height, band]);
 
@@ -100,8 +114,6 @@ export function TimeSeriesChart({
         );
     }
 
-    const latest = points.at(-1)?.value;
-
     return (
         <figure className="m-0">
             <svg
@@ -109,9 +121,7 @@ export function TimeSeriesChart({
                 className="w-full"
                 preserveAspectRatio="none"
                 role="img"
-                aria-label={`${label}${
-                    latest === undefined ? '' : `. Último valor ${latest.toFixed(1)} ${unit}`
-                }. Mínimo ${geometry.lo.toFixed(1)}, máximo ${geometry.hi.toFixed(1)}.`}
+                aria-label={`${label}. Último valor ${geometry.latest.toFixed(1)} ${unit}. Mínimo ${geometry.lo.toFixed(1)}, máximo ${geometry.hi.toFixed(1)}.`}
             >
                 <defs>
                     <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -127,7 +137,7 @@ export function TimeSeriesChart({
                         width={VIEW_W}
                         height={geometry.bandRect.height}
                         fill="var(--color-ok)"
-                        fillOpacity="0.08"
+                        fillOpacity="0.15"
                     />
                 )}
 

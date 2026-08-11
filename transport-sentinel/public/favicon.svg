@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Transport Sentinel">
+  <title>Transport Sentinel</title>
+  <rect width="32" height="32" rx="7" fill="#1d6fa5"/>
+  <g fill="#f4f8fb">
+    <rect x="11" y="5" width="2" height="22"/>
+    <rect x="19" y="5" width="2" height="22"/>
+    <rect x="8" y="8" width="16" height="2"/>
+    <rect x="8" y="15" width="16" height="2"/>
+    <rect x="8" y="22" width="16" height="2"/>
+  </g>
+</svg>

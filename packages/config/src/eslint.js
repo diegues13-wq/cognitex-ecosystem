@@ -78,9 +78,17 @@ export function createEslintConfig({ extend = [] } = {}) {
             },
         },
 
-        // Tests and config files run in Node and may log freely.
+        // Tests, config files and server code run in Node and may log freely.
+        // Server logs are the operational record for a Cloud Run service —
+        // there is no other place for a startup line or a seed progress
+        // report to go.
         {
-            files: ['**/*.test.{js,jsx,ts,tsx}', '**/*.config.{js,ts}'],
+            files: [
+                '**/*.test.{js,jsx,ts,tsx}',
+                '**/*.config.{js,ts}',
+                'api/**/*.{js,ts}',
+                'src/server.{js,ts}',
+            ],
             rules: { 'no-console': 'off' },
         },
 

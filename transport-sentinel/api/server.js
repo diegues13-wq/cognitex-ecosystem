@@ -27,6 +27,7 @@ import { GoogleGenAI } from '@google/genai';
 
 import { initFirestore, isAvailable, getDB } from './db/firestore.js';
 import { seedDatabase }                       from './db/seed.js';
+import { requireIdToken }                     from './auth.js';
 import {
     TRAINS, ROUTES,
     generateFleetSnapshot, generateFleetKPIs, generateAlerts,
@@ -39,8 +40,55 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors());
-app.use(express.json());
+// ─── Health, before anything that could reject it ────────────────────────────
+// Deliberately public and deliberately open to any origin: uptime checks and
+// the deploy pipeline call it from outside the site origins, and it discloses
+// nothing but liveness and which store is behind the API.
+app.get('/api/health', cors(), (_req, res) => res.json({
+    status:    'ok',
+    firestore: isAvailable() ? 'connected' : 'in-memory',
+    ts:        Date.now(),
+}));
+
+// ─── CORS, restricted to the site origins ────────────────────────────────────
+//
+// This was `cors()` with no arguments, which reflects any Origin and lets any
+// page on the internet read every route — on a service that is deliberately
+// deployed --allow-unauthenticated so the SPA can load.
+//
+// The SPA is served by this same process, so in production it needs no CORS
+// headers at all; the allowlist exists for the marketing site and for the
+// Vite dev server on :5177.
+const SITE_ORIGINS = [
+    'https://transport.cognitexindustrial.com',
+    'https://cognitexindustrial.com',
+    'https://www.cognitexindustrial.com',
+];
+
+const DEV_ORIGINS = ['http://localhost:5177', 'http://127.0.0.1:5177'];
+
+const ALLOWED_ORIGINS = new Set([
+    ...SITE_ORIGINS,
+    ...(process.env.NODE_ENV === 'production' ? [] : DEV_ORIGINS),
+    ...(process.env.ALLOWED_ORIGINS ?? '')
+        .split(',')
+        .map(origin => origin.trim())
+        .filter(Boolean),
+]);
+
+app.use(cors({
+    // A request with no Origin is same-origin, curl, or a health prober.
+    // Returning `false` sends no CORS headers, which is correct for all three
+    // — it does not block them, it just does not grant a cross-origin reader.
+    origin(origin, callback) {
+        callback(null, origin ? ALLOWED_ORIGINS.has(origin) : false);
+    },
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Key'],
+    maxAge: 3600,
+}));
+
+app.use(express.json({ limit: '32kb' }));
 
 // ─── Helper: read Firestore collection as array ──────────────────────────────
 async function fromCollection(name) {
@@ -143,15 +191,56 @@ app.get('/api/schedule', (req, res) =>
     res.json(generateTrainSchedule(req.query.route || 'RT-001'))
 );
 
-// ─── Simple in-memory rate limiter for AI endpoint ───────────────────────────
-const _aiRateMap = new Map();
-function aiRateOk(ip) {
+// ─── Per-user rate limit for the AI endpoint ─────────────────────────────────
+//
+// Still in-memory and therefore still per-instance — it is a courtesy limit,
+// not the access control. The access control is `requireIdToken`. It is keyed
+// on the uid now rather than the IP, because behind Cloud Run a whole
+// corporate network arrives as one address, and one user on a shared NAT
+// could exhaust the budget for everyone in the building.
+const RATE_WINDOW_MS = 60_000;
+const RATE_LIMIT = 20;
+const rateBuckets = new Map();
+
+function withinRateLimit(uid) {
     const now = Date.now();
-    const entry = _aiRateMap.get(ip) || { n: 0, reset: now + 60_000 };
-    if (now > entry.reset) { entry.n = 0; entry.reset = now + 60_000; }
-    entry.n++;
-    _aiRateMap.set(ip, entry);
-    return entry.n <= 30; // 30 requests/min per IP
+    const bucket = rateBuckets.get(uid);
+
+    if (!bucket || now > bucket.resetAt) {
+        rateBuckets.set(uid, { count: 1, resetAt: now + RATE_WINDOW_MS });
+        // Opportunistic sweep so a long-lived instance does not accumulate a
+        // bucket per user who ever asked one question.
+        if (rateBuckets.size > 5000) {
+            for (const [key, value] of rateBuckets) {
+                if (now > value.resetAt) rateBuckets.delete(key);
+            }
+        }
+        return true;
+    }
+
+    bucket.count += 1;
+    return bucket.count <= RATE_LIMIT;
+}
+
+/**
+ * Vertex AI failures, as codes.
+ *
+ * The client used to receive the provider's raw error message and pattern
+ * match on it, which is how a `gcloud projects add-iam-policy-binding`
+ * command — complete with the project id and the compute service-account
+ * e-mail — ended up rendered in a chat bubble in a control room. The full
+ * message stays in the server log where an SRE can read it.
+ */
+function classifyGeminiError(error) {
+    const detail = `${error?.status ?? ''} ${error?.message ?? ''}`;
+
+    if (/PERMISSION_DENIED|\b403\b|not authorized|has not been used/i.test(detail)) {
+        return 'permission_denied';
+    }
+    if (/RESOURCE_EXHAUSTED|\b429\b|quota/i.test(detail)) return 'quota';
+    if (/UNAUTHENTICATED|\b401\b/i.test(detail)) return 'permission_denied';
+    if (/UNAVAILABLE|\b50[0-4]\b|deadline/i.test(detail)) return 'unavailable';
+    return 'model_error';
 }
 
 // ─── Gemini AI chat (Vertex AI — ADC, no API key required) ──────────────────
@@ -171,18 +260,24 @@ function getGemini() {
     return geminiClient;
 }
 
-app.post('/api/ai/chat', async (req, res) => {
-    const ip = req.ip || req.socket?.remoteAddress || 'unknown';
-    if (!aiRateOk(ip)) return res.status(429).json({ error: 'Demasiadas solicitudes. Espera un momento.' });
+app.post('/api/ai/chat', requireIdToken, async (req, res) => {
+    if (!withinRateLimit(req.user.uid)) {
+        return res.status(429).json({ code: 'rate_limited' });
+    }
 
     const rawPrompt = req.body?.prompt;
-    const rawSys    = req.body?.systemInstruction;
-    if (!rawPrompt || typeof rawPrompt !== 'string') return res.status(400).json({ error: 'prompt required' });
+    if (!rawPrompt || typeof rawPrompt !== 'string') {
+        return res.status(400).json({ code: 'model_error' });
+    }
 
     const prompt            = rawPrompt.slice(0, 8000);
+    const rawSys            = req.body?.systemInstruction;
     const systemInstruction = rawSys ? String(rawSys).slice(0, 4000) : undefined;
 
-    if (!GCP_PROJECT) return res.status(503).json({ error: 'GOOGLE_CLOUD_PROJECT not set' });
+    if (!GCP_PROJECT) {
+        console.error('[ai/chat] refusing: GOOGLE_CLOUD_PROJECT is not set');
+        return res.status(503).json({ code: 'unavailable' });
+    }
 
     res.setHeader('Content-Type',  'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -203,8 +298,9 @@ app.post('/api/ai/chat', async (req, res) => {
         }
         res.write('data: [DONE]\n\n');
     } catch (err) {
-        console.error('[ai/chat] Gemini error:', err.message);
-        res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+        // Full detail to the log, a code to the operator.
+        console.error('[ai/chat] Vertex AI error for uid', req.user.uid, '·', err?.message);
+        res.write(`data: ${JSON.stringify({ code: classifyGeminiError(err) })}\n\n`);
     }
     res.end();
 });
@@ -231,17 +327,27 @@ app.post('/api/admin/reseed', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── Health ──────────────────────────────────────────────────────────────────
-app.get('/api/health', (_, res) => res.json({
-    status:    'ok',
-    firestore: isAvailable() ? 'connected' : 'in-memory',
-    ts:        Date.now(),
-}));
-
 // ─── Serve React SPA ─────────────────────────────────────────────────────────
 const publicDir = path.join(__dirname, 'public');
-app.use(express.static(publicDir, { maxAge: '1h' }));
-app.get('*', (_, res) => res.sendFile(path.join(publicDir, 'index.html')));
+
+// Hashed bundles are immutable; index.html must never be, or a deploy leaves
+// operators on the previous build until they hard-refresh.
+app.use(express.static(publicDir, {
+    maxAge: '1h',
+    setHeaders(res, filePath) {
+        if (filePath.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
+        else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+    },
+}));
+
+// An unknown API path is a client bug, not a deep link. Without this it fell
+// through to the SPA fallback and answered a fetch for JSON with an HTML
+// document, which surfaces as an unrelated parse error.
+app.use('/api', (_req, res) => res.status(404).json({ code: 'not_found' }));
+
+app.get('*', (_req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 
 // ─── Startup ─────────────────────────────────────────────────────────────────
 (async () => {

@@ -43,6 +43,17 @@ export interface AuthState {
     error: string | null;
     signIn: (email: string, password: string) => Promise<void>;
     signOutUser: () => Promise<void>;
+    /**
+     * A fresh Firebase ID token for calling your own backend, or null in demo
+     * mode and when nobody is signed in.
+     *
+     * Exposed here so an app with an API does not have to reach around this
+     * hook into `firebase/auth` itself — which is what transport-sentinel had
+     * to do, putting SDK calls back into app code the package exists to keep
+     * out. The SDK refreshes the token automatically when it is close to
+     * expiry, so calling this per request is correct.
+     */
+    getIdToken: () => Promise<string | null>;
 }
 
 const DEMO_USER: SessionUser = {
@@ -137,5 +148,13 @@ export function useAuth(): AuthState {
         await signOut(auth);
     }, [auth]);
 
-    return { user, loading, demoMode, error, signIn, signOutUser };
+    const getIdToken = useCallback(async () => {
+        // Demo mode has no credential to offer, and a backend that refuses
+        // the call is the correct outcome — it is what stops an unverified
+        // session from spending on billed compute.
+        if (!auth?.currentUser) return null;
+        return auth.currentUser.getIdToken();
+    }, [auth]);
+
+    return { user, loading, demoMode, error, signIn, signOutUser, getIdToken };
 }

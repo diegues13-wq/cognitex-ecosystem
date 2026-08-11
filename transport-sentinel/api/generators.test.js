@@ -12,7 +12,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { ROUTES, generateTrainSchedule } from './generators.js';
+import {
+    ROUTES,
+    TRAINS,
+    generateAlerts,
+    generateEnergyData,
+    generateTrainSchedule,
+} from './generators.js';
 
 test('every route terminates and returns a finite schedule', () => {
     for (const route of ROUTES) {
@@ -74,4 +80,86 @@ test('service ids are unique within a schedule', () => {
 test('an unknown route id falls back instead of throwing', () => {
     const schedule = generateTrainSchedule('RT-DOES-NOT-EXIST');
     assert.ok(schedule.route, 'expected a fallback route');
+});
+
+/**
+ * Alerts are the other shape that was wrong in production.
+ *
+ * The API emitted `{ time: 'HH:mm', priority: 'CRITICAL' }` while the browser
+ * generator emitted `{ timestamp, severity }`, so the ticker rendered no time
+ * and the CCO critical filter matched nothing. The wire shape is now the
+ * `Alert` interface from @cognitex/data, and these hold the producer to it.
+ */
+
+const SHARED_STATUSES = new Set(['ok', 'warning', 'alert', 'offline']);
+
+test('alerts carry the shared Alert shape', () => {
+    const alerts = generateAlerts('todos');
+    assert.ok(alerts.length > 0, 'expected at least one alert');
+
+    for (const alert of alerts) {
+        assert.equal(typeof alert.id, 'string', 'id must be a string');
+        assert.equal(typeof alert.orgId, 'string', 'every document carries a tenant');
+        assert.equal(typeof alert.assetId, 'string', 'assetId is a string, "" for network-wide');
+        assert.equal(typeof alert.message, 'string');
+        assert.equal(typeof alert.at, 'number', 'at must be epoch millis, not a clock string');
+        assert.ok(Number.isFinite(alert.at) && alert.at > 0, 'at must be a real instant');
+        assert.ok(SHARED_STATUSES.has(alert.status), `unknown status ${alert.status}`);
+        assert.equal(alert.acknowledgedAt, null);
+
+        assert.equal(alert.time, undefined, 'the pre-formatted `time` field must not come back');
+        assert.equal(alert.priority, undefined, '`priority` was replaced by `status`');
+    }
+});
+
+test('at least one alert is critical, so the CCO filter has something to match', () => {
+    const critical = generateAlerts('todos').filter((a) => a.status === 'alert');
+    assert.ok(critical.length > 0, 'the fixture must exercise the critical path');
+});
+
+/**
+ * A ratio that cannot vary is a constant, and drawing a constant as a
+ * thirty-day trend line tells an operator something false about their
+ * railway. Both of these used to be algebraically fixed:
+ * `kwhElec / (kwhElec / 6.5)` is 6.5, and `kwhElec * 0.12` is 12 %.
+ */
+test('specific energy intensity varies day to day', () => {
+    const days = generateEnergyData(30);
+    const intensities = new Set(days.map((d) => d.specifickWhKm));
+    assert.ok(intensities.size > 5, 'kWh per train-km is effectively a constant');
+
+    for (const day of days) {
+        assert.ok(day.trainKmElectrico > 0, 'the denominator must be a real distance');
+        const derived = day.kwhElectrico / day.trainKmElectrico;
+        assert.ok(
+            Math.abs(derived - day.specifickWhKm) < 0.01,
+            'the published intensity must match its own numerator and denominator'
+        );
+        assert.ok(day.specifickWhKm > 5 && day.specifickWhKm < 10, 'intensity out of plausible range');
+    }
+});
+
+test('regenerated energy is a varying share, not a fixed fraction', () => {
+    const shares = new Set(
+        generateEnergyData(30).map((d) => Math.round((d.kwhRegen / d.kwhElectrico) * 1000))
+    );
+    assert.ok(shares.size > 5, 'the regenerated share is effectively a constant');
+});
+
+test('the fleet filter keeps network-wide alerts and drops the other segment', () => {
+    const typeById = Object.fromEntries(TRAINS.map((t) => [t.id, t.type]));
+
+    for (const fleetType of ['pasajeros', 'carga']) {
+        for (const alert of generateAlerts(fleetType)) {
+            if (!alert.assetId) continue; // network-wide, always kept
+            assert.equal(
+                typeById[alert.assetId],
+                fleetType,
+                `${alert.id} does not belong to the ${fleetType} fleet`
+            );
+        }
+    }
+
+    const networkWide = generateAlerts('carga').filter((a) => a.assetId === '');
+    assert.ok(networkWide.length > 0, 'a network-wide alert must survive every filter');
 });

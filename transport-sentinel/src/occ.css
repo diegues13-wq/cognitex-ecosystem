@@ -1,0 +1,135 @@
+@import '@cognitex/theme/tokens.css';
+
+/**
+ * Transport Sentinel — the control-room layer.
+ *
+ * Everything that defines *what things look like* now comes from
+ * @cognitex/theme: the navy surface scale, the ok/warn/alert semantics, the
+ * type families, the focus ring. This file adds only what an OCC console
+ * needs and a general dashboard does not — tighter panels, dense tabular
+ * rows, and the two motions a control room actually reads (a scrolling alert
+ * strip and a blinking critical indicator).
+ *
+ * The old app carried its own `occ` steel-blue scale plus ~40 hardcoded hex
+ * literals. Those are gone: the steel blue is `--color-brand`, set once from
+ * BRANDS.transport, so the console and the rest of the family cannot drift.
+ *
+ * HARD CONSTRAINT — panels are SOLID.
+ * The CSS filter that convolves whatever is painted behind an element routes
+ * through Skia's Gaussian kernel, which takes an AVX2 path that raised SIGILL
+ * on pre-Haswell CPUs and repeatedly crashed this console in the field.
+ * Industrial panel PCs are exactly the machines that are old. Depth here is
+ * borders and box-shadow, both of which are simple raster ops. Do not
+ * reintroduce that filter, and do not name it in a comment either — Tailwind
+ * v4 scans comments as plain text and would emit the utility.
+ */
+
+@layer components {
+    /*
+     * The console tile. Same surfaces as the shared `.panel`, one step denser:
+     * 8px corners rather than 12px, because a CCO screen carries three times
+     * as many panels as a management dashboard and the radius reads as noise
+     * at that count.
+     */
+    .occ-panel {
+        background-color: var(--color-navy-deep);
+        border: 1px solid color-mix(in srgb, var(--color-steel) 18%, transparent);
+        border-radius: 8px;
+        transition: border-color var(--dur-fast) ease;
+    }
+
+    .occ-panel-inset {
+        background-color: var(--color-navy-900);
+        border: 1px solid color-mix(in srgb, var(--color-steel) 12%, transparent);
+        border-radius: 6px;
+    }
+
+    /* An interactive tile — the asset list, the route pickers. */
+    .occ-selectable:hover {
+        border-color: color-mix(in srgb, var(--color-brand) 45%, transparent);
+    }
+
+    .occ-selected {
+        border-color: var(--color-brand);
+        background-color: color-mix(in srgb, var(--color-brand) 10%, var(--color-navy-deep));
+    }
+
+    /*
+     * Dense readout table. Control rooms scan columns, so every numeric cell
+     * is tabular and the row rhythm is tight without shrinking the type below
+     * the shared scale.
+     */
+    .occ-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+    }
+    .occ-table th {
+        font-family: var(--font-mono);
+        font-size: var(--text-label);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-steel);
+        font-weight: 500;
+        padding: 0 0 0.5rem;
+        text-align: left;
+        white-space: nowrap;
+    }
+    .occ-table td {
+        padding: 0.4rem 0;
+        font-size: 0.8125rem;
+        border-top: 1px solid color-mix(in srgb, var(--color-steel) 12%, transparent);
+    }
+    .occ-table td.num,
+    .occ-table th.num {
+        text-align: right;
+    }
+
+    /* Status indicator that survives colour-blindness because it is paired
+       with a text label everywhere it is used. */
+    .occ-dot {
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 9999px;
+        flex-shrink: 0;
+    }
+    .occ-dot-alert {
+        animation: occ-blink 1.2s step-end infinite;
+    }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────────
+   Both are suppressed by the shared prefers-reduced-motion block in
+   tokens.css, which zeroes every animation duration. */
+
+@keyframes occ-blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.25;
+    }
+}
+
+/* The alert strip scrolls one full copy of its content, so duplicating the
+   list once in the markup produces a seamless loop. */
+@keyframes occ-ticker {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.occ-ticker-track {
+    animation: occ-ticker 45s linear infinite;
+    will-change: transform;
+}
+
+.occ-ticker-track:hover,
+.occ-ticker-track:focus-within {
+    animation-play-state: paused;
+}

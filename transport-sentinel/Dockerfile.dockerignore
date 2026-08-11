@@ -1,0 +1,40 @@
+# Context filter for `docker build -f transport-sentinel/Dockerfile .`
+#
+# BuildKit reads <dockerfile>.dockerignore in preference to the context root's
+# .dockerignore, so this file must be self-sufficient rather than an addition
+# to the root one. It is a superset of it.
+#
+# The line that matters is `**/node_modules`. The runtime stage runs
+# `npm ci --omit=dev` and then copies `transport-sentinel/api/` over the
+# result; without this, a developer's local `api/node_modules` — the full dev
+# tree, ~91MB — is in the context, lands on top of the production install and
+# ships in the image.
+
+node_modules
+**/node_modules
+dist
+**/dist
+build
+**/build
+coverage
+**/coverage
+.git
+.github
+.gitignore
+docs
+**/*.md
+.env
+.env.*
+!.env.example
+npm-debug.log*
+**/.DS_Store
+
+# The other consoles. Only packages/ and transport-sentinel/ are ever copied,
+# but excluding them keeps the context small and the build fast.
+agro-sentinel
+cash-sentinel
+cognitex-landing
+industry-sentinel
+personal-sentinel
+productivity-sentinel
+services

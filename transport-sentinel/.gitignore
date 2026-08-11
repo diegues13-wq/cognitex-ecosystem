@@ -1,0 +1,4 @@
+# Where the built SPA lands when you run the API locally the way the image
+# does (`cp -r dist api/public && node api/server.js`). The root .gitignore
+# covers `dist` but not this copy of it, and it is ~1MB of hashed assets.
+api/public

@@ -208,7 +208,6 @@ function rnd(min, max) { return min + Math.random() * (max - min); }
 // ─── FLEET SNAPSHOT (real-time state) ────────────────────────────────────────
 
 export function generateFleetSnapshot(fleetType = 'todos') {
-    const now = new Date();
     const filtered = fleetType === 'todos' ? TRAINS : TRAINS.filter(t => t.type === fleetType);
 
     return filtered.map(train => {
@@ -445,26 +444,43 @@ export function generateIncidents() {
 
 // ─── REAL-TIME ALERTS ─────────────────────────────────────────────────────────
 
+/**
+ * Alerts, in the shape @cognitex/data defines.
+ *
+ * This used to emit `{ time: 'HH:mm', priority: 'CRITICAL' }` while the
+ * browser-side producer emitted `{ timestamp, severity }`, so whichever one
+ * answered, half the consumers read undefined: the ticker showed no time and
+ * the CCO critical filter matched nothing. Both producers are gone; there is
+ * one shape, it carries an instant rather than a pre-formatted clock string,
+ * and the status vocabulary is the one every Cognitex console shares.
+ *
+ * `assetId` is the empty string for a network-wide alert, which is what a
+ * null train id meant.
+ */
+
+const ORG_ID = process.env.DEFAULT_ORG_ID || 'demo';
+
 export function generateAlerts(fleetType = 'todos') {
-    const now = new Date();
+    const now = Date.now();
+    const minutesAgo = (minutes) => now - minutes * 60_000;
+
     const allAlerts = [
-        { id: 'ALT-001', time: format(addMinutes(now, -3),   'HH:mm'), type: 'MANTENIMIENTO', trainId: 'BRZ-001', trainName: 'Carajás 2001',      message: 'WO-2026-0143 EN CURSO — Rodamiento eje 3 en reparación. Tren fuera de servicio.', priority: 'CRITICAL' },
-        { id: 'ALT-002', time: format(addMinutes(now, -8),   'HH:mm'), type: 'PREDICTIVO',     trainId: 'BRZ-003', trainName: 'Carajás 2003',      message: 'IA PREDICTIVA: Temperatura motor de tracción +12°C sobre baseline. Fallo predicho en 8 días (confianza 88%).', priority: 'CRITICAL' },
-        { id: 'ALT-003', time: format(addMinutes(now, -15),  'HH:mm'), type: 'RETRASO',        trainId: 'MEX-001', trainName: 'Tren Maya TM-01',   message: 'TM-01 lleva 14 min de retraso en RT-005 tramo Cancún–Playa del Carmen. OTP comprometido.', priority: 'WARNING' },
-        { id: 'ALT-004', time: format(addMinutes(now, -22),  'HH:mm'), type: 'MANTENIMIENTO',  trainId: 'MEX-001', trainName: 'Tren Maya TM-01',   message: 'Frenos (pastillas) a 16% de vida útil. OT WO-2026-0142 programada en 4 días.', priority: 'WARNING' },
-        { id: 'ALT-005', time: format(addMinutes(now, -35),  'HH:mm'), type: 'OCUPACION',      trainId: 'USA-001', trainName: 'Acela 2151',        message: 'Ocupación Acela 2151 al 97% en NEC. Considerar refuerzo de frecuencia.', priority: 'INFO' },
-        { id: 'ALT-006', time: format(addMinutes(now, -48),  'HH:mm'), type: 'ENERGIA',        trainId: 'USA-004', trainName: 'Coast Starlight 11', message: 'Consumo combustible CS-011 un 18% por encima del parámetro de ruta. Revisar perfil de velocidad.', priority: 'WARNING' },
-        { id: 'ALT-007', time: format(addMinutes(now, -62),  'HH:mm'), type: 'RETRASO',        trainId: 'CAN-001', trainName: 'VIA Corridor 60',   message: 'VC-060 retraso acumulado 7 min en RT-003 — tramo Toronto–Kingston.', priority: 'INFO' },
-        { id: 'ALT-008', time: format(addMinutes(now, -90),  'HH:mm'), type: 'COMBUSTIBLE',    trainId: 'URU-001', trainName: 'Tren de la Madera', message: 'Nivel de combustible AFE-101 al 18%. Reabastecimiento en Durazno recomendado.', priority: 'WARNING' },
-        { id: 'ALT-009', time: format(addMinutes(now, -120), 'HH:mm'), type: 'INFO',            trainId: null,      trainName: null,                message: 'WO-2026-0152 completada. Sensor puerta ECU-001 reemplazado. Tren en servicio.', priority: 'INFO' },
-        { id: 'ALT-010', time: format(addMinutes(now, -145), 'HH:mm'), type: 'MANTENIMIENTO',  trainId: 'USA-001', trainName: 'Acela 2151',        message: 'Pantógrafo Acela 2151 a 28% de vida útil. Programar OT próximas 2 semanas.', priority: 'INFO' },
-    ];
+        { id: 'ALT-001', at: minutesAgo(3),   category: 'MANTENIMIENTO', assetId: 'BRZ-001', assetName: 'Carajás 2001',       status: 'alert',   message: 'WO-2026-0143 en curso — rodamiento del eje 3 en reparación. Tren fuera de servicio.' },
+        { id: 'ALT-002', at: minutesAgo(8),   category: 'PREDICTIVO',    assetId: 'BRZ-003', assetName: 'Carajás 2003',       status: 'alert',   message: 'Temperatura del motor de tracción 12 °C sobre el valor de referencia. Fallo previsto en 8 días (confianza 88 %).' },
+        { id: 'ALT-003', at: minutesAgo(15),  category: 'RETRASO',       assetId: 'MEX-001', assetName: 'Tren Maya TM-01',    status: 'warning', message: 'TM-01 acumula 14 min de retraso en RT-005, tramo Cancún–Playa del Carmen.' },
+        { id: 'ALT-004', at: minutesAgo(22),  category: 'MANTENIMIENTO', assetId: 'MEX-001', assetName: 'Tren Maya TM-01',    status: 'warning', message: 'Pastillas de freno al 16 % de vida útil. WO-2026-0142 programada en 4 días.' },
+        { id: 'ALT-005', at: minutesAgo(35),  category: 'OCUPACION',     assetId: 'USA-001', assetName: 'Acela 2151',         status: 'ok',      message: 'Ocupación del Acela 2151 al 97 % en el corredor noreste. Considerar refuerzo de frecuencia.' },
+        { id: 'ALT-006', at: minutesAgo(48),  category: 'ENERGIA',       assetId: 'USA-004', assetName: 'Coast Starlight 11', status: 'warning', message: 'Consumo de combustible del CS-011 un 18 % por encima del parámetro de ruta. Revisar perfil de velocidad.' },
+        { id: 'ALT-007', at: minutesAgo(62),  category: 'RETRASO',       assetId: 'CAN-001', assetName: 'VIA Corridor 60',    status: 'ok',      message: 'VC-060 acumula 7 min de retraso en RT-003, tramo Toronto–Kingston.' },
+        { id: 'ALT-008', at: minutesAgo(90),  category: 'COMBUSTIBLE',   assetId: 'URU-001', assetName: 'Tren de la Madera',  status: 'warning', message: 'Nivel de combustible del AFE-101 al 18 %. Se recomienda reabastecer en Durazno.' },
+        { id: 'ALT-009', at: minutesAgo(120), category: 'INFO',          assetId: '',        assetName: null,                 status: 'ok',      message: 'WO-2026-0152 completada. Sensor de puerta del ECU-001 reemplazado; tren en servicio.' },
+        { id: 'ALT-010', at: minutesAgo(145), category: 'MANTENIMIENTO', assetId: 'USA-001', assetName: 'Acela 2151',         status: 'ok',      message: 'Pantógrafo del Acela 2151 al 28 % de vida útil. Programar orden en las próximas 2 semanas.' },
+    ].map(alert => ({ ...alert, orgId: ORG_ID, acknowledgedAt: null }));
+
+    if (fleetType !== 'pasajeros' && fleetType !== 'carga') return allAlerts;
 
     const trainTypeMap = Object.fromEntries(TRAINS.map(t => [t.id, t.type]));
-    if (fleetType === 'todos') return allAlerts;
-    if (fleetType === 'pasajeros') return allAlerts.filter(a => !a.trainId || trainTypeMap[a.trainId] === 'pasajeros');
-    if (fleetType === 'carga')     return allAlerts.filter(a => !a.trainId || trainTypeMap[a.trainId] === 'carga');
-    return allAlerts;
+    return allAlerts.filter(a => !a.assetId || trainTypeMap[a.assetId] === fleetType);
 }
 
 // ─── ENERGY DATA (multi-day) ──────────────────────────────────────────────────
@@ -476,15 +492,33 @@ export function generateEnergyData(days = 30) {
         const isWeekend = [0, 6].includes(date.getDay());
         const kwhElec = Math.round(rnd(isWeekend ? 8000 : 11000, isWeekend ? 13000 : 17000));
         const fuelDiesel = Math.round(rnd(isWeekend ? 1200 : 1800, isWeekend ? 2000 : 2800));
+
+        // Distance is the quantity the intensities are per, so it is generated
+        // and the ratios are derived from it — not the other way round.
+        //
+        // `specifickWhKm` used to be `kwhElec / (kwhElec / 6.5)`, which is 6.5
+        // for every day of every month: a constant rendered as a 30-day trend
+        // line, flat, under a UIC reference band it sat just below. The
+        // regenerated share had the same problem — it was `kwhElec * 0.12`, so
+        // the "recovery" KPI could only ever read 12 %.
+        const kwhPerTrainKm = rnd(6.2, 8.4);   // UIC reference band: 6.67-8.14
+        const litresPerTrainKm = rnd(2.3, 3.0);
+        const trainKmElectrico = Math.round(kwhElec / kwhPerTrainKm);
+        const trainKmDiesel = Math.round(fuelDiesel / litresPerTrainKm);
+        const kwhRegen = Math.round(kwhElec * rnd(0.09, 0.15));
+
         return {
             date: format(date, 'yyyy-MM-dd'),
             displayDate: format(date, 'dd/MM'),
             kwhElectrico: kwhElec,
             litrosDiesel: fuelDiesel,
             co2Kg: Math.round(fuelDiesel * 2.68),
-            kwhRegen: Math.round(kwhElec * 0.12),
+            kwhRegen,
             costEnergiaUSD: Math.round(kwhElec * 0.08 + fuelDiesel * 0.85),
-            specifickWhKm: parseFloat((kwhElec / (kwhElec / 6.5)).toFixed(2)),
+            trainKmElectrico,
+            trainKmDiesel,
+            specifickWhKm: parseFloat((kwhElec / trainKmElectrico).toFixed(2)),
+            specificLKm: parseFloat((fuelDiesel / trainKmDiesel).toFixed(2)),
         };
     });
 }
